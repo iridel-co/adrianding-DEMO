@@ -19,6 +19,9 @@ const NAV = [
   { href: "/about", label: "About" },
   { href: "/gallery", label: "Gallery" },
   { href: "/staff-login", label: "Staff login" },
+  // Demo-review route: the three transactional email templates, for the client
+  // to sign off on before the send wiring is built in phase 2.
+  { href: "/email-templates", label: "Email templates" },
 ]
 
 // Kept in step with the hero's own SOCIALS (hero-editorial.tsx) — same five

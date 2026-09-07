@@ -1,21 +1,44 @@
 "use client"
 
 import { useRef, useState } from "react"
+import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { ArrowLeft, ArrowRight, Check, Mail } from "lucide-react"
+import { ArrowLeft, ArrowRight, ChevronDown, Phone } from "lucide-react"
 import { gsap, useGSAP } from "@/app/_lib/gsap"
+import { saveHandoff } from "@/app/_lib/handoff"
+import { DemoFillButton } from "@/app/_components/demo-fill"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
+import { SPECIALIZATIONS } from "@/lib/specializations"
 import { cn } from "@/lib/utils"
 
 /**
  * Corporate training inquiry — multi-step, progressive disclosure. Frontend
- * only: submitting shows an acknowledgment screen. No network call.
+ * only: nothing is sent anywhere; submitting routes to
+ * `/corporate-training/inquiry-received`.
+ *
+ * Step 3 (programme / headcount / date / venue) is the client's own ask — a
+ * name and a free-text message was not enough to quote against, so those four
+ * are now captured explicitly.
  */
+
+const PROGRAMS = [
+  ...SPECIALIZATIONS.map((s) => s.title),
+  "Not sure yet — help us scope it",
+] as const
+
+const ATTENDEE_BANDS = [
+  "1 – 15",
+  "16 – 30",
+  "31 – 50",
+  "51 – 100",
+  "More than 100",
+] as const
 
 const schema = z.object({
   fullName: z.string().min(2, "Please enter your full name."),
@@ -23,6 +46,10 @@ const schema = z.object({
   phone: z.string().min(7, "Enter a valid contact number."),
   company: z.string().min(2, "Which company?"),
   role: z.string().min(2, "Your role or title."),
+  program: z.enum(PROGRAMS, { message: "Pick the closest programme." }),
+  attendees: z.enum(ATTENDEE_BANDS, { message: "Roughly how many people?" }),
+  targetDate: z.string().min(2, "Even a rough month helps us hold a date."),
+  venue: z.string().min(2, "Where would this run?"),
   context: z.string().optional(),
   consent: z.literal(true, { message: "You need to agree to continue." }),
 })
@@ -31,25 +58,87 @@ type FormValues = z.infer<typeof schema>
 
 const STEPS: { title: string; fields: (keyof FormValues)[] }[] = [
   { title: "Your details", fields: ["fullName", "email", "phone"] },
-  { title: "Your company", fields: ["company", "role", "context"] },
+  { title: "Your company", fields: ["company", "role"] },
+  {
+    title: "Your programme",
+    fields: ["program", "attendees", "targetDate", "venue"],
+  },
   { title: "Confirm", fields: ["consent"] },
 ]
 
 export function CorporateInquiryForm() {
+  const router = useRouter()
   const [step, setStep] = useState(0)
-  const [done, setDone] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
   const paneRef = useRef<HTMLDivElement>(null)
+
+  // Date capture has two modes. Most inquiries have a real date or a bracket in
+  // mind, so the calendar is the default; "Not fixed yet" falls back to free
+  // text for "sometime in Q1" or "after the audit finishes", which a date input
+  // physically cannot express. Either way the schema field stays one string —
+  // the picker composes into it — so nothing downstream has to branch.
+  const [dateMode, setDateMode] = useState<"pick" | "text">("pick")
+  const [dateFrom, setDateFrom] = useState("")
+  const [dateTo, setDateTo] = useState("")
 
   const {
     register,
     handleSubmit,
     trigger,
     getValues,
+    setValue,
+    reset,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     mode: "onTouched",
   })
+
+  /**
+   * Demo shortcut — see `_components/demo-fill.tsx`. The date picker keeps its
+   * own local state alongside the form value, so the sample fill has to set
+   * both or the inputs would render empty while the review step showed a date.
+   */
+  const fillSample = () => {
+    const from = "2026-11-10"
+    const to = "2026-11-12"
+    setDateMode("pick")
+    setDateFrom(from)
+    setDateTo(to)
+    reset({
+      fullName: "Maria Santos",
+      email: "maria.santos@acme.com.ph",
+      phone: "0917 555 0132",
+      company: "Acme Manufacturing",
+      role: "Head of Learning & Development",
+      program: SPECIALIZATIONS[0].title as FormValues["program"],
+      attendees: "16 – 30",
+      targetDate: composeDateRange(from, to),
+      venue: "Our head office in Cebu City",
+      context:
+        "New supervisors promoted from the floor this year — we need them leading, not just scheduling.",
+      consent: true,
+    })
+  }
+
+  const applyPickedDates = (from: string, to: string) => {
+    setValue("targetDate", composeDateRange(from, to), {
+      shouldValidate: true,
+      shouldDirty: true,
+    })
+  }
+
+  const switchDateMode = (mode: "pick" | "text") => {
+    setDateMode(mode)
+    // Clear the other mode's value so a stale entry can't be submitted.
+    if (mode === "text") {
+      setDateFrom("")
+      setDateTo("")
+      setValue("targetDate", "", { shouldDirty: true })
+    } else {
+      setValue("targetDate", "", { shouldDirty: true })
+    }
+  }
 
   useGSAP(
     () => {
@@ -65,7 +154,7 @@ export function CorporateInquiryForm() {
       })
       return () => mm.revert()
     },
-    { dependencies: [step, done], scope: paneRef }
+    { dependencies: [step], scope: paneRef }
   )
 
   const next = async () => {
@@ -74,45 +163,26 @@ export function CorporateInquiryForm() {
   }
   const back = () => setStep((s) => Math.max(s - 1, 0))
 
-  if (done) {
-    const v = getValues()
-    return (
-      <div
-        ref={paneRef}
-        className="bg-background text-foreground rounded-xl p-8 shadow-2xl sm:p-10"
-      >
-        <div className="bg-brand/10 text-brand flex size-12 items-center justify-center rounded-full">
-          <Check className="size-6" />
-        </div>
-        <h3 className="mt-5 font-serif text-2xl tracking-tight">
-          Thanks, {v.fullName.split(" ")[0]}. We&rsquo;ve got your inquiry.
-        </h3>
-        <p className="text-muted-foreground mt-3 leading-relaxed">
-          Someone from the Maximum Impact PH team will reply to{" "}
-          <span className="text-foreground">{v.email}</span> within 2 business
-          days to understand what {v.company} needs and put together a proposal.
-        </p>
-        <p className="text-muted-foreground mt-4 text-sm leading-relaxed">
-          For context: Adrian has trained 20,000+ professionals across the Top
-          500 companies in the Philippines over 20+ years — from multinationals
-          to family businesses.
-        </p>
-        <p className="text-muted-foreground mt-6 flex items-center gap-2 text-sm">
-          <Mail className="size-4" />
-          coachadrianding@maximumimpact.online
-        </p>
-        <p className="text-muted-foreground/60 mt-6 text-xs">
-          Demo form — no data is sent or stored.
-        </p>
-      </div>
-    )
+  const onSubmit = (v: FormValues) => {
+    setSubmitting(true)
+    saveHandoff({
+      kind: "corporate",
+      fullName: v.fullName,
+      email: v.email,
+      company: v.company,
+      program: v.program,
+      attendees: v.attendees,
+      targetDate: v.targetDate,
+      venue: v.venue,
+    })
+    router.push("/corporate-training/inquiry-received")
   }
 
   const current = STEPS[step]
 
   return (
     <form
-      onSubmit={handleSubmit(() => setDone(true))}
+      onSubmit={handleSubmit(onSubmit)}
       className="bg-background text-foreground rounded-xl p-6 shadow-2xl sm:p-10"
     >
       <div className="flex items-center gap-2">
@@ -126,9 +196,12 @@ export function CorporateInquiryForm() {
           />
         ))}
       </div>
-      <p className="text-muted-foreground mt-3 text-xs tracking-[0.1em] uppercase">
-        Step {step + 1} of {STEPS.length} · {current.title}
-      </p>
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+        <p className="text-muted-foreground text-xs tracking-[0.1em] uppercase">
+          Step {step + 1} of {STEPS.length} · {current.title}
+        </p>
+        <DemoFillButton onFill={fillSample} />
+      </div>
 
       <div ref={paneRef} className="mt-6 space-y-5">
         {step === 0 && (
@@ -172,27 +245,136 @@ export function CorporateInquiryForm() {
                 {...register("role")}
               />
             </Field>
+          </>
+        )}
+
+        {step === 2 && (
+          <>
             <Field
-              label="What are you looking to work on? (optional)"
+              label="Preferred topic or programme"
+              error={errors.program?.message}
+            >
+              <SelectField defaultValue="" {...register("program")}>
+                <option value="" disabled>
+                  Select a programme
+                </option>
+                {PROGRAMS.map((p) => (
+                  <option key={p} value={p}>
+                    {p}
+                  </option>
+                ))}
+              </SelectField>
+            </Field>
+            <Field
+              label="Number of attendees"
+              error={errors.attendees?.message}
+            >
+              <SelectField defaultValue="" {...register("attendees")}>
+                <option value="" disabled>
+                  Select a range
+                </option>
+                {ATTENDEE_BANDS.map((a) => (
+                  <option key={a} value={a}>
+                    {a} people
+                  </option>
+                ))}
+              </SelectField>
+            </Field>
+            <Field label="Possible date" error={errors.targetDate?.message}>
+              <Tabs
+                value={dateMode}
+                onValueChange={(v) => switchDateMode(v as "pick" | "text")}
+                className="mb-3"
+              >
+                <TabsList>
+                  <TabsTrigger value="pick">Pick dates</TabsTrigger>
+                  <TabsTrigger value="text">Not fixed yet</TabsTrigger>
+                </TabsList>
+              </Tabs>
+
+              {dateMode === "pick" ? (
+                <>
+                  {/* Leave `to` blank for a single day; fill it for a range. */}
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div>
+                      <span className="text-muted-foreground mb-1.5 block text-xs">
+                        From
+                      </span>
+                      <Input
+                        type="date"
+                        className="h-12 text-base"
+                        value={dateFrom}
+                        min={todayIso()}
+                        onChange={(e) => {
+                          setDateFrom(e.target.value)
+                          applyPickedDates(e.target.value, dateTo)
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground mb-1.5 block text-xs">
+                        To{" "}
+                        <span className="text-muted-foreground/70">
+                          (optional)
+                        </span>
+                      </span>
+                      <Input
+                        type="date"
+                        className="h-12 text-base"
+                        value={dateTo}
+                        min={dateFrom || todayIso()}
+                        onChange={(e) => {
+                          setDateTo(e.target.value)
+                          applyPickedDates(dateFrom, e.target.value)
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <p className="text-muted-foreground mt-2 text-xs">
+                    One date for a single session, or add an end date for a
+                    range.
+                  </p>
+                </>
+              ) : (
+                <Input
+                  className="h-12 text-base"
+                  placeholder="e.g. Second week of November, or Q1 2027"
+                  {...register("targetDate")}
+                />
+              )}
+            </Field>
+            <Field label="Possible venue" error={errors.venue?.message}>
+              <Input
+                className="h-12 text-base"
+                placeholder="e.g. Our Cebu office, or a hotel you arrange"
+                {...register("venue")}
+              />
+            </Field>
+            <Field
+              label="Anything else we should know? (optional)"
               error={errors.context?.message}
             >
               <Textarea
-                rows={4}
+                rows={3}
                 className="text-base"
-                placeholder="Team size, topic, rough timing…"
+                placeholder="What prompted this, what good would look like…"
                 {...register("context")}
               />
             </Field>
           </>
         )}
 
-        {step === 2 && (
+        {step === 3 && (
           <>
             <dl className="bg-muted/40 space-y-2 rounded-sm p-4 text-sm">
               <Row k="Name" v={getValues("fullName") || "—"} />
               <Row k="Email" v={getValues("email") || "—"} />
               <Row k="Company" v={getValues("company") || "—"} />
               <Row k="Role" v={getValues("role") || "—"} />
+              <Row k="Programme" v={getValues("program") || "—"} />
+              <Row k="Attendees" v={getValues("attendees") || "—"} />
+              <Row k="Target date" v={getValues("targetDate") || "—"} />
+              <Row k="Venue" v={getValues("venue") || "—"} />
             </dl>
             <label className="flex items-start gap-3">
               <input
@@ -215,29 +397,116 @@ export function CorporateInquiryForm() {
         )}
       </div>
 
-      <div className="mt-8 flex items-center justify-between">
-        {step > 0 ? (
-          <Button type="button" variant="ghost" onClick={back}>
-            <ArrowLeft className="size-4" />
-            Back
-          </Button>
-        ) : (
-          <span />
-        )}
-        {step < STEPS.length - 1 ? (
-          <Button type="button" variant="brand" onClick={next}>
-            Continue
-            <ArrowRight className="size-4" />
-          </Button>
-        ) : (
-          <Button type="submit" variant="brand">
-            Send inquiry
-          </Button>
-        )}
+      {/* The "call us instead" line shares the action row and sits opposite the
+          primary button, so the alternative to filling the form is offered at
+          the exact moment someone is deciding whether to continue with it.
+          Back and Continue group together on the right; the row wraps on narrow
+          widths, putting the phone line above the buttons rather than crushing
+          both. The sentence is one text node so the flex `gap` can't open a
+          space in front of the number. */}
+      <div className="mt-8 flex flex-wrap-reverse items-center justify-between gap-x-6 gap-y-4">
+        <p className="text-muted-foreground/70 flex items-center gap-2 text-xs">
+          <Phone className="size-3.5 shrink-0" />
+          <span>
+            Rather talk it through? Call or text{" "}
+            <a
+              href="tel:+639209007709"
+              className="hover:text-foreground font-medium whitespace-nowrap underline"
+            >
+              0920 900 7709
+            </a>
+          </span>
+        </p>
+
+        <div className="ml-auto flex items-center gap-2">
+          {step > 0 && (
+            <Button type="button" variant="ghost" onClick={back}>
+              <ArrowLeft className="size-4" />
+              Back
+            </Button>
+          )}
+          {/* Distinct `key`s so React can't reuse this <button> DOM node
+              across branches — see the identical comment in the workshop
+              form's registration-form.tsx for the failure mode this avoids. */}
+          {step < STEPS.length - 1 ? (
+            <Button key="continue" type="button" variant="brand" onClick={next}>
+              Continue
+              <ArrowRight className="size-4" />
+            </Button>
+          ) : (
+            <Button
+              key="submit"
+              type="submit"
+              variant="brand"
+              disabled={submitting}
+            >
+              {submitting ? "Sending…" : "Send inquiry"}
+            </Button>
+          )}
+        </div>
       </div>
     </form>
   )
 }
+
+/** `YYYY-MM-DD` for today, so the pickers can't offer a date in the past. */
+function todayIso() {
+  const d = new Date()
+  const p = (n: number) => String(n).padStart(2, "0")
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`
+}
+
+/**
+ * Turns the two `<input type="date">` values into the single human-readable
+ * string the rest of the flow carries (review step, handoff, confirmation page).
+ *
+ * Formats from the raw `YYYY-MM-DD` parts rather than `new Date(iso)` — that
+ * parses as UTC midnight, which renders as the *previous* day for anyone west
+ * of Greenwich, and this is a Philippine audience picking Philippine dates.
+ */
+const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+]
+
+function formatIso(iso: string) {
+  const [y, m, d] = iso.split("-").map(Number)
+  if (!y || !m || !d) return ""
+  return `${d} ${MONTHS[m - 1]} ${y}`
+}
+
+function composeDateRange(from: string, to: string) {
+  const a = from ? formatIso(from) : ""
+  const b = to ? formatIso(to) : ""
+  if (a && b && a !== b) return `${a} – ${b}`
+  return a || b || ""
+}
+
+/** Native select styled to match `Input` — same treatment as the workshop form. */
+const SelectField = ({
+  children,
+  ...props
+}: React.ComponentPropsWithRef<"select">) => (
+  <div className="relative">
+    <select
+      className="border-input bg-background focus-visible:ring-ring h-12 w-full appearance-none rounded-md border py-3 pr-10 pl-3 text-base shadow-sm transition-colors focus-visible:ring-1 focus-visible:outline-none"
+      {...props}
+    >
+      {children}
+    </select>
+    <ChevronDown className="text-muted-foreground pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2" />
+  </div>
+)
 
 function Field({
   label,

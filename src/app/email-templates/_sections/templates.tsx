@@ -82,8 +82,18 @@ const TEMPLATES: EmailTemplate[] = [
     greeting: "Hi {first_name},",
     body: [
       "Thanks for reaching out about corporate training for {company}. We've received your inquiry and someone from our team will get back to you within 2 business days to understand what you need and put together a proposal.",
+      "Here's what you sent us — reply to this email if any of it needs correcting before we start scoping.",
       "For context while you wait: Adrian has trained more than 20,000 professionals across the Top 500 companies in the Philippines over 20+ years — from multinationals and banks to family businesses.",
     ],
+    panel: {
+      title: "Your inquiry",
+      rows: [
+        ["Programme", "{program}"],
+        ["Attendees", "{attendees}"],
+        ["Target date", "{target_date}"],
+        ["Venue", "{venue}"],
+      ],
+    },
     closing:
       "If it's time-sensitive, reply here or call 0920 900 7709 and we'll prioritise it.",
   },

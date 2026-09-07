@@ -1,11 +1,14 @@
 "use client"
 
 import { useRef, useState } from "react"
+import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { ArrowLeft, ArrowRight, Check, ChevronDown, Mail } from "lucide-react"
+import { ArrowLeft, ArrowRight, ChevronDown, Phone } from "lucide-react"
 import { gsap, useGSAP } from "@/app/_lib/gsap"
+import { saveHandoff } from "@/app/_lib/handoff"
+import { DemoFillButton } from "@/app/_components/demo-fill"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -13,8 +16,13 @@ import { cn } from "@/lib/utils"
 
 /**
  * Workshop registration — multi-step, progressive disclosure (PRD UX direction).
- * Frontend only: submitting advances to a confirmation screen that spells out
- * the real payment flow. No network call.
+ * Frontend only: nothing is sent anywhere.
+ *
+ * On submit this hands the entered details to `sessionStorage` and routes to
+ * `/workshops/<slug>/registered`. It deliberately does NOT show an in-dialog
+ * "done" state any more: the dialog is uncontrolled, so closing it threw the
+ * confirmation away, and the client's whole point was that a submission has to
+ * land somewhere that keeps selling (payment urgency, primer, what to expect).
  */
 
 const SALARY_RANGES = [
@@ -48,11 +56,22 @@ const STEPS: { title: string; fields: (keyof FormValues)[] }[] = [
   { title: "Confirm", fields: ["consent"] },
 ]
 
-type Props = { workshopTitle: string; schedule: string; venue: string }
+type Props = {
+  slug: string
+  workshopTitle: string
+  schedule: string
+  venue: string
+}
 
-export function RegistrationForm({ workshopTitle, schedule, venue }: Props) {
+export function RegistrationForm({
+  slug,
+  workshopTitle,
+  schedule,
+  venue,
+}: Props) {
+  const router = useRouter()
   const [step, setStep] = useState(0)
-  const [done, setDone] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
   const paneRef = useRef<HTMLDivElement>(null)
 
   const {
@@ -60,11 +79,31 @@ export function RegistrationForm({ workshopTitle, schedule, venue }: Props) {
     handleSubmit,
     trigger,
     getValues,
+    reset,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     mode: "onTouched",
   })
+
+  /**
+   * Demo shortcut — see `_components/demo-fill.tsx`. `reset()` writes every
+   * field at once and clears any errors already on screen, so the form lands in
+   * a clean valid state rather than a half-touched one. The step is left where
+   * it is: the multi-step reveal is part of what the client is reviewing, and
+   * skipping to the end would hide it.
+   */
+  const fillSample = () => {
+    reset({
+      fullName: "Juan Dela Cruz",
+      email: "juan.delacruz@email.com",
+      phone: "0917 555 0148",
+      occupation: "Insurance advisor",
+      salaryRange: "₱50,000 – ₱80,000",
+      city: "Cebu City",
+      consent: true,
+    })
+  }
 
   useGSAP(
     () => {
@@ -80,7 +119,7 @@ export function RegistrationForm({ workshopTitle, schedule, venue }: Props) {
       })
       return () => mm.revert()
     },
-    { dependencies: [step, done], scope: paneRef }
+    { dependencies: [step], scope: paneRef }
   )
 
   const next = async () => {
@@ -88,50 +127,17 @@ export function RegistrationForm({ workshopTitle, schedule, venue }: Props) {
     if (ok) setStep((s) => Math.min(s + 1, STEPS.length - 1))
   }
   const back = () => setStep((s) => Math.max(s - 1, 0))
-  const onSubmit = () => setDone(true)
 
-  if (done) {
-    const v = getValues()
-    return (
-      <div ref={paneRef}>
-        <div className="my-8 flex items-center justify-center gap-3">
-          <div className="bg-brand/10 text-brand flex size-12 shrink-0 items-center justify-center rounded-full">
-            <Check className="size-6" />
-          </div>
-          <h3 className="text-2xl font-semibold tracking-tight">
-            You&rsquo;re on the list, {v.fullName.split(" ")[0]}.
-          </h3>
-        </div>
-        <p className="text-muted-foreground leading-relaxed">
-          Your spot for <span className="text-foreground">{workshopTitle}</span>{" "}
-          is held. Here is what happens next:
-        </p>
-        <ol className="mt-6 space-y-4">
-          {[
-            `We email a confirmation to ${v.email} with the payment details (bank transfer or QR).`,
-            "You send payment and reply to that same email thread with your proof of payment.",
-            "Our team reviews it and marks your registration as PAID in our system.",
-            "You get a final confirmation email with your joining instructions and a primer video.",
-          ].map((line, i) => (
-            <li key={i} className="flex gap-3">
-              <span className="bg-muted text-foreground/70 flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
-                {i + 1}
-              </span>
-              <span className="text-muted-foreground text-sm leading-relaxed">
-                {line}
-              </span>
-            </li>
-          ))}
-        </ol>
-        <p className="text-muted-foreground mt-6 flex items-center gap-2 text-sm">
-          <Mail className="size-4" />
-          Questions? coachadrianding@maximumimpact.online
-        </p>
-        <p className="text-muted-foreground/60 mt-6 text-xs">
-          Demo form — no data is sent or stored.
-        </p>
-      </div>
-    )
+  const onSubmit = (v: FormValues) => {
+    setSubmitting(true)
+    saveHandoff({
+      kind: "workshop",
+      slug,
+      fullName: v.fullName,
+      email: v.email,
+      phone: v.phone,
+    })
+    router.push(`/workshops/${slug}/registered`)
   }
 
   const current = STEPS[step]
@@ -150,9 +156,12 @@ export function RegistrationForm({ workshopTitle, schedule, venue }: Props) {
           />
         ))}
       </div>
-      <p className="text-muted-foreground mt-3 text-xs tracking-[0.1em] uppercase">
-        Step {step + 1} of {STEPS.length} · {current.title}
-      </p>
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+        <p className="text-muted-foreground text-xs tracking-[0.1em] uppercase">
+          Step {step + 1} of {STEPS.length} · {current.title}
+        </p>
+        <DemoFillButton onFill={fillSample} />
+      </div>
 
       <div ref={paneRef} className="mt-10 space-y-5">
         {step === 0 && (
@@ -255,25 +264,61 @@ export function RegistrationForm({ workshopTitle, schedule, venue }: Props) {
         )}
       </div>
 
-      <div className="mt-8 flex items-center justify-between">
-        {step > 0 ? (
-          <Button type="button" variant="ghost" onClick={back}>
-            <ArrowLeft className="size-4" />
-            Back
-          </Button>
-        ) : (
-          <span />
-        )}
-        {step < STEPS.length - 1 ? (
-          <Button type="button" variant="brand" onClick={next}>
-            Continue
-            <ArrowRight className="size-4" />
-          </Button>
-        ) : (
-          <Button type="submit" variant="brand">
-            Complete registration
-          </Button>
-        )}
+      {/* The "call us instead" line shares the action row and sits opposite the
+          primary button, so the alternative to filling the form is offered at
+          the exact moment someone is deciding whether to continue with it.
+          Back and Continue group together on the right; the row wraps on narrow
+          widths, putting the phone line above the buttons rather than crushing
+          both. The sentence is one text node so the flex `gap` can't open a
+          space in front of the number. */}
+      <div className="mt-8 flex flex-wrap-reverse items-center justify-between gap-x-6 gap-y-4">
+        <p className="text-muted-foreground/70 flex items-center gap-2 text-xs">
+          <Phone className="size-3.5 shrink-0" />
+          <span>
+            Rather ask first? Call or text{" "}
+            <a
+              href="tel:+639209007709"
+              className="hover:text-foreground font-medium whitespace-nowrap underline"
+            >
+              0920 900 7709
+            </a>
+          </span>
+        </p>
+
+        <div className="ml-auto flex items-center gap-2">
+          {step > 0 && (
+            <Button type="button" variant="ghost" onClick={back}>
+              <ArrowLeft className="size-4" />
+              Back
+            </Button>
+          )}
+          {/* Distinct `key`s force React to unmount/remount rather than reuse
+              the same <button> DOM node across the two branches. Without them,
+              a click that lands right as validation resolves can catch React
+              mid-swap: it flips this node's `type` from "button" to "submit"
+              between the click's mousedown and mouseup, and the browser
+              submits on mouseup even though nothing clicked the submit
+              button — the click that was meant to advance one step silently
+              fires the final submit instead. Reproduces reliably whenever
+              validation resolves fast (confirmed via the demo-fill button,
+              whose data is valid immediately) and is a real risk for a fast
+              real click too, not just automation. */}
+          {step < STEPS.length - 1 ? (
+            <Button key="continue" type="button" variant="brand" onClick={next}>
+              Continue
+              <ArrowRight className="size-4" />
+            </Button>
+          ) : (
+            <Button
+              key="submit"
+              type="submit"
+              variant="brand"
+              disabled={submitting}
+            >
+              {submitting ? "Reserving your seat…" : "Complete registration"}
+            </Button>
+          )}
+        </div>
       </div>
     </form>
   )

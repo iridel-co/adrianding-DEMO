@@ -30,7 +30,7 @@ export function LandingGalleryPreview({
   }))
 
   return (
-    <section className="bg-background py-16 lg:py-24">
+    <section className="bg-muted/40 py-16 lg:py-24">
       <div className="mx-auto max-w-7xl px-6 sm:px-8">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div>

@@ -1,49 +1,15 @@
 import Image from "next/image"
 import { Reveal } from "@/app/_components/reveal"
 import { SplitReveal } from "@/app/_components/split-reveal"
+import { CERTIFICATIONS, type Certification } from "@/lib/certifications"
 
 /**
  * About — certifications & accreditations as a single logo row, matching the
  * "in great company" treatment: bare marks, no card chrome.
- * TODO: confirm the exact accrediting-body names and years (AET / CPD) with the
- * client; the rest are from the PRD.
+ * Data is shared with the workshop detail pages — see `src/lib/certifications.ts`.
  */
 
-const CERTS: {
-  name: string
-  line: string
-  src: string
-  /** Backs the mark with a circle in this color — INSEAD's wordmark has no
-   *  card of its own like the others, so it floats without one otherwise. */
-  circleBg?: string
-}[] = [
-  {
-    name: "Peak Potentials",
-    line: "Train the Trainer certification — T. Harv Eker, 2004",
-    src: "/images/logos/trainer-logo.webp",
-  },
-  {
-    name: "Genos International",
-    line: "Emotional Intelligence coaching practice, 2017",
-    src: "/images/logos/genos-logo.webp",
-  },
-  {
-    name: "INSEAD",
-    line: "Executive Education programme, 2021",
-    src: "/images/logos/insead-logo.png",
-    circleBg: "#eaecef",
-  },
-  {
-    name: "AET",
-    line: "Accredited trainer",
-    src: "/images/logos/aet-logo.png",
-  },
-  {
-    name: "CPD Council",
-    line: "Accredited professional-development provider",
-    src: "/images/logos/cpd-logo.webp",
-  },
-]
+const CERTS = CERTIFICATIONS
 
 export function AboutCertifications() {
   return (
@@ -74,7 +40,7 @@ export function AboutCertifications() {
   )
 }
 
-function CertCard({ cert }: { cert: (typeof CERTS)[number] }) {
+function CertCard({ cert }: { cert: Certification }) {
   return (
     <div className="flex w-44 flex-col items-center gap-5 text-center sm:w-56">
       <div className="relative flex h-28 w-full items-center justify-center sm:h-32">

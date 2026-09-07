@@ -31,6 +31,22 @@ export type Workshop = {
   format: string
   curriculum: string[]
   inclusions: string[]
+  /**
+   * The problem this workshop solves, in the visitor's words — the first line on
+   * the detail page, above the title. Ad traffic lands here cold and needs to
+   * recognise itself before it reads a course name.
+   * TODO: client sign-off — representative framing, not his wording.
+   */
+  problem: string
+  /** "You leave able to…" — 3-4 concrete results, shown as the trust block. */
+  outcomes: string[]
+  /** What to bring / how the day runs — shown on the confirmation page. */
+  whatToExpect: string[]
+  /** One line under the primer video player, per course. */
+  primerBlurb: string
+  seatsTotal: number
+  /** Drives the scarcity pill. TODO: CMS-managed in the real build. */
+  seatsLeft: number
 }
 
 export const WORKSHOPS: Workshop[] = [
@@ -68,6 +84,25 @@ export const WORKSHOPS: Workshop[] = [
       "30-day post-training application mechanism",
       "Online reunion session with the cohort",
     ],
+    problem:
+      "You are doing the calls, the follow-ups and the presentations — and still losing deals you should have won.",
+    outcomes: [
+      "Open a conversation so the prospect wants the next meeting",
+      "Ask the questions that surface the real reason they would buy",
+      "Answer “it's too expensive” without discounting",
+      "Close on a clear next step instead of “let me think about it”",
+    ],
+    whatToExpect: [
+      "Registration opens 8:30 AM — come early, seating is first come",
+      "Bring one live deal you are stuck on; you will rebuild it during the day",
+      "Business casual. Bring a notebook — the manual is yours to keep",
+      "Role-play with feedback in the afternoon block",
+      "You leave with a written 30-day application plan",
+    ],
+    primerBlurb:
+      "A short message from Coach Adrian on what to think about before the day starts.",
+    seatsTotal: 40,
+    seatsLeft: 11,
   },
   {
     slug: "exceptional-leadership",
@@ -103,6 +138,25 @@ export const WORKSHOPS: Workshop[] = [
       "30-day post-training application mechanism",
       "Online reunion session with the cohort",
     ],
+    problem:
+      "You were promoted for being good at the work. Nobody taught you how to lead the people who now do it.",
+    outcomes: [
+      "Set a standard your team meets without being chased",
+      "Run the accountability conversation you have been putting off",
+      "Delegate so people grow instead of handing work back",
+      "Leave with a written 90-day plan for your team",
+    ],
+    whatToExpect: [
+      "Registration opens 8:30 AM — come early, seating is first come",
+      "Bring one situation with a team member you want to resolve",
+      "Business casual. Bring a notebook — the manual is yours to keep",
+      "Guided self-assessment in the morning block",
+      "You leave with a written 90-day leadership plan",
+    ],
+    primerBlurb:
+      "Coach Adrian on the one shift that separates a manager from a leader — worth five minutes before the day.",
+    seatsTotal: 40,
+    seatsLeft: 17,
   },
   // TODO: placeholder open workshops — added to preview a fuller catalogue.
   // Replace with the client's real upcoming dates.
@@ -140,6 +194,25 @@ export const WORKSHOPS: Workshop[] = [
       "30-day post-training application mechanism",
       "Online reunion session with the cohort",
     ],
+    problem:
+      "You know your material cold — and still watch the room drift the moment you start talking.",
+    outcomes: [
+      "Build a talk around one point the audience can repeat",
+      "Open in a way that earns the next five minutes",
+      "Hold your pace and stillness when the pressure lands",
+      "Handle a hostile question without losing the thread",
+    ],
+    whatToExpect: [
+      "Registration opens 8:30 AM — come early, seating is first come",
+      "Bring a real talk or pitch you have to give soon; you will rebuild it",
+      "You will be recorded on camera for feedback — footage is yours only",
+      "Business casual. Bring a notebook — the manual is yours to keep",
+      "You leave with a rebuilt, delivered version of your own talk",
+    ],
+    primerBlurb:
+      "A short primer on the one-sentence point every talk needs — watch before you draft anything.",
+    seatsTotal: 30,
+    seatsLeft: 22,
   },
   {
     slug: "negotiation-essentials",
@@ -174,6 +247,25 @@ export const WORKSHOPS: Workshop[] = [
       "30-day post-training application mechanism",
       "Online reunion session with the cohort",
     ],
+    problem:
+      "You close the deal, then look at the margin you gave away and cannot explain why you gave it.",
+    outcomes: [
+      "Walk in knowing your number and your walk-away",
+      "Trade concessions on purpose instead of conceding under pressure",
+      "Read what the other side actually needs, not what they asked for",
+      "Close an agreement that still holds three months later",
+    ],
+    whatToExpect: [
+      "Registration opens 8:30 AM — come early, seating is first come",
+      "Bring a negotiation you are heading into; you will prepare it live",
+      "Business casual. Bring a notebook — the manual is yours to keep",
+      "Simulations run all afternoon, with a debrief after every round",
+      "You leave with a reusable preparation sheet",
+    ],
+    primerBlurb:
+      "Coach Adrian on why preparation, not personality, decides most negotiations.",
+    seatsTotal: 30,
+    seatsLeft: 24,
   },
   {
     slug: "coaching-for-managers",
@@ -208,6 +300,25 @@ export const WORKSHOPS: Workshop[] = [
       "30-day post-training application mechanism",
       "Online reunion session with the cohort",
     ],
+    problem:
+      "Your team brings you every problem, you solve every problem, and nobody — including you — is growing.",
+    outcomes: [
+      "Tell the difference between a coaching moment and a telling moment",
+      "Ask the handful of questions that unlock someone's own thinking",
+      "Give feedback that actually changes what happens next week",
+      "Run a one-on-one your team looks forward to",
+    ],
+    whatToExpect: [
+      "Registration opens 8:30 AM — come early, seating is first come",
+      "Bring one team member's situation you want to work through",
+      "Business casual. Bring a notebook — the manual is yours to keep",
+      "Triad practice — you will coach and be coached",
+      "You leave with a plan for your next five one-on-ones",
+    ],
+    primerBlurb:
+      "Coach Adrian on why solving your team's problems is the most expensive habit a manager has.",
+    seatsTotal: 30,
+    seatsLeft: 26,
   },
   {
     slug: "customer-experience-excellence",
@@ -242,6 +353,25 @@ export const WORKSHOPS: Workshop[] = [
       "30-day post-training application mechanism",
       "Online reunion session with the cohort",
     ],
+    problem:
+      "Your service is fine on a good day and unpredictable on a busy one — and customers only remember the busy one.",
+    outcomes: [
+      "Write service standards a whole team can actually follow",
+      "Own the first 30 seconds of every customer interaction",
+      "Turn a complaint into the reason they stay with you",
+      "De-escalate a difficult customer without giving away the business",
+    ],
+    whatToExpect: [
+      "Registration opens 8:30 AM — come early, seating is first come",
+      "Bring a recent complaint your team handled; you will rework it",
+      "Business casual. Bring a notebook — the manual is yours to keep",
+      "Service-recovery role-play in the afternoon block",
+      "You leave with a first draft of standards for your own team",
+    ],
+    primerBlurb:
+      "Coach Adrian on what customers are really judging you on — and it is not the transaction.",
+    seatsTotal: 30,
+    seatsLeft: 28,
   },
   {
     // TODO: replace representative past events with the client's real history.
@@ -273,6 +403,22 @@ export const WORKSHOPS: Workshop[] = [
       "30-day post-training application mechanism",
       "Online reunion session with the cohort",
     ],
+    problem:
+      "You hired good people individually and somehow ended up with a team that does not hold together.",
+    outcomes: [
+      "Name what your culture actually is right now, not what the poster says",
+      "Install rituals that build belonging without a budget",
+      "Catch cultural drift early enough to correct it",
+    ],
+    whatToExpect: [
+      "Registration opens 8:30 AM — come early, seating is first come",
+      "Business casual. Bring a notebook — the manual is yours to keep",
+      "You leave with a written ritual plan for your team",
+    ],
+    primerBlurb:
+      "Coach Adrian on what culture actually is — and what it is not.",
+    seatsTotal: 40,
+    seatsLeft: 0,
   },
 ]
 

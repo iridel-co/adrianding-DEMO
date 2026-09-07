@@ -11,6 +11,7 @@ import {
 import { RegistrationForm } from "./registration-form"
 
 type Props = {
+  slug: string
   workshopTitle: string
   schedule: string
   venue: string
@@ -19,9 +20,11 @@ type Props = {
 
 /**
  * Wraps the multi-step registration form in a modal. `children` is the
- * trigger element (e.g. the "Register now" button).
+ * trigger element (e.g. the "Register now" button). `slug` is what the form
+ * redirects to on submit — see `registration-form.tsx`.
  */
 export function RegistrationDialog({
+  slug,
   workshopTitle,
   schedule,
   venue,
@@ -41,6 +44,7 @@ export function RegistrationDialog({
           </DialogDescription>
         </DialogHeader>
         <RegistrationForm
+          slug={slug}
           workshopTitle={workshopTitle}
           schedule={schedule}
           venue={venue}

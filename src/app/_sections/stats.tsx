@@ -5,9 +5,10 @@ import { Reveal } from "@/app/_components/reveal"
  * Landing — "By the numbers". Editorial / magazine treatment: a quiet
  * department heading, then four figures set large in the serif with a
  * caption-style line under each. No cards, no rules, no dividers — whitespace
- * and type carry it. Sits directly under <LandingSpecializations> ("Six
- * programs, two decades deep") on the same bg-muted/40 ground, shared no
- * divider, backing up that claim with the numbers right after it.
+ * and type carry it. Sits directly under <LandingCompanies> on the same
+ * bg-background ground with no divider, so the client roster and the figures
+ * read as one credibility block — which is what the PRD asks for, and what
+ * hands the visitor straight to the fork below.
  */
 
 const STATS = [
@@ -20,7 +21,7 @@ const STATS = [
 
 export function LandingStats() {
   return (
-    <section className="bg-muted/40 text-foreground">
+    <section className="bg-background text-foreground">
       <div className="mx-auto max-w-7xl px-6 pt-4 pb-12 sm:px-8 lg:pt-6 lg:pb-16">
         <h2 className="text-muted-foreground font-serif text-lg italic lg:text-xl">
           By the numbers

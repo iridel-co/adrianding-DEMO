@@ -15,6 +15,7 @@ import {
 import { useReducedMotionSafe } from "@/app/_lib/use-reduced-motion-safe"
 import { useIsTouch } from "@/app/_lib/use-is-touch"
 import { smoothScrollToElement } from "@/app/_lib/smooth-scroll-to"
+import { AttentionOnView } from "@/app/_components/attention-on-view"
 import { Reveal } from "@/app/_components/reveal"
 import { TextSweepReveal } from "@/app/_components/text-sweep-reveal"
 
@@ -413,12 +414,18 @@ function PathCard({
             edge-flush pill (`-ml-4` cancels the pill's own left padding
             against the card's padding edge — mirrored as `-mr-4` here for the
             mobile right edge). */}
-        <div className="mt-8 flex justify-end sm:justify-start">
-          <span className="group/cta hover:bg-brand hover:text-brand-foreground -mr-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-semibold tracking-[0.08em] text-black uppercase transition-colors duration-300 sm:mr-0 sm:-ml-4 sm:text-sm sm:tracking-[0.12em]">
+        {/* The pill gets a one-shot "beat" the first time the card scrolls into
+            view — the client asked for these two CTAs to entice rather than sit
+            still. `cta-beat-target` is animated from globals.css by the
+            `data-beat` attribute AttentionOnView sets; keeping the keyframe on
+            this inner span means it never contends with the card's own
+            framer-motion transforms. */}
+        <AttentionOnView className="mt-8 flex justify-end sm:justify-start">
+          <span className="group/cta hover:bg-brand hover:text-brand-foreground cta-beat-target -mr-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-semibold tracking-[0.08em] text-black uppercase transition-colors duration-300 sm:mr-0 sm:-ml-4 sm:text-sm sm:tracking-[0.12em]">
             {p.cta}
             <ArrowRight className="size-4 transition-transform group-hover/cta:translate-x-1" />
           </span>
-        </div>
+        </AttentionOnView>
       </div>
     </Link>
   )

@@ -248,6 +248,13 @@ export function HeroEditorial() {
               </Marquee>
             </div>
           </div>
+          {/* History: a problem-framing line briefly sat here (2026-09-06) in
+              response to "credibility but not yet trust". Removed 2026-09-07 —
+              it competed with the wordmark for the same band, which the cover
+              composition can't carry (cf. lessons 2026-08-06, "a giant
+              background wordmark and a headline cannot share the same band").
+              The problem framing now lives on each course page instead, where
+              the ad traffic that needs it actually lands. */}
           <div className="he-line pointer-events-auto mt-6 flex items-center justify-center gap-1.5 sm:-ml-2.5 sm:justify-start">
             {SOCIALS.map(({ label, href, Icon }) => (
               <a

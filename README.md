@@ -33,20 +33,44 @@ This repo is being shown to Adrian Ding for approval. **Nothing here is wired to
 backend.** Once he signs off on direction and content, the next phase builds the CRM/CMS/auth
 layer described below.
 
-Routes shipped: `/` (landing), `/about`, `/workshops` + `/workshops/[slug]`,
-`/corporate-training`, `/gallery` + `/gallery/[slug]`, `/staff-login`, `/email-templates`.
+Routes shipped: `/` (landing), `/about`, `/workshops` + `/workshops/[slug]` +
+`/workshops/[slug]/registered`, `/corporate-training` + `/corporate-training/inquiry-received`,
+`/gallery` + `/gallery/[slug]`, `/staff-login`, `/email-templates`.
 
-| Route                 | Sections                                                                                                                  |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `/`                   | editorial hero · companies marquee · specializations · paths · stats · workshops-open · quote-reveal · testimonials · CTA |
-| `/about`              | hero · story · journey/timeline · certifications · FAQ                                                                    |
-| `/workshops`          | hero · list (calendar)                                                                                                    |
-| `/workshops/[slug]`   | overview · details · registration form/dialog · register CTA                                                              |
-| `/corporate-training` | hero · why · companies · programs · testimonials · inquiry form/CTA                                                       |
-| `/gallery`            | floating wall grid                                                                                                        |
-| `/gallery/[slug]`     | event hero · photo wall                                                                                                   |
-| `/staff-login`        | UI shell only — see below                                                                                                 |
-| `/email-templates`    | copy/layout preview only — see below                                                                                      |
+| Route                                  | Sections                                                                                                                      |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `/`                                    | editorial hero · quote-reveal · companies marquee · stats · paths · workshops-open · specializations · testimonials · gallery |
+| `/about`                               | hero · story · journey/timeline · certifications · FAQ                                                                        |
+| `/workshops`                           | hero · list (calendar)                                                                                                        |
+| `/workshops/[slug]`                    | hero · overview · proof · details · testimonials · FAQ · register CTA · support band · sticky register bar                    |
+| `/workshops/[slug]/registered`         | confirmation · payment urgency · primer · what to expect · support band — `noindex`                                           |
+| `/corporate-training`                  | hero · why · programs · companies · testimonials · credentials · inquiry form/CTA · support band                              |
+| `/corporate-training/inquiry-received` | acknowledgment · reply commitment · submitted summary · primer · credibility · support band — `noindex`                       |
+| `/gallery`                             | floating wall grid                                                                                                            |
+| `/gallery/[slug]`                      | event hero · photo wall                                                                                                       |
+| `/staff-login`                         | UI shell only — see below                                                                                                     |
+| `/email-templates`                     | copy/layout preview only — see below                                                                                          |
+
+### The two funnels
+
+Both entry paths end at a form, and both forms end at a confirmation page.
+
+1. **Ad → course page.** The client's traffic model (AIM / Oxford style): an ad for one
+   workshop links straight to `/workshops/<slug>`, never the homepage. That page therefore
+   has to stand alone — it opens on the `problem` field rather than the course title, and
+   carries the credential band, testimonials, registration FAQ, client logos and a sticky
+   register bar so a cold visitor can convert without seeing another page.
+2. **Homepage → fork.** Hero → belief quote → logos + figures (one credibility block) →
+   `#which-path` → the open-workshop list. Proof runs straight into the decision; the
+   deeper capability material sits after it.
+
+**Form → confirmation handoff.** Both forms write the submitted values to `sessionStorage`
+via `src/app/_lib/handoff.ts`, then `router.push` to their confirmation route, which reads
+them back **in a `useEffect`, never during render** — `sessionStorage` doesn't exist during
+SSR, so branching the first client render on it hydration-mismatches. The prerendered HTML
+is always the generic copy and the personalised version swaps in after mount. Every
+confirmation section must therefore look complete when the handoff is `null` (direct visit,
+private mode, blocked site data).
 
 ---
 
@@ -56,16 +80,18 @@ Content is real-looking but **representative, not final** in these files. Every 
 card, gallery event, and testimonial needs his input before it ships — don't treat any of
 this as locked copy.
 
-| File                                         | What's pending                                                                                                                                                                |
-| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/lib/workshops.ts`                       | Each workshop card + detail page: title, curriculum outline, inclusions, and **price** (`"Price on inquiry*"` until confirmed).                                               |
-| `src/lib/gallery.ts`                         | Each past event (parent grid card + child page): name, date, blurb, photo set, and Adrian's "reflections" copy — written in his voice as a placeholder, not his actual notes. |
-| `src/lib/testimonials.ts`                    | Every quote is a placeholder pending the real ones from `Coach_Adrian_Ding_Website_2025.pdf`. No headshots supplied yet.                                                      |
-| `src/lib/timeline.ts`                        | Founding year and milestone wording need confirmation.                                                                                                                        |
-| `src/app/about/_sections/certifications.tsx` | Confirm the exact accrediting-body names and years (AET / CPD).                                                                                                               |
-| `src/app/_sections/stats.tsx`                | Industry count is a placeholder pending client confirmation.                                                                                                                  |
-| `src/lib/companies.ts` / logo marquee        | 47 of 91 companies have no logo artwork and render as name chips — see `PRD.md` → **Companies Served — Roster**.                                                              |
-| `src/app/fonts/`                             | **The Seasons** and **Abramo** are web-sourced demo copies of commercial fonts — swap for licensed files (same filenames) before any real handoff. See `PRD.md` → **Fonts**.  |
+| File                                         | What's pending                                                                                                                                                                                        |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/lib/workshops.ts`                       | Each workshop card + detail page: title, curriculum outline, inclusions, **price**, plus the newer `problem` / `outcomes` / `whatToExpect` / `primerBlurb` / `seatsLeft` fields — all representative. |
+| `src/lib/workshop-faq.ts`                    | Registration FAQ — the transfer window, the 48-hour seat hold, and whether an official receipt is issued by default all need confirming.                                                              |
+| `.../registered/_sections/payment.tsx`       | Bank account name/number and the GCash QR are placeholders. So is the 48-hour hold window.                                                                                                            |
+| `src/lib/gallery.ts`                         | Each past event (parent grid card + child page): name, date, blurb, photo set, and Adrian's "reflections" copy — written in his voice as a placeholder, not his actual notes.                         |
+| `src/lib/testimonials.ts`                    | Every quote is a placeholder pending the real ones from `Coach_Adrian_Ding_Website_2025.pdf`. No headshots supplied yet.                                                                              |
+| `src/lib/timeline.ts`                        | Founding year and milestone wording need confirmation.                                                                                                                                                |
+| `src/app/about/_sections/certifications.tsx` | Confirm the exact accrediting-body names and years (AET / CPD).                                                                                                                                       |
+| `src/app/_sections/stats.tsx`                | Industry count is a placeholder pending client confirmation.                                                                                                                                          |
+| `src/lib/companies.ts` / logo marquee        | 47 of 91 companies have no logo artwork and render as name chips — see `PRD.md` → **Companies Served — Roster**.                                                                                      |
+| `src/app/fonts/`                             | **The Seasons** and **Abramo** are web-sourced demo copies of commercial fonts — swap for licensed files (same filenames) before any real handoff. See `PRD.md` → **Fonts**.                          |
 
 Before editing a card in gallery/workshops/testimonials, check whether the change is
 cosmetic (safe to make now) or content (needs AD's sign-off first) — when unsure, ask rather
@@ -82,7 +108,13 @@ Everything below is UI only. This is the actual scope of work once Adrian Ding a
   contract when wiring a real CMS (fields, relations like `relatedWorkshop`, etc).
 - **Registration forms don't submit anywhere.** `workshops/[slug]/_sections/registration-form.tsx`
   (workshop signup) and `corporate-training/_sections/*` (inquiry form) validate with Zod
-  client-side only — no CRM write, no confirmation email.
+  client-side only — no CRM write, no confirmation email. They hand off through
+  `sessionStorage` and redirect to a confirmation route; that route is what a real
+  submission would land on, but nothing is transmitted or persisted.
+- **The confirmation pages are the UI for a process that is still manual.** The four-step
+  tracker on `/workshops/[slug]/registered` (registered → payment sent → staff confirms →
+  primer email) is the client's actual flow drawn out. Step 3 is a human marking a row as
+  paid in a CRM that does not exist yet.
 - **`/staff-login` is a UI shell** — no auth provider, no session, no protected routes behind
   it. Needs real auth (and a reason to exist — confirm with AD what staff actually need to do
   there) before it's real.

@@ -270,6 +270,41 @@
     }
   }
 
+  /* CTA attention beat — the landing fork's two path pills (`paths.tsx`).
+     The client asked for these to "beat or vibrate so it entices"; scoped to
+     a single pass when the card scrolls into view rather than a perpetual
+     loop, so it catches the eye once and then leaves the composition alone.
+     Applied by `<AttentionOnView>`, which adds `data-beat` after an
+     IntersectionObserver fires once. Scale + a widening ring, never a shake:
+     a jitter on a pill inside a photo card reads as a rendering fault. */
+  @keyframes cta-beat {
+    0%,
+    100% {
+      transform: scale(1);
+      box-shadow: 0 0 0 0 var(--brand);
+    }
+    18% {
+      transform: scale(1.075);
+      box-shadow: 0 0 0 7px transparent;
+    }
+    36% {
+      transform: scale(1);
+      box-shadow: 0 0 0 0 transparent;
+    }
+    54% {
+      transform: scale(1.055);
+      box-shadow: 0 0 0 6px transparent;
+    }
+  }
+  [data-beat] .cta-beat-target {
+    animation: cta-beat 1.5s cubic-bezier(0.22, 1, 0.36, 1) 2;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-beat] .cta-beat-target {
+      animation: none;
+    }
+  }
+
   /* The shared Button component's `brand` variant already wipes in a
      `::before` fill and inverts the label color on hover (see button.tsx).
      The navbar's CTA opts out via this class instead, matching

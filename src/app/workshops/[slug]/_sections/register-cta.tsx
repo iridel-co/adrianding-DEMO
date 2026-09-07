@@ -12,9 +12,14 @@ export function RegisterCta({ workshop }: { workshop: Workshop }) {
         variant="brand"
         className="relative bg-transparent"
         heading="Ready to save your seat?"
-        subtext={`${workshop.schedule} · ${workshop.venue}, ${workshop.city}`}
+        subtext={`${workshop.schedule} · ${workshop.venue}, ${workshop.city} · ${
+          workshop.seatsLeft > 0
+            ? `${workshop.seatsLeft} of ${workshop.seatsTotal} seats left`
+            : "Fully booked"
+        }`}
         actions={
           <RegistrationDialog
+            slug={workshop.slug}
             workshopTitle={workshop.title}
             schedule={workshop.schedule}
             venue={`${workshop.venue}, ${workshop.city}`}

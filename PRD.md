@@ -67,13 +67,21 @@
 
 **The one thing this demo must communicate:** Adrian Ding's 20+ years training 20,000+ leaders across HSBC, Wipro, Petron, and more, now has a digital front door built to convert both corporate inquiries and public workshop signups.
 
-**Section flow (landing page)** — reworked 2026-09-01 for a single-decision funnel
-(audit follow-up); `page.tsx` is the source of truth:
-Hero (one CTA, scrolls to the fork) → Quote → About teaser (the person) →
-Companies Served (marquee) + Statistics (one credibility block, shared ground) →
-Areas of Specialization (typographic list) → **Which path is yours?** (`#which-path`
-— workshops vs corporate training, the page's only CTA) → Workshops open for
-registration → Testimonials → Gallery preview → Footer
+**Section flow (landing page)** — reordered 2026-09-06 on client feedback ("what matters
+most is driving traffic and funneling them in"); `page.tsx` is the source of truth.
+A problem-framing line was tried in the hero on 2026-09-06 and removed on 2026-09-07 —
+it competed with the wordmark for the same band, and the framing belongs on the course
+pages, where the ad traffic that needs it actually lands.
+Hero (one CTA, scrolls to the fork) → Quote →
+Companies Served (marquee) + Statistics (one credibility block, shared `bg-background`
+ground, no divider) → **Which path is yours?** (`#which-path` — workshops vs corporate
+training, the page's only CTA, both pills carry a one-shot attention beat on scroll-in) →
+Workshops open for registration → Areas of Specialization → Testimonials →
+Gallery preview → Footer
+
+Specializations moved below the fork: it previously sat between the roster and the
+decision point, pushing the page's only CTA down past three full sections. Proof now runs
+straight into the fork.
 
 ---
 
@@ -198,6 +206,31 @@ Client-supplied roster, used by the filterable marquee on the Landing page and r
 - **Workshop Registration Form** — multi-step per UX Direction. Fields: Name, Number, Email, Occupation, Salary range, City (optional), consent checkbox. Frontend only — no backend in this phase.
 - Payment details section (bank/QR placeholder), reflecting the intended flow: user submits form → receives confirmation email with payment details → replies in-thread with proof of payment → staff manually reviews and marks as PAID in CRM → user receives payment confirmation email. Represented as static UI in this phase, not functional.
 
+### Trust layer (added 2026-09-06, client feedback)
+
+The client's traffic model is AIM / Oxford: an ad per course links **directly** to that
+course page, never the homepage. So the detail page must convert a cold visitor on its own.
+It opens on a full-bleed photo hero carrying the `problem` line as the tag and the course
+title as the headline, with date / venue / seats-left chips under them. Then: intro,
+outcomes, the register rail (countdown + scarcity + CTA), primer slot, client-logo strip,
+credential band (`src/lib/certifications.ts`), curriculum + inclusions, testimonials,
+registration FAQ (`src/lib/workshop-faq.ts`), CTA, and a "talk to a human" support band.
+A sticky register bar follows the visitor down the page with the seats-left count.
+
+The FAQ opens on **hover** on desktop (controlled accordion, `onMouseEnter` sets the open
+item and Radix's `onValueChange` still handles click/keyboard, so both drive one piece of
+state). Hover never closes an item — moving to another replaces it. On touch no hover
+handler is attached at all, since a tap synthesises `mouseenter` and would race the
+trigger's own toggle.
+
+### Child (`/workshops/[workshop-slug]/registered`)
+
+The post-submission destination — one per course, templated the same way the course pages
+are. Confirmation header with the registrant's first name, a four-step progress tracker of
+the real process, the payment-urgency block (48-hour hold, bank/QR placeholder,
+reply-with-proof instruction), the per-course primer video, what to expect, a summary of the
+booking, and the support band. `noindex`.
+
 > `*` Pricing not yet provided — asterisked placeholder, no functioning CMS in this phase.
 
 ---
@@ -211,8 +244,25 @@ _(Not explicitly listed by Chan but required — this is 80% of Adrian's revenue
 3. **Areas of Specialization** (capabilities grid, reused component)
 4. **Companies Served** (reused marquee component)
 5. **Testimonials** (corporate-specific selection — Wipro, HSBC, Global Payments, Global Pacific)
-6. **Corporate Training Inquiry Form** — multi-step. Fields: Name, Number, Email, Company, Occupation/Role. Frontend only.
-7. **Footer** (global)
+6. **Accreditation band** — the AET / CPD / INSEAD / Genos / Peak Potentials marks, shared with the About page via `src/lib/certifications.ts`. Added 2026-09-06: an L&D head has to justify the spend internally, and the accrediting bodies are what survives that conversation.
+7. **Corporate Training Inquiry Form** — multi-step, four steps. Fields: Name, Number, Email, Company, Role, then **Preferred topic or programme**, **Number of attendees** (banded), **Possible date**, **Possible venue** (all four added 2026-09-06 at the client's request — a name and a free-text message was not enough to quote against), optional context, consent. Frontend only.
+   - **Possible date** has two modes (2026-09-07): "Pick dates" — a from/to pair of native date pickers, one date for a single session or both for a range — and "Not fixed yet", a free-text fallback for "Q1 2027" or "after the audit", which a date input cannot express. Either mode composes into the same single string, so nothing downstream branches.
+8. **Support band** — call / text / email, for anyone not ready to fill a form.
+9. **Footer** (global)
+
+### Child (`/corporate-training/inquiry-received`)
+
+Post-submission destination: acknowledgment naming the company, a three-step
+what-happens-next timeline, then the **reply-commitment block on full brand ground** —
+the corporate mirror of the workshop confirmation's payment block, carrying the "within 2
+business days" promise, the discovery-call shape and the call-us-sooner number. Then a
+corporate primer video slot, a read-back of the submitted programme / attendees / date /
+venue, a credibility block, and the support band. `noindex`.
+
+> The full-brand-ground block is the treatment to reach for whenever a page has **one
+> commitment that must not be scrolled past** — a held seat, a reply window. It earns its
+> loudness by carrying an obligation, so use it once per page at most; spending it on
+> ordinary marketing copy is what would make it stop working.
 
 ---
 

@@ -6,7 +6,9 @@ import { CorporateWhy } from "./_sections/why"
 import { CorporatePrograms } from "./_sections/programs"
 import { CorporateCompanies } from "./_sections/companies"
 import { CorporateTestimonials } from "./_sections/testimonials"
+import { CorporateCredentials } from "./_sections/credentials"
 import { CorporateInquiryCta } from "./_sections/inquiry-cta"
+import { SupportBand } from "@/app/_components/support-band"
 
 export const metadata: Metadata = {
   title: "Corporate Training — Coach Adrian Ding",
@@ -24,7 +26,15 @@ export default function CorporateTrainingPage() {
         <CorporatePrograms />
         <CorporateCompanies />
         <CorporateTestimonials />
+        {/* Accreditation before the form — the last objection an L&D head has
+            to answer internally. */}
+        <CorporateCredentials />
         <CorporateInquiryCta />
+        {/* Anyone not ready to fill a form still gets a way through. */}
+        <SupportBand
+          heading="Would rather talk it through first?"
+          blurb="Tell us roughly what your team needs and we will come back with a shape and a number. No form required to start the conversation."
+        />
       </main>
       <SiteFooter />
     </>

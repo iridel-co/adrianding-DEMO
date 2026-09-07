@@ -56,22 +56,29 @@ export function Countdown({ target, className }: CountdownProps) {
     )
   }
 
+  /**
+   * Sized to fit the workshop page's narrow register rail (a `max-w-xs` card,
+   * ~272px of content once its padding is off). Four 2-digit figures plus three
+   * separators at the old `text-4xl`/`text-5xl` overflowed it — the digits ran
+   * past the card's right edge. `min-w-0` on the row lets it shrink inside a
+   * flex/grid parent rather than forcing the parent wider.
+   */
   return (
-    <div className={cn("flex items-start gap-3 sm:gap-4", className)}>
+    <div className={cn("flex min-w-0 items-start gap-2", className)}>
       {UNITS.map(({ key, label }, i) => (
-        <div key={key} className="flex items-start gap-3 sm:gap-4">
+        <div key={key} className="flex min-w-0 items-start gap-2">
           <div className="flex flex-col items-center">
             <MotionNumberFlow
               value={parts ? parts[key] : 0}
               format={{ minimumIntegerDigits: 2 }}
-              className="text-4xl font-semibold tracking-tighter tabular-nums sm:text-5xl"
+              className="text-[1.75rem] leading-none font-semibold tracking-tighter tabular-nums sm:text-[2rem]"
             />
-            <span className="text-muted-foreground mt-1 text-[0.625rem] font-medium tracking-[0.14em] uppercase">
+            <span className="text-muted-foreground mt-1.5 text-[0.5625rem] font-medium tracking-[0.12em] uppercase">
               {label}
             </span>
           </div>
           {i < UNITS.length - 1 && (
-            <span className="text-muted-foreground/40 pt-0.5 text-2xl font-semibold sm:text-3xl">
+            <span className="text-muted-foreground/40 text-lg leading-none font-semibold">
               :
             </span>
           )}

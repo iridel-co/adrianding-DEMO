@@ -12,13 +12,17 @@ import { SiteFooter } from "./_components/site-footer"
 /**
  * Landing funnel, top to bottom:
  *   Hero (who) → Quote (the belief) →
- *   Companies (client roster) → Specializations (what he does, "Six
- *   programs, two decades deep") → Stats (the numbers backing that claim,
- *   shared ground with Specializations, no divider) →
+ *   Companies (client roster) → Stats (the numbers) — one credibility block →
  *   Paths (#which-path — pick a lane: workshops vs corporate; the hero's
  *   only CTA scrolls here) →
- *   Workshops open (the individual lane's next step) →
- *   Testimonials → Gallery → Footer.
+ *   Workshops open (the individual lane's concrete next step) →
+ *   Specializations → Testimonials → Gallery → Footer.
+ *
+ * Reordered 2026-09-06 on client feedback. Specializations used to sit between
+ * the roster and the fork, which pushed the page's only decision point below
+ * three full sections of background. Proof (logos + figures) now runs straight
+ * into the fork, so a visitor reaches "which of these is me" early; the deeper
+ * capability material sits after it for anyone still reading.
  */
 export default function Page() {
   return (
@@ -39,15 +43,16 @@ export default function Page() {
       <div data-navbar-theme="light" className="bg-background relative z-10">
         {/* Client roster right off the hero. */}
         <LandingCompanies />
-        {/* The six areas every engagement is built from. */}
-        <LandingSpecializations />
-        {/* Headline figures — backs up the six programs just shown. */}
+        {/* Headline figures — shares Companies' ground, one credibility block. */}
         <LandingStats />
         {/* The fork and the page's single CTA target: workshops (individuals)
             vs corporate training. #which-path — the hero bar scrolls here. */}
         <LandingPaths />
         {/* Concrete next step for anyone who picked the workshop lane. */}
         <LandingWorkshopsOpen />
+        {/* The six areas every engagement is built from — depth for anyone who
+            didn't convert at the fork above. */}
+        <LandingSpecializations />
         <LandingTestimonials />
         <LandingGalleryPreview />
         <SiteFooter />
