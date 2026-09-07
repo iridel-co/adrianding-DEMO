@@ -193,6 +193,12 @@ Live in `src/app/_components/` and `src/app/_sections/`, built specifically for 
   portal on `document.body` and is positioned from the trigger's viewport rect, flipping its
   anchored edge near the bottom of the screen. The marker circles are four hand-wobbled SVG
   paths picked by `date % 4` — deterministic, never randomized, so SSR and client agree.
+- `workshops/[slug]/_sections/sticky-register-bar.tsx` — the fixed bottom "Register" bar on
+  open-workshop pages. It hides itself the instant the page's `<footer>` scrolls into view
+  (`document.querySelector("footer")` — there's only ever one per page), rather than the page
+  padding the footer to clear a bar that stays shown to the bottom. Padding the footer left a
+  dead gap under its decorative wordmark; not hiding the bar put a light `bg-background` bar
+  on top of the black footer. Don't reintroduce either — see `tasks/lessons.md` 2026-09-07.
 
 ---
 
