@@ -13,6 +13,11 @@ import { WorkshopFaq } from "./_sections/faq"
 import { RegisterCta } from "./_sections/register-cta"
 import { PastCta } from "./_sections/past-cta"
 import { StickyRegisterBar } from "./_sections/sticky-register-bar"
+import { TeamCta } from "./_sections/team-cta"
+import {
+  AboutPromptOverlay,
+  AboutPromptSwitcher,
+} from "@/app/_components/about-prompt"
 
 type Params = { params: Promise<{ slug: string }> }
 
@@ -52,6 +57,10 @@ export default async function WorkshopPage({ params }: Params) {
   return (
     <>
       <SiteNavbar />
+      {/* DEMO ONLY — lets the three "know more about Adrian" presentations be
+          switched live in a client meeting. Remove with the variant plumbing in
+          `about-prompt.tsx` once one is chosen. */}
+      <AboutPromptSwitcher />
       <main>
         <WorkshopHero workshop={workshop} />
         <WorkshopOverview workshop={workshop} />
@@ -64,6 +73,9 @@ export default async function WorkshopPage({ params }: Params) {
         ) : (
           <PastCta workshop={workshop} />
         )}
+        {/* Corporate off-ramp, strictly after the seat CTA above — see
+            `team-cta.tsx` for why the order is load-bearing. */}
+        <TeamCta />
         <SupportBand />
       </main>
       <SiteFooter />
@@ -71,6 +83,7 @@ export default async function WorkshopPage({ params }: Params) {
           last row is the decorative aria-hidden wordmark (no links/content),
           so there's nothing there for the bar to cover — no spacer needed. */}
       {isOpen && <StickyRegisterBar workshop={workshop} />}
+      <AboutPromptOverlay />
     </>
   )
 }

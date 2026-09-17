@@ -2,11 +2,16 @@
  * Public workshop catalogue — powers the workshops list, each workshop detail
  * page (with its countdown + registration form), and the landing-page preview.
  *
- * In the real build this is CMS-managed. Prices are unset pending the client
- * (PRD): shown as "Price on inquiry*" — real UI copy, not a raw placeholder
- * token, so it reads as intentional if this ships before the client confirms
- * figures. TODO: swap in the real price once supplied. Curriculum outlines are
- * representative — TODO: replace with the exact outline from the source deck.
+ * In the real build this is CMS-managed.
+ *
+ * The first three entries (salesmanship, leadership, train-the-trainers) carry
+ * the client's own course material, supplied 2026-09-17, and head the array so
+ * they head the list page. Everything after them is representative copy written
+ * for the demo — TODO: replace or drop before handoff.
+ *
+ * TODO: every price is an arbitrary demo figure (₱6,500 for a one-day course,
+ * ₱18,500 for the three-day certification) pending the client's real numbers.
+ * The trailing asterisk is the page's own "indicative" marker.
  */
 
 export type Workshop = {
@@ -51,53 +56,56 @@ export type Workshop = {
 
 export const WORKSHOPS: Workshop[] = [
   {
+    // Content below is the client's own course material (supplied 2026-09-17),
+    // lightly formatted for the page — not representative copy. `problem`,
+    // `outcomes` and `whatToExpect` are still derived from it rather than
+    // written by him; TODO: client sign-off on those three.
     slug: "exceptional-salesmanship",
     title: "Exceptional Salesmanship",
     start: "2026-10-09T09:00:00+08:00",
     schedule: "Friday, October 9, 2026 · 9:00 AM – 5:00 PM",
     venue: "SEDA Ayala Center Cebu, E-bloc",
     city: "Cebu City",
-    price: "Price on inquiry*",
+    price: "₱6,500*",
     image: "/images/gallery/primaryhomes/photo-3.jpg",
     status: "open",
     summary:
-      "A full-day intensive on the mindset, language and process behind sales that close — without pressure tactics.",
+      "A one-day masterclass on attracting high-value clients, improving conversions and growing revenue — without pressure tactics.",
     intro:
-      "Selling is a transfer of conviction. This one-day workshop rebuilds how you open, qualify, present and close — so the sale feels like the natural next step for the buyer, not a battle. Built for professionals who live and die by their numbers.",
+      "An intensive, one-day masterclass designed to equip further top producers to become the preferred partner. Participants will acquire the disciplines and competencies to attract high-value clients, improve conversions, increase lifetime retention and grow revenue.",
     audience:
-      "Account managers, agents and consultants in insurance, real estate, medical, retail and service industries — anyone carrying a quota.",
+      "Designed for sales professionals in insurance, real estate, medical, retail and the service industry.",
     format:
-      "One full day, in person. Live frameworks, paired practice, role-play with feedback, and a 30-day application plan you leave with.",
+      "High-energy, minimal lecture, driven by peer-to-peer case studies and practical frameworks — the A–Z guide on the mechanics of consultative selling.",
     curriculum: [
-      "The conviction transfer — why people actually buy",
-      "Opening for trust in the first 90 seconds",
-      "Question ladders that surface the real need",
-      "Presenting value so price becomes a detail",
-      "Handling objections without friction",
-      "Closing language and the assumptive next step",
-      "Building a referral engine from every client",
+      "Elite mindset & daily disciplines — time boxing, pipeline building, handling rejection, and the habits of the top 5%",
+      "Attraction mechanisms & client-centric positioning — how to prospect and magnetically bring prospects to your doorstep",
+      "Personal branding, social media optimisation, funnelling and nurturing strategies",
+      "Consultative selling mastery — a systematic flow from pain points to solutions, rebutting objections and closing",
+      "Compelling persuasion skills",
+      "Excellent customer service standards",
     ],
     inclusions: [
-      "Printed training manual",
-      "Certificate of completion",
-      "AM & PM snacks plus lunch",
-      "30-day post-training application mechanism",
-      "Online reunion session with the cohort",
+      "Personalised kit: training manual + signature certificate of completion",
+      "AM/PM snacks plus plated lunch",
+      "30-day post-training mechanism",
+      "Frameworks",
+      "Online reunion and check-in after 30 days with the batch",
     ],
     problem:
       "You are doing the calls, the follow-ups and the presentations — and still losing deals you should have won.",
     outcomes: [
-      "Open a conversation so the prospect wants the next meeting",
-      "Ask the questions that surface the real reason they would buy",
-      "Answer “it's too expensive” without discounting",
-      "Close on a clear next step instead of “let me think about it”",
+      "Attract high-value clients instead of chasing every lead",
+      "Run a consultative flow from pain point to close, not a pitch",
+      "Rebut objections without discounting your way to the sale",
+      "Hold clients longer through service standards, not follow-up spam",
     ],
     whatToExpect: [
       "Registration opens 8:30 AM — come early, seating is first come",
       "Bring one live deal you are stuck on; you will rebuild it during the day",
       "Business casual. Bring a notebook — the manual is yours to keep",
-      "Role-play with feedback in the afternoon block",
-      "You leave with a written 30-day application plan",
+      "Peer-to-peer case studies and practical frameworks, minimal lecture",
+      "An online reunion and check-in with the batch 30 days after",
     ],
     primerBlurb:
       "A short message from Coach Adrian on what to think about before the day starts.",
@@ -105,58 +113,125 @@ export const WORKSHOPS: Workshop[] = [
     seatsLeft: 11,
   },
   {
+    // Client's own course material (supplied 2026-09-17). Same sign-off TODO as
+    // the salesmanship entry above for problem / outcomes / whatToExpect.
     slug: "exceptional-leadership",
     title: "Exceptional Leadership",
     start: "2026-10-16T09:00:00+08:00",
     schedule: "Friday, October 16, 2026 · 9:00 AM – 5:00 PM",
     venue: "SEDA Ayala Center Cebu, E-bloc",
     city: "Cebu City",
-    price: "Price on inquiry*",
+    price: "₱6,500*",
     image: "/images/gallery/sunlife/photo-3.jpg",
     status: "open",
     summary:
-      "The shift from managing tasks to leading people — a practical day on influence, standards and building a team that owns its results.",
+      "A concise, intensive day for the modern leader — grow from within, then lead a team that performs without you in the room.",
     intro:
-      "Most people are promoted for their individual output and then left to figure out leadership on the job. This workshop closes that gap: how to set standards people rise to, have the conversations you have been avoiding, and build a culture that holds without you in the room.",
+      "An intensive yet concise workshop for the modern leadership accelerator to grow from within and lead high-performing teams at work.",
     audience:
-      "New and emerging leaders, supervisors, and senior individual contributors stepping into people management.",
+      "Designed for experienced professionals (35+) balancing operational demands with strategic oversight.",
     format:
-      "One full day, in person. Case work, guided self-assessment, live coaching demos, and a personal leadership plan.",
+      "High-energy, minimal lecture, driven by peer-to-peer case studies and practical frameworks — a clear blueprint for upgrading your leadership, plus networking with professionals.",
     curriculum: [
-      "Manager vs leader — the real difference in the day-to-day",
-      "Setting standards people choose to meet",
-      "The accountability conversation, start to finish",
-      "Coaching in the moment instead of rescuing",
-      "Delegation that develops the team",
-      "Reading and shaping team culture",
-      "Your 90-day leadership plan",
+      "Building your trinity of assets in leadership: mindset, heart-set, skill-set",
+      "Navigating the 4 phases in business today: tech + AI, scaling & expansion, sales & revenue generation, redundancy & culture revamp",
+      "The right mentalities of leaders and how to apply them — from managing to elevating",
+      "Building your 4Qs as a leader: EQ, SQ, AQ and FQ",
+      "Understanding and driving people towards excellence",
+      "Non-negotiable leadership skills: delegating, endorsing, follow-up and follow-through",
+      "Team management, face-to-face or hybrid",
+      "Constructive feedback, difficult conversations and resolving conflict",
+      "Persuasive communication: pitches, trouble-shooting and reports",
+      "Cross-functional buy-in, strategic thinking and critical problem-solving",
     ],
     inclusions: [
-      "Printed training manual",
-      "Certificate of completion",
-      "AM & PM snacks plus lunch",
-      "30-day post-training application mechanism",
-      "Online reunion session with the cohort",
+      "Personalised kit: training manual + signature certificate of completion",
+      "AM/PM snacks plus plated lunch",
+      "30-day post-training mechanism",
+      "Frameworks",
+      "Online reunion and check-in after 30 days with the batch",
     ],
     problem:
-      "You were promoted for being good at the work. Nobody taught you how to lead the people who now do it.",
+      "You were promoted for your own output, and nobody handed you the manual for getting it through other people.",
     outcomes: [
-      "Set a standard your team meets without being chased",
-      "Run the accountability conversation you have been putting off",
-      "Delegate so people grow instead of handing work back",
-      "Leave with a written 90-day plan for your team",
+      "Move from managing tasks to elevating the people doing them",
+      "Have the difficult conversation you have been putting off",
+      "Delegate with follow-through instead of taking the work back",
+      "Win cross-functional buy-in without borrowing authority",
     ],
     whatToExpect: [
       "Registration opens 8:30 AM — come early, seating is first come",
-      "Bring one situation with a team member you want to resolve",
+      "Bring one team situation you are currently stuck on",
       "Business casual. Bring a notebook — the manual is yours to keep",
-      "Guided self-assessment in the morning block",
-      "You leave with a written 90-day leadership plan",
+      "Peer-to-peer case studies and practical frameworks, minimal lecture",
+      "An online reunion and check-in with the batch 30 days after",
     ],
     primerBlurb:
-      "Coach Adrian on the one shift that separates a manager from a leader — worth five minutes before the day.",
+      "Coach Adrian on the shift from managing tasks to leading people.",
     seatsTotal: 40,
     seatsLeft: 17,
+  },
+  {
+    // Client's own course material (supplied 2026-09-17). The only three-day
+    // programme in the catalogue, and the only one that certifies — which is
+    // why it carries its own price band and a much smaller cohort (teach-back
+    // rounds and 360 feedback do not scale past ~24 people).
+    // TODO: client sign-off on `problem`, `title` (his full title is "…
+    // Certification Program for Exceptional Presentations" — shortened here so
+    // it fits a card, full phrasing kept in `summary`) and the price.
+    slug: "train-the-trainers-certification",
+    title: "Train the Trainers Certification Program",
+    start: "2026-11-11T09:00:00+08:00",
+    schedule: "November 11–13, 2026 · 9:00 AM – 5:00 PM daily",
+    venue: "SEDA Ayala Center Cebu, E-bloc",
+    city: "Cebu City",
+    price: "₱18,500*",
+    image: "/images/gallery/exceptional-salesmanship-manila-2025/photo-4.jpg",
+    status: "open",
+    summary:
+      "A three-day boot camp for exceptional presentations — design, deliver and certify as a high-impact trainer and facilitator.",
+    intro:
+      "An intensive 3-day boot camp equipping aspiring trainers and consultants to become high-impact presenters and facilitators through masterclass instruction in program design, stage presence and audience engagement. The program culminates in live presentations where participants deliver training modules and receive actionable feedback.",
+    audience:
+      "Aspiring trainers and consultants, and subject-matter experts stepping into facilitation.",
+    format:
+      "Three full days, in person. Masterclass instruction, live teach-back rounds, and 360-degree peer and master-trainer feedback against a standardised 20-point rubric.",
+    curriculum: [
+      "The identity shift: moving from subject-matter expert to transformational facilitator",
+      "Overcoming presentation anxiety, adopting adult learning principles, and setting learning objectives",
+      "Instructional design: structuring 1-day and multi-day workshops — logical program flows, theory vs. practice, and high-retention learning activities",
+      "Content & slide design: visually appealing decks, workbooks, and gamification tactics that keep energy high",
+      "Stagecraft & vocal mastery: commanding the room through body language, vocal pacing, theatrical anchor points, engagement tactics, relevant humour and open-loop storytelling",
+      "Facilitation & crowd control: managing participants, facilitating productive group debates, and reading room dynamics in real time",
+      "Post-training impact & rave reviews: evaluation forms (Kirkpatrick model), driving post-workshop implementation, and securing repeat corporate bookings",
+      "Business & monetisation: packaging consulting offers, pricing training packages, proposal writing, and building a personal trainer brand",
+      "Teach-back rounds: each participant delivers a 15-minute live module using real slides and activities",
+      "Structured feedback & certification: 360-degree peer and master-trainer feedback on a 20-point rubric (content, delivery, engagement, impact)",
+    ],
+    inclusions: [
+      "Personalised kit and training manual",
+      "AM/PM snacks plus plated lunch for 3 days",
+      "Maximum Impact Certification as “Competent Trainer”",
+    ],
+    problem:
+      "You know your subject cold. Holding a room with it for a full day is a different skill, and nobody ever taught you that one.",
+    outcomes: [
+      "Leave with a fully developed signature training outline",
+      "Take home personal delivery video recordings from Day 3",
+      "Read your own facilitator assessment scorecard against a 20-point rubric",
+      "Walk out with a complete training template for your chosen topic",
+    ],
+    whatToExpect: [
+      "Three consecutive days — registration opens 8:30 AM on Day 1",
+      "Bring a topic you want to build a training programme around",
+      "Day 3 is live teach-backs: you present a 15-minute module to the group",
+      "You will be recorded on Day 3 and keep the footage",
+      "Certification is assessed, not automatic — the 20-point rubric is shared on Day 1",
+    ],
+    primerBlurb:
+      "Coach Adrian on the jump from knowing your subject to holding a room with it.",
+    seatsTotal: 24,
+    seatsLeft: 16,
   },
   // TODO: placeholder open workshops — added to preview a fuller catalogue.
   // Replace with the client's real upcoming dates.
@@ -167,7 +242,7 @@ export const WORKSHOPS: Workshop[] = [
     schedule: "Friday, October 23, 2026 · 9:00 AM – 5:00 PM",
     venue: "SEDA Ayala Center Cebu, E-bloc",
     city: "Cebu City",
-    price: "Price on inquiry*",
+    price: "₱6,500*",
     image: "/images/gallery/axa/photo-3.jpg",
     status: "open",
     summary:
@@ -221,7 +296,7 @@ export const WORKSHOPS: Workshop[] = [
     schedule: "Friday, November 6, 2026 · 9:00 AM – 5:00 PM",
     venue: "SEDA Ayala Center Cebu, E-bloc",
     city: "Cebu City",
-    price: "Price on inquiry*",
+    price: "₱6,500*",
     image: "/images/gallery/dueksaminc/photo-3.jpg",
     status: "open",
     summary:
@@ -274,7 +349,7 @@ export const WORKSHOPS: Workshop[] = [
     schedule: "Friday, November 20, 2026 · 9:00 AM – 5:00 PM",
     venue: "SEDA Ayala Center Cebu, E-bloc",
     city: "Cebu City",
-    price: "Price on inquiry*",
+    price: "₱6,500*",
     image: "/images/gallery/evercare/photo-3.jpg",
     status: "open",
     summary:
@@ -327,7 +402,7 @@ export const WORKSHOPS: Workshop[] = [
     schedule: "Friday, December 4, 2026 · 9:00 AM – 5:00 PM",
     venue: "SEDA Ayala Center Cebu, E-bloc",
     city: "Cebu City",
-    price: "Price on inquiry*",
+    price: "₱6,500*",
     image: "/images/gallery/primaryhomes/photo-5.jpg",
     status: "open",
     summary:
@@ -381,7 +456,7 @@ export const WORKSHOPS: Workshop[] = [
     schedule: "November 14, 2025 · 9:00 AM – 5:00 PM",
     venue: "SEDA Ayala Center Cebu, E-bloc",
     city: "Cebu City",
-    price: "Price on inquiry*",
+    price: "₱6,500*",
     image: "/images/gallery/sunlife/photo-5.jpg",
     status: "past",
     summary:

@@ -6,9 +6,14 @@ import { CorporateWhy } from "./_sections/why"
 import { CorporatePrograms } from "./_sections/programs"
 import { CorporateCompanies } from "./_sections/companies"
 import { CorporateTestimonials } from "./_sections/testimonials"
+import { CorporateTrainer } from "./_sections/trainer"
 import { CorporateCredentials } from "./_sections/credentials"
 import { CorporateInquiryCta } from "./_sections/inquiry-cta"
 import { SupportBand } from "@/app/_components/support-band"
+import {
+  AboutPromptOverlay,
+  AboutPromptSwitcher,
+} from "@/app/_components/about-prompt"
 
 export const metadata: Metadata = {
   title: "Corporate Training — Coach Adrian Ding",
@@ -20,12 +25,17 @@ export default function CorporateTrainingPage() {
   return (
     <>
       <SiteNavbar />
+      {/* DEMO ONLY — see the workshop detail page. */}
+      <AboutPromptSwitcher />
       <main>
         <CorporateTrainingHero />
         <CorporateWhy />
         <CorporatePrograms />
         <CorporateCompanies />
         <CorporateTestimonials />
+        {/* The person, then his paperwork — one credibility block on a shared
+            ground, immediately before the form. */}
+        <CorporateTrainer />
         {/* Accreditation before the form — the last objection an L&D head has
             to answer internally. */}
         <CorporateCredentials />
@@ -37,6 +47,7 @@ export default function CorporateTrainingPage() {
         />
       </main>
       <SiteFooter />
+      <AboutPromptOverlay />
     </>
   )
 }

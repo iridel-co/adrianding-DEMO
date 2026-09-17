@@ -2,6 +2,7 @@ import Image from "next/image"
 import { Counter } from "@/app/_components/counter"
 import { Reveal } from "@/app/_components/reveal"
 import { CERTIFICATIONS } from "@/lib/certifications"
+import { AboutPromptAnchor } from "@/app/_components/about-prompt"
 
 /**
  * Instructor-credibility band on the workshop detail page.
@@ -130,6 +131,12 @@ export function WorkshopProof() {
               ))}
             </ul>
           </Reveal>
+
+          {/* The only link to /about on this page. The section above already
+              answers "is he legit enough to pay for"; this is for the minority
+              who want the whole story. Secondary styling on purpose — it must
+              never compete with Reserve your seat. */}
+          <AboutPromptAnchor className="mt-10" />
         </div>
       </div>
     </section>

@@ -196,8 +196,17 @@ Client-supplied roster, used by the filterable marquee on the Landing page and r
 - List of all workshops, distinguishing "Open for Registration" vs "Past"
 - Each card: name, date, venue, price, short description, CTA button
 - Currently known workshops:
-  - **Exceptional Salesmanship** — Oct 9, 2026, 9:00–5:00 PM, SEDA Ayala E-bloc. Price: ₱[placeholder]\*
-  - **Exceptional Leadership** — Oct 16, 2026, 9:00–5:00 PM, SEDA Ayala E-bloc. Price: ₱[placeholder]\*
+  - **Exceptional Salesmanship** — Oct 9, 2026, 9:00–5:00 PM, SEDA Ayala E-bloc. ₱6,500\*
+  - **Exceptional Leadership** — Oct 16, 2026, 9:00–5:00 PM, SEDA Ayala E-bloc. ₱6,500\*
+  - **Train the Trainers Certification Program** — Nov 11–13, 2026, 9:00–5:00 PM daily, SEDA Ayala E-bloc. ₱18,500\*
+
+> **Client course material supplied 2026-09-17.** The three courses above now carry
+> Adrian's own descriptions, curriculum, inclusions and highlights, and head
+> `src/lib/workshops.ts` so they head the list page. The four courses after them
+> (Presenting with Impact, Negotiation Essentials, Coaching for Managers, Customer
+> Experience Excellence) are representative copy written for the demo — replace or
+> drop before handoff. Every price is an arbitrary demo figure pending his real
+> numbers; see `MEETING-NOTES.md`.
 
 ### Child (`/workshops/[workshop-slug]`)
 
@@ -216,6 +225,71 @@ outcomes, the register rail (countdown + scarcity + CTA), primer slot, client-lo
 credential band (`src/lib/certifications.ts`), curriculum + inclusions, testimonials,
 registration FAQ (`src/lib/workshop-faq.ts`), CTA, and a "talk to a human" support band.
 A sticky register bar follows the visitor down the page with the seats-left count.
+
+### Credibility exit + corporate off-ramp (added 2026-09-17, client feedback)
+
+Client asked for (1) a pop-up inviting the reader to "know more about Coach
+Adrian", maroon with white text, firing "as they near the thought of wondering
+who I am", (2) ad traffic landing on the course first and his profile second,
+and (3) "train your team" following after that.
+
+(2) was already the architecture — the instructor-credibility band sits third on
+the page. What was missing was any way _out_ of it: the course pages linked to
+`/about` only through the global navbar, and to `/corporate-training` not at all.
+
+- **`_components/about-prompt.tsx`** — one `/about` link per page, at the end of
+  the section that already carries his portrait and story (`proof.tsx` on a
+  course page, the new `corporate-training/_sections/trainer.tsx` on the
+  corporate page). Secondary weight, never `variant="brand"`, so it cannot
+  compete with Register / Send inquiry. Three presentations are built —
+  `inline`, `card` (dismissible maroon card, bottom-left, desktop only) and
+  `modal` (the client's literal request) — switchable live from
+  `<AboutPromptSwitcher />` for the client meeting. **Recommendation: `card`.**
+  A modal on a conversion page costs registrations, and on a phone it lands on
+  top of the sticky register bar, the only always-reachable CTA there.
+  The switcher and the variant plumbing come out once he picks one.
+- **`workshops/[slug]/_sections/team-cta.tsx`** — the corporate off-ramp, placed
+  strictly **after** the register CTA. Above it, a private-workshop pitch would
+  cannibalise the seat the ad paid for.
+- **`corporate-training/_sections/trainer.tsx`** — the corporate page proved the
+  company (logos, testimonials, accreditations) and never showed the man. Shares
+  `bg-background` with the accreditation band below it and carries no divider, so
+  the person and the paperwork read as one credibility block.
+- **`workshops/[slug]/opengraph-image.tsx`** — per-course social card (photo,
+  title, date, venue, brand rule). Ad and forwarded course links previewed with
+  the site-wide card before this, so every course looked like the same link.
+
+#### Phase 2 handoff — the social cards belong in the CMS
+
+Generated at build time, one PNG per course, straight off the `Workshop` record:
+`image` → the photo, `title`, `schedule` (weekday and time range stripped) and
+`venue` → the type. Nothing about a card is authored by hand, so **when the
+catalogue becomes CMS-managed the cards follow for free** — publishing a new
+workshop mints its own preview card with no design step and no upload.
+
+What the build team needs to carry over:
+
+- The card is a **derived asset, never a CMS field.** Do not add an "OG image"
+  upload next to the course record; it would drift from the course the moment a
+  date or venue is edited. If a client ever needs to override the photo alone,
+  override `image`, not the card.
+- **Satori's format constraints are not the site's.** Fonts must be TTF (the
+  `.woff2` the site serves throws "Unsupported OpenType signature"), and course
+  photos must be JPEG or PNG — `.webp` fails to decode. `src/app/og-assets/`
+  holds the TTF cuts for exactly this reason. Any image pipeline that converts
+  course photos to `.webp` wholesale will silently break every card.
+- **`params` is a Promise in Next 15 metadata routes.** Typing it as a plain
+  object compiles clean and renders the same fallback card for every slug —
+  which is how it shipped the first time here, caught only because all eight
+  output files were byte-identical. Worth a test that asserts two cards differ.
+- **Regenerate on republish.** Cards are static build output, so a CMS edit must
+  trigger a rebuild (or revalidation) of that course's `opengraph-image` route,
+  or the preview keeps showing the old date.
+- **Photo choice is editorial, not automatic.** The card crops the course's
+  `image` full-bleed, so a photo that reads fine as a small card on the list page
+  can put a third-party banner or a stray logo into Adrian's ad preview. Whoever
+  publishes a course should see the card before it goes out — a preview of the
+  generated card in the CMS editor is worth building.
 
 The FAQ opens on **hover** on desktop (controlled accordion, `onMouseEnter` sets the open
 item and Radix's `onValueChange` still handles click/keyboard, so both drive one piece of
