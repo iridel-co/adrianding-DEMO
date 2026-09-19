@@ -256,13 +256,19 @@ the page. What was missing was any way _out_ of it: the course pages linked to
   company (logos, testimonials, accreditations) and never showed the man. Shares
   `bg-background` with the accreditation band below it and carries no divider, so
   the person and the paperwork read as one credibility block.
+- **`workshops/[slug]/_sections/share-button.tsx`** — copies the course URL to
+  the clipboard from the hero chip row. His traffic spreads by forwarded link,
+  so forwarding has to be one tap rather than a trip to the address bar. The
+  copied URL is rebuilt from `origin + pathname`, so tracking params and the
+  demo switcher's state never ride along into a group chat.
 - **`workshops/[slug]/opengraph-image.tsx`** — per-course social card (photo,
   title, date, venue, brand rule). Ad and forwarded course links previewed with
   the site-wide card before this, so every course looked like the same link.
 
 #### Phase 2 handoff — the social cards belong in the CMS
 
-Generated at build time, one PNG per course, straight off the `Workshop` record:
+Generated at build time, one JPEG per course (PNG is over WhatsApp's ~300KB
+preview ceiling — see `lib/og-jpeg.ts`), straight off the `Workshop` record:
 `image` → the photo, `title`, `schedule` (weekday and time range stripped) and
 `venue` → the type. Nothing about a card is authored by hand, so **when the
 catalogue becomes CMS-managed the cards follow for free** — publishing a new
