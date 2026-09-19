@@ -181,20 +181,27 @@ function PromptPortrait() {
 }
 
 /**
- * Bottom-CENTRE, on every viewport. The sticky register bar owns the full width
- * of the bottom edge on phones, so the two are separated vertically rather than
- * by hiding one of them — `bottom-28` (7rem) clears the bar's ~69px with ~43px
- * to spare, and the bar still outranks this at `z-40` if a future layout change
- * ever brings them back into contact.
+ * Bottom-CENTRE on phones and tablets, bottom-RIGHT from `lg` up. A phone has
+ * no side to prefer — centred is the only placement that does not look like a
+ * mistake at 390px — while a desktop has margin to spare, and the corner keeps
+ * the card out of the reading column.
+ *
+ * Vertically it is the same everywhere. The sticky register bar owns the full
+ * width of the bottom edge on phones, so the two are separated by height rather
+ * than by hiding one of them: `bottom-28` (7rem) clears the bar's ~69px with
+ * ~43px to spare, and the bar still outranks this at `z-40` if a future layout
+ * change ever brings them back into contact.
  *
  * That clearance is a constant, not a measurement: on the corporate page, where
  * no bar exists, the card simply sits a little off the floor, which costs
  * nothing. Width is the viewport minus a 1rem gutter either side, capped at the
  * desktop width, so it never runs off-screen on a phone.
  *
- * Centring is `left-1/2` + `-translate-x-1/2`, which shares the transform with
- * the slide-in `translate-y` — Tailwind drives the two axes through separate
- * custom properties, so neither clobbers the other.
+ * Centring is `left-1/2` + `-translate-x-1/2`, and `lg:` unwinds BOTH halves
+ * (`lg:left-auto lg:right-6 lg:translate-x-0`) — dropping either one leaves the
+ * card hanging half a width off its anchor. The x and y translations share the
+ * transform but Tailwind drives them through separate custom properties, so the
+ * slide-in `translate-y` is unaffected.
  */
 function SlideInCard({
   open,
@@ -205,7 +212,7 @@ function SlideInCard({
 }) {
   return (
     <div
-      className={`bg-brand text-brand-foreground fixed bottom-28 left-1/2 z-30 w-[calc(100vw-2rem)] max-w-[20rem] -translate-x-1/2 rounded-xl p-5 shadow-2xl transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none ${
+      className={`bg-brand text-brand-foreground fixed bottom-28 left-1/2 z-30 w-[calc(100vw-2rem)] max-w-[20rem] -translate-x-1/2 rounded-xl p-5 shadow-2xl transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none lg:right-6 lg:left-auto lg:translate-x-0 ${
         open
           ? "translate-y-0 opacity-100"
           : "pointer-events-none translate-y-4 opacity-0"

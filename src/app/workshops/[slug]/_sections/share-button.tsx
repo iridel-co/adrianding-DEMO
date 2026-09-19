@@ -57,11 +57,13 @@ export function ShareButton() {
     timer.current = setTimeout(() => setState("idle"), 2400)
   }
 
+  // "Copied to clipboard", not "Copied" — the visitor has to be told WHERE the
+  // link went, or the button reads as having done nothing they can act on.
   const label =
     state === "copied"
-      ? "Link copied"
+      ? "Copied to clipboard"
       : state === "failed"
-        ? "Copy failed"
+        ? "Couldn’t copy"
         : "Share"
 
   return (
