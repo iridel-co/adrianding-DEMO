@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og"
+import { ogJpeg } from "@/lib/og-jpeg"
 import { readFile } from "node:fs/promises"
 import { join } from "node:path"
 import { WORKSHOPS, getWorkshop } from "@/lib/workshops"
@@ -6,7 +7,7 @@ import { WORKSHOPS, getWorkshop } from "@/lib/workshops"
 export const runtime = "nodejs"
 export const alt = "Public workshop with Coach Adrian Ding"
 export const size = { width: 1200, height: 630 }
-export const contentType = "image/png"
+export const contentType = "image/jpeg"
 
 export function generateStaticParams() {
   return WORKSHOPS.map((w) => ({ slug: w.slug }))
@@ -59,7 +60,7 @@ export default async function WorkshopOgImage({
   // and nothing else, and "Friday" is not what makes someone click.
   const dateLine = workshop?.schedule.split("·")[0]?.replace(/^\w+day,\s*/, "")
 
-  return new ImageResponse(
+  const card = new ImageResponse(
     <div
       style={{
         width: "100%",
@@ -191,4 +192,7 @@ export default async function WorkshopOgImage({
       ],
     }
   )
+
+  // WhatsApp drops any card over ~300 KB — see `ogJpeg`.
+  return ogJpeg(card)
 }

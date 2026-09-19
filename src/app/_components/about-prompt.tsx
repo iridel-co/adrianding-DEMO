@@ -16,10 +16,9 @@ import { ArrowRight, X } from "lucide-react"
  *   inline — the button alone, sitting in the section that already tells his
  *            story. Nothing floats, nothing interrupts.
  *   card   — inline, plus a dismissible maroon card that slides in bottom-LEFT
- *            once that section has been read. Desktop only: on a phone the
- *            bottom of the screen belongs to the sticky register bar, which is
- *            the only always-reachable CTA on the page, and two fixed elements
- *            fighting for it costs registrations.
+ *            once that section has been read. Runs on phones too: it clears the
+ *            sticky register bar by sitting above it rather than by hiding, so
+ *            the only always-reachable CTA on the page is never covered.
  *   modal  — inline, plus a centred maroon dialog on the same trigger. The
  *            client's literal request. Deliberately NOT suppressed on mobile,
  *            because seeing it land on top of the register bar is the argument.
@@ -43,7 +42,7 @@ const VARIANTS: { id: AboutPromptVariant; label: string; note: string }[] = [
   {
     id: "card",
     label: "Slide-in card",
-    note: "Quiet card, bottom-left. Desktop only.",
+    note: "Quiet card, bottom-left, above the register bar.",
   },
   { id: "modal", label: "Pop-up", note: "Centred dialog over the page." },
 ]
@@ -182,15 +181,20 @@ function PromptPortrait() {
 }
 
 /**
- * Bottom-LEFT on purpose. The sticky register bar owns the full width of the
- * bottom edge on phones and the right side on desktop; `lg:` gates this to
- * viewports where there is room for both.
+ * Bottom-CENTRE, on every viewport. The sticky register bar owns the full width
+ * of the bottom edge on phones, so the two are separated vertically rather than
+ * by hiding one of them — `bottom-28` (7rem) clears the bar's ~69px with ~43px
+ * to spare, and the bar still outranks this at `z-40` if a future layout change
+ * ever brings them back into contact.
  *
- * `bottom-28` rather than `bottom-6`: the register bar is ~62px tall, sits at
- * `bottom-0` and outranks this at `z-40`, so a 24px offset put the card's own
- * link underneath it. The clearance is a constant instead of a measurement —
- * on the corporate page, where no bar exists, the card simply sits a little
- * off the floor, which costs nothing.
+ * That clearance is a constant, not a measurement: on the corporate page, where
+ * no bar exists, the card simply sits a little off the floor, which costs
+ * nothing. Width is the viewport minus a 1rem gutter either side, capped at the
+ * desktop width, so it never runs off-screen on a phone.
+ *
+ * Centring is `left-1/2` + `-translate-x-1/2`, which shares the transform with
+ * the slide-in `translate-y` — Tailwind drives the two axes through separate
+ * custom properties, so neither clobbers the other.
  */
 function SlideInCard({
   open,
@@ -201,7 +205,7 @@ function SlideInCard({
 }) {
   return (
     <div
-      className={`bg-brand text-brand-foreground fixed bottom-28 left-6 z-30 hidden w-[20rem] rounded-xl p-5 shadow-2xl transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none lg:block ${
+      className={`bg-brand text-brand-foreground fixed bottom-28 left-1/2 z-30 w-[calc(100vw-2rem)] max-w-[20rem] -translate-x-1/2 rounded-xl p-5 shadow-2xl transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none ${
         open
           ? "translate-y-0 opacity-100"
           : "pointer-events-none translate-y-4 opacity-0"

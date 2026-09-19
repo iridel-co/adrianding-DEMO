@@ -4,6 +4,7 @@ import { SiteFooter } from "@/app/_components/site-footer"
 import { SiteCta } from "@/app/_components/site-cta"
 import { AboutHero } from "./_sections/hero"
 import { AboutStory } from "./_sections/story"
+import { AboutNumbers } from "./_sections/numbers"
 import { AboutJourney } from "./_sections/journey"
 import { AboutCertifications } from "./_sections/certifications"
 import { AboutFaq } from "./_sections/faq"
@@ -21,6 +22,7 @@ export default function AboutPage() {
       <main>
         <AboutHero />
         <AboutStory />
+        <AboutNumbers />
         <AboutJourney />
         <AboutCertifications />
         <AboutFaq />
