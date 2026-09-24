@@ -1,61 +1,55 @@
 import { SplitReveal } from "@/app/_components/split-reveal"
-import { Reveal } from "@/app/_components/reveal"
 import {
-  SpecRevealCards,
-  type SpecCard,
-} from "@/app/_components/spec-reveal-cards"
+  ProgramCarousel,
+  type ProgramCard,
+} from "@/app/_components/program-carousel"
 import {
   SPECIALIZATIONS,
   SPECIALIZATION_IMAGES,
   SPECIALIZATION_IMAGE_ALTS,
+  SPECIALIZATION_IMAGE_POSITIONS,
 } from "@/lib/specializations"
 
 /**
- * Corporate Training — same reveal-card treatment as the landing page's
- * specializations section, mirrored (rail on the right, cards on the left),
- * reframed around what a team gets when they bring Adrian in.
+ * Corporate Training — "Programs we run": a horizontal, constant-width
+ * carousel (see `program-carousel.tsx`), not the landing page's reveal-card
+ * stack. Hovering (desktop) or tapping (mobile/touch) a card widens it to
+ * show who the programme is for and an Inquire button that jumps to the
+ * inquiry form with that programme preselected. Added 2026-09-19; the
+ * landing page's `SpecRevealCards` section is deliberately unchanged.
  */
-const CARDS: SpecCard[] = SPECIALIZATIONS.map((spec) => ({
+const CARDS: ProgramCard[] = SPECIALIZATIONS.map((spec) => ({
   key: spec.key,
   title: spec.title,
   blurb: spec.blurb,
+  usefulFor: spec.usefulFor,
   image: SPECIALIZATION_IMAGES[spec.key],
   imageAlt: SPECIALIZATION_IMAGE_ALTS[spec.key],
+  imagePosition: SPECIALIZATION_IMAGE_POSITIONS[spec.key],
 }))
 
 export function CorporatePrograms() {
   return (
     <section className="bg-muted/40 py-24 lg:py-36">
-      <div className="mx-auto w-full max-w-7xl px-6 sm:px-8">
-        {/* `flex flex-col` below `lg` so the `order-*` classes actually apply
-            — as a plain block container they did nothing, and the card rail
-            (first in DOM, so it can sit left on the desktop grid) rendered
-            above its own heading on mobile. */}
-        <div className="flex flex-col lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,19rem)] lg:gap-16 xl:gap-20">
-          {/* Cards on the left this time. */}
-          {/* Horizontal snap rail below `lg`, vertical stack from `lg` — see
-              the landing page's `LandingSpecializations` for the same pair. */}
-          <Reveal
-            stagger={0.08}
-            className="no-scrollbar order-2 -mx-6 mt-12 flex snap-x snap-mandatory scroll-px-6 gap-3 overflow-x-auto px-6 pb-1 sm:-mx-8 sm:scroll-px-8 sm:px-8 lg:order-1 lg:mx-0 lg:mt-0 lg:snap-none lg:flex-col lg:overflow-visible lg:px-0 lg:pb-0"
-          >
-            <SpecRevealCards items={CARDS} />
-          </Reveal>
-
-          {/* Rail on the right — held in view while the stack scrolls past. */}
-          <div className="order-1 lg:sticky lg:top-28 lg:order-2 lg:self-start">
-            <SplitReveal className="font-serif text-[2.5rem] leading-[1.05] tracking-[-0.02em] lg:text-[3rem]">
-              Programs
-              <br />
-              <span className="text-brand">we run</span>
+      <ProgramCarousel
+        items={CARDS}
+        heading={
+          <div className="max-w-2xl">
+            <SplitReveal className="font-serif text-[2.5rem] leading-[1.05] tracking-[-0.02em] lg:text-[3.5rem]">
+              Programs <span className="text-brand">we run</span>
             </SplitReveal>
-            <p className="text-muted-foreground mt-6 text-lg leading-relaxed">
+            <p className="text-muted-foreground mt-5 text-lg leading-relaxed">
               Six areas, refined over twenty years on the training circuit —
-              tailored to your team&rsquo;s roles, industry and goals.
+              tailored to your team&rsquo;s roles, industry and goals.{" "}
+              <span className="lg:hidden">Tap</span>
+              <span className="hidden lg:inline">Hover</span> a programme to see
+              who it&rsquo;s for.
             </p>
+            {/* Copy is one sentence with the verb swapped by breakpoint —
+                touch visitors see "Tap", pointer visitors see "Hover". */}
           </div>
-        </div>
-      </div>
+        }
+      />
     </section>
   )
 }
