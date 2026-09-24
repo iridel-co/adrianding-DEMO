@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { ArrowLeft, ArrowRight, ChevronDown, Phone } from "lucide-react"
+import { ArrowLeft, ArrowRight, Check, ChevronDown, Phone } from "lucide-react"
 import { gsap, useGSAP } from "@/app/_lib/gsap"
 import { saveHandoff } from "@/app/_lib/handoff"
 import { smoothScrollToElement } from "@/app/_lib/smooth-scroll-to"
@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
-import { SPECIALIZATIONS } from "@/lib/specializations"
+import { CORPORATE_PROGRAMMES } from "@/lib/specializations"
 import { cn } from "@/lib/utils"
 
 /**
@@ -33,8 +33,14 @@ import { cn } from "@/lib/utils"
  * reload safe) and a `PROGRAM_INQUIRE_EVENT` window event (re-applies a
  * programme even if the URL didn't change, e.g. a second click after the
  * visitor picked something else by hand). Also new: an optional
- * "Also interested in" checkbox list, so one inquiry can cover more than one
- * programme.
+ * "Also interested in" group of selectable tiles (real checkboxes, visually
+ * hidden, inside a fieldset — changed from plain checkboxes 2026-09-24), so
+ * one inquiry can cover more than one programme.
+ *
+ * Programme list (2026-09-24): reads `CORPORATE_PROGRAMMES` — Adrian's six
+ * real programmes plus four demo-only placeholders — so the corporate page's
+ * select and tiles show all ten. The landing page still reads the real six
+ * only.
  *
  * Deep-link landing (2026-09-24): a cold load of
  * `/corporate-training?program=<key>#inquiry` prefills correctly above but
@@ -51,12 +57,33 @@ import { cn } from "@/lib/utils"
 // Must match the constant in _components/program-carousel.tsx — see PLAN-feedback-2.md.
 const PROGRAM_INQUIRE_EVENT = "ad:program-inquire"
 
-const SPEC_TITLES = SPECIALIZATIONS.map((s) => s.title) as [string, ...string[]]
+const SPEC_TITLES = CORPORATE_PROGRAMMES.map((s) => s.title) as [
+  string,
+  ...string[],
+]
 
 const PROGRAMS = [
-  ...SPECIALIZATIONS.map((s) => s.title),
+  ...CORPORATE_PROGRAMMES.map((s) => s.title),
   "Not sure yet — help us scope it",
 ] as const
+
+// "Also interested in" tiles (2026-09-24). Selected = filled brand + white
+// check badge + slight scale + brand glow. The border AND the glow change
+// together with the fill on hover in both states (memory rule).
+const TILE_BASE =
+  "relative flex min-h-14 cursor-pointer items-center gap-3 rounded-lg border px-3.5 py-3 text-left text-sm font-medium select-none transition-[background-color,border-color,box-shadow,color,scale] duration-200 ease-out motion-reduce:transition-none has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-background"
+const TILE_OFF =
+  "border-input bg-background text-foreground shadow-sm shadow-black/5 hover:border-brand/60 hover:bg-brand/5 hover:shadow-md hover:shadow-brand/15"
+const TILE_ON =
+  "border-brand bg-brand text-brand-foreground scale-[1.02] shadow-lg shadow-brand/35 hover:border-brand-accent hover:bg-brand-accent hover:shadow-brand-accent/45"
+const TILE_ICON_BASE =
+  "flex size-9 shrink-0 items-center justify-center rounded-md transition-colors duration-200 motion-reduce:transition-none"
+const TILE_ICON_OFF = "bg-brand/10 text-brand"
+const TILE_ICON_ON = "bg-white/15 text-brand-foreground"
+const TILE_CHECK_BASE =
+  "flex size-5 shrink-0 items-center justify-center rounded-full transition-colors duration-200 motion-reduce:transition-none"
+const TILE_CHECK_OFF = "border-input border text-transparent"
+const TILE_CHECK_ON = "bg-background text-brand"
 
 const ATTENDEE_BANDS = [
   "1 – 15",
@@ -141,7 +168,7 @@ export function CorporateInquiryForm() {
    *  select. Unknown keys are ignored silently — a stale or hand-edited URL
    *  must not error, it just leaves the form as-is. */
   const applyProgram = (key: string, focus: boolean) => {
-    const spec = SPECIALIZATIONS.find((s) => s.key === key)
+    const spec = CORPORATE_PROGRAMMES.find((s) => s.key === key)
     if (!spec) return
     setValue("program", spec.title as FormValues["program"], {
       shouldValidate: false,
@@ -290,14 +317,14 @@ export function CorporateInquiryForm() {
       phone: "0917 555 0132",
       company: "Acme Manufacturing",
       role: "Head of Learning & Development",
-      program: SPECIALIZATIONS[0].title as FormValues["program"],
+      program: CORPORATE_PROGRAMMES[0].title as FormValues["program"],
       attendees: "16 – 30",
       targetDate: composeDateRange(from, to),
       venue: "Our head office in Cebu City",
       context:
         "New supervisors promoted from the floor this year — we need them leading, not just scheduling.",
       consent: true,
-      alsoInterested: [SPECIALIZATIONS[3].title],
+      alsoInterested: [CORPORATE_PROGRAMMES[3].title],
     })
   }
 
@@ -452,27 +479,57 @@ export function CorporateInquiryForm() {
                 ))}
               </SelectField>
             </Field>
-            <Field label="Also interested in (optional)">
-              <p className="text-muted-foreground -mt-0.5 mb-2 text-xs">
+            <fieldset className="space-y-1.5">
+              <legend className="text-sm leading-none font-medium">
+                Also interested in (optional)
+              </legend>
+              <p
+                id="also-interested-help"
+                className="text-muted-foreground mt-2 mb-3 text-xs"
+              >
                 Tick any others you&rsquo;d like the proposal to cover.
               </p>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {SPECIALIZATIONS.filter((s) => s.title !== primary).map((s) => (
-                  <label
-                    key={s.key}
-                    className="border-input hover:border-foreground/40 has-[:checked]:border-brand has-[:checked]:bg-brand/5 flex min-h-11 cursor-pointer items-start gap-3 rounded-md border px-3 py-2.5 text-sm transition-colors"
-                  >
-                    <input
-                      type="checkbox"
-                      className="accent-brand mt-0.5 size-4 shrink-0"
-                      checked={also.includes(s.title)}
-                      onChange={() => toggleAlso(s.title)}
-                    />
-                    <span>{s.title}</span>
-                  </label>
-                ))}
+              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                {CORPORATE_PROGRAMMES.filter((p) => p.title !== primary).map(
+                  (p) => {
+                    const on = also.includes(p.title)
+                    const Icon = p.icon
+                    return (
+                      <label
+                        key={p.key}
+                        className={cn(TILE_BASE, on ? TILE_ON : TILE_OFF)}
+                      >
+                        <input
+                          type="checkbox"
+                          className="sr-only"
+                          checked={on}
+                          onChange={() => toggleAlso(p.title)}
+                          aria-describedby="also-interested-help"
+                        />
+                        <span
+                          className={cn(
+                            TILE_ICON_BASE,
+                            on ? TILE_ICON_ON : TILE_ICON_OFF
+                          )}
+                        >
+                          <Icon className="size-[1.125rem]" aria-hidden />
+                        </span>
+                        <span className="flex-1 leading-snug">{p.title}</span>
+                        <span
+                          aria-hidden
+                          className={cn(
+                            TILE_CHECK_BASE,
+                            on ? TILE_CHECK_ON : TILE_CHECK_OFF
+                          )}
+                        >
+                          <Check className="size-3.5" strokeWidth={3} />
+                        </span>
+                      </label>
+                    )
+                  }
+                )}
               </div>
-            </Field>
+            </fieldset>
             <Field
               label="Number of attendees"
               error={errors.attendees?.message}
