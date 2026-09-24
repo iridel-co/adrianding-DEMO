@@ -3,6 +3,7 @@ import Link from "next/link"
 import { CalendarDays, MapPin } from "lucide-react"
 import { SplitReveal } from "@/app/_components/split-reveal"
 import { Reveal } from "@/app/_components/reveal"
+import { WorkshopTagPills } from "@/app/_components/workshop-tags"
 import type { Workshop } from "@/lib/workshops"
 import { ShareButton } from "./share-button"
 
@@ -60,9 +61,13 @@ export function WorkshopHero({ workshop }: { workshop: Workshop }) {
           {workshop.title}
         </SplitReveal>
 
+        <Reveal className="mt-5">
+          <WorkshopTagPills tags={workshop.tags} size="md" />
+        </Reveal>
+
         <Reveal
           stagger={0.07}
-          className="mt-9 flex flex-wrap items-center gap-x-3 gap-y-3"
+          className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-3"
         >
           <Chip icon={CalendarDays}>{workshop.schedule}</Chip>
           <Chip icon={MapPin}>

@@ -1,5 +1,5 @@
-import { EventCards } from "@/app/_components/event-cards"
 import { WorkshopsCalendar } from "@/app/_components/workshops-calendar"
+import { WorkshopTagFilter } from "@/app/_components/workshop-tag-filter"
 import { OPEN_WORKSHOPS } from "@/lib/workshops"
 
 /**
@@ -14,6 +14,9 @@ import { OPEN_WORKSHOPS } from "@/lib/workshops"
  * The page's `<h1>` and intro copy now live in `<WorkshopsHero>` (full-bleed
  * banner, rendered before this in `page.tsx`) — that photo is the
  * above-the-fold LCP, so `EventCards` below no longer needs `priority`.
+ *
+ * Tag filter chips sit above the grid (OR semantics — see
+ * `workshop-tag-filter.tsx`); the calendar is unfiltered.
  */
 export function WorkshopsList() {
   return (
@@ -24,7 +27,7 @@ export function WorkshopsList() {
 
       <section className="pb-20 lg:pb-32">
         {/* Full-bleed row. */}
-        <EventCards workshops={OPEN_WORKSHOPS} variant="grid" />
+        <WorkshopTagFilter workshops={OPEN_WORKSHOPS} />
       </section>
     </>
   )
