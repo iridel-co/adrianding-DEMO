@@ -12,11 +12,33 @@
  * TODO: every price is an arbitrary demo figure (₱6,500 for a one-day course,
  * ₱18,500 for the three-day certification) pending the client's real numbers.
  * The trailing asterisk is the page's own "indicative" marker.
+ *
+ * Each workshop carries 1–3 `tags` from `WORKSHOP_TAGS` (added 2026-09-19 — the
+ * client wanted it obvious at a glance which area a course serves).
  */
+
+/**
+ * Fixed taxonomy for "which area does this workshop serve". Order here is the
+ * display order everywhere (card pills, filter chips). In the real build this is
+ * a CMS taxonomy field, not free text — see README "Backend / CRM / CMS".
+ */
+export const WORKSHOP_TAGS = [
+  "Leadership",
+  "Sales",
+  "Communication",
+  "Coaching",
+  "Customer Experience",
+  "Culture",
+  "Train-the-Trainer",
+] as const
+export type WorkshopTag = (typeof WORKSHOP_TAGS)[number]
 
 export type Workshop = {
   slug: string
   title: string
+  /** 1–3 tags from WORKSHOP_TAGS, most relevant first. Shown as pills on every
+   *  card and on the detail hero; drives the /workshops filter. */
+  tags: WorkshopTag[]
   /** ISO 8601 with PH offset. */
   start: string
   /** Human-readable schedule line. */
@@ -62,6 +84,8 @@ export const WORKSHOPS: Workshop[] = [
     // written by him; TODO: client sign-off on those three.
     slug: "exceptional-salesmanship",
     title: "Exceptional Salesmanship",
+    // TODO: client sign-off on tags
+    tags: ["Sales", "Customer Experience"],
     start: "2026-10-09T09:00:00+08:00",
     schedule: "Friday, October 9, 2026 · 9:00 AM – 5:00 PM",
     venue: "SEDA Ayala Center Cebu, E-bloc",
@@ -117,6 +141,7 @@ export const WORKSHOPS: Workshop[] = [
     // the salesmanship entry above for problem / outcomes / whatToExpect.
     slug: "exceptional-leadership",
     title: "Exceptional Leadership",
+    tags: ["Leadership", "Communication"],
     start: "2026-10-16T09:00:00+08:00",
     schedule: "Friday, October 16, 2026 · 9:00 AM – 5:00 PM",
     venue: "SEDA Ayala Center Cebu, E-bloc",
@@ -181,6 +206,7 @@ export const WORKSHOPS: Workshop[] = [
     // it fits a card, full phrasing kept in `summary`) and the price.
     slug: "train-the-trainers-certification",
     title: "Train the Trainers Certification Program",
+    tags: ["Train-the-Trainer", "Communication"],
     start: "2026-11-11T09:00:00+08:00",
     schedule: "November 11–13, 2026 · 9:00 AM – 5:00 PM daily",
     venue: "SEDA Ayala Center Cebu, E-bloc",
@@ -238,6 +264,7 @@ export const WORKSHOPS: Workshop[] = [
   {
     slug: "presenting-with-impact",
     title: "Presenting with Impact",
+    tags: ["Communication"],
     start: "2026-10-23T09:00:00+08:00",
     schedule: "Friday, October 23, 2026 · 9:00 AM – 5:00 PM",
     venue: "SEDA Ayala Center Cebu, E-bloc",
@@ -292,6 +319,7 @@ export const WORKSHOPS: Workshop[] = [
   {
     slug: "negotiation-essentials",
     title: "Negotiation Essentials",
+    tags: ["Sales", "Communication"],
     start: "2026-11-06T09:00:00+08:00",
     schedule: "Friday, November 6, 2026 · 9:00 AM – 5:00 PM",
     venue: "SEDA Ayala Center Cebu, E-bloc",
@@ -345,6 +373,7 @@ export const WORKSHOPS: Workshop[] = [
   {
     slug: "coaching-for-managers",
     title: "Coaching for Managers",
+    tags: ["Coaching", "Leadership"],
     start: "2026-11-20T09:00:00+08:00",
     schedule: "Friday, November 20, 2026 · 9:00 AM – 5:00 PM",
     venue: "SEDA Ayala Center Cebu, E-bloc",
@@ -398,6 +427,7 @@ export const WORKSHOPS: Workshop[] = [
   {
     slug: "customer-experience-excellence",
     title: "Customer Experience Excellence",
+    tags: ["Customer Experience"],
     start: "2026-12-04T09:00:00+08:00",
     schedule: "Friday, December 4, 2026 · 9:00 AM – 5:00 PM",
     venue: "SEDA Ayala Center Cebu, E-bloc",
@@ -452,6 +482,7 @@ export const WORKSHOPS: Workshop[] = [
     // TODO: replace representative past events with the client's real history.
     slug: "building-winning-cultures-2025",
     title: "Building Winning Cultures",
+    tags: ["Culture", "Leadership"],
     start: "2025-11-14T09:00:00+08:00",
     schedule: "November 14, 2025 · 9:00 AM – 5:00 PM",
     venue: "SEDA Ayala Center Cebu, E-bloc",

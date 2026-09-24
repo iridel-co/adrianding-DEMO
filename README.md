@@ -111,6 +111,27 @@ Everything below is UI only. This is the actual scope of work once Adrian Ding a
   client-side only — no CRM write, no confirmation email. They hand off through
   `sessionStorage` and redirect to a confirmation route; that route is what a real
   submission would land on, but nothing is transmitted or persisted.
+- **Every form submission must notify the owners and land in the CRM as `NEW`** (client
+  ask, 2026-09-19). This covers _both_ entry points — workshop registration
+  (`workshops/[slug]/_sections/registration-form.tsx`) and the corporate inquiry
+  (`corporate-training/_sections/inquiry-form.tsx`) — and any form added later. On submit
+  the backend must, server-side:
+  1. **Create the CRM record first, with status `NEW`** — every field the form collects
+     (corporate: the primary programme _and_ the "Also interested in" list; workshop: the
+     course slug and its date), plus `source` (`workshop-registration` |
+     `corporate-inquiry`) and a submitted-at timestamp. `NEW` is the only status the site
+     sets; the rest of the lifecycle is the CRM's, to be agreed with Adrian.
+  2. **Then email the owners** a "new inquiry" notification: who, which form, the key
+     fields, and a link to the CRM record.
+     The record is the source of truth. If the email fails, the lead still exists and still
+     shows as `NEW` (retry the email, never the record). If the record write fails, the
+     visitor must see an error and must **not** be sent to the confirmation page. Owner
+     recipient addresses are TBD with Adrian — configuration, not code. The visitor-facing
+     acknowledgement emails in `/email-templates` are a separate send and do not replace the
+     owner notification.
+- **Workshop `tags`** (`WORKSHOP_TAGS` in `src/lib/workshops.ts`) become a fixed CMS
+  taxonomy field (multi-select, 1–3 per course), not free text — the /workshops filter
+  chips are derived from it.
 - **The confirmation pages are the UI for a process that is still manual.** The four-step
   tracker on `/workshops/[slug]/registered` (registered → payment sent → staff confirms →
   primer email) is the client's actual flow drawn out. Step 3 is a human marking a row as

@@ -209,6 +209,8 @@ Client-supplied roster, used by the filterable marquee on the Landing page and r
 > drop before handoff. Every price is an arbitrary demo figure pending his real
 > numbers; see `MEETING-NOTES.md`.
 
+- **Focus tags (added 2026-09-19, client feedback):** every workshop carries 1–3 tags from a fixed taxonomy (Leadership, Sales, Communication, Coaching, Customer Experience, Culture, Train-the-Trainer) shown as pills on every card (landing + list) and on the course hero. Filter chips above the /workshops grid — "All" by default, multi-select, **OR** semantics (a course shows if it has any selected tag). Chips only list tags an open course actually carries.
+
 ### Child (`/workshops/[workshop-slug]`)
 
 - Full workshop details: date, time, venue, price, curriculum outline (from source deck), inclusions (training manual, certificate, AM/PM snacks + lunch, 30-day post-training mechanism, online reunion), highlights (targeted audience, format)
@@ -242,13 +244,8 @@ the page. What was missing was any way _out_ of it: the course pages linked to
   the section that already carries his portrait and story (`proof.tsx` on a
   course page, the new `corporate-training/_sections/trainer.tsx` on the
   corporate page). Secondary weight, never `variant="brand"`, so it cannot
-  compete with Register / Send inquiry. Three presentations are built —
-  `inline`, `card` (dismissible maroon card, bottom-left, desktop only) and
-  `modal` (the client's literal request) — switchable live from
-  `<AboutPromptSwitcher />` for the client meeting. **Recommendation: `card`.**
-  A modal on a conversion page costs registrations, and on a phone it lands on
-  top of the sticky register bar, the only always-reachable CTA there.
-  The switcher and the variant plumbing come out once he picks one.
+  compete with Register / Send inquiry.
+  Presentation: **inline only** — the client picked it on 2026-09-19 ("INLINE WINS"). The button sits in the section; nothing floats or pops up. The `card` and `modal` variants and the meeting switcher were deleted the same week.
 - **`workshops/[slug]/_sections/team-cta.tsx`** — the corporate off-ramp, placed
   strictly **after** the register CTA. Above it, a private-workshop pitch would
   cannibalise the seat the ad paid for.
@@ -322,11 +319,11 @@ _(Not explicitly listed by Chan but required — this is 80% of Adrian's revenue
 
 1. **Intro/hero-lite** — positions corporate training as the primary offering
 2. **Why Corporate Training** — value prop tied to stats (20,000+ trained, Top 500 companies)
-3. **Areas of Specialization** (capabilities grid, reused component)
+3. **Programs we run** — header on top, then a horizontal carousel of the six programmes (~3.5 cards visible at 1440px, prev/next arrows on desktop). Hovering or keyboard-focusing a card widens it sideways while its neighbours narrow — the row's total width is fixed, so nothing jumps — and reveals who the programme is useful for plus an **Inquire** button that scrolls to the form with that programme preselected (`?program=<key>#inquiry`). Mobile: swipe rail, tap to expand. Added 2026-09-19; the landing page's specializations section is deliberately unchanged. The "useful for" bullets are representative — TODO client sign-off.
 4. **Companies Served** (reused marquee component)
 5. **Testimonials** (corporate-specific selection — Wipro, HSBC, Global Payments, Global Pacific)
 6. **Accreditation band** — the AET / CPD / INSEAD / Genos / Peak Potentials marks, shared with the About page via `src/lib/certifications.ts`. Added 2026-09-06: an L&D head has to justify the spend internally, and the accrediting bodies are what survives that conversation.
-7. **Corporate Training Inquiry Form** — multi-step, four steps. Fields: Name, Number, Email, Company, Role, then **Preferred topic or programme**, **Number of attendees** (banded), **Possible date**, **Possible venue** (all four added 2026-09-06 at the client's request — a name and a free-text message was not enough to quote against), optional context, consent. Frontend only.
+7. **Corporate Training Inquiry Form** — multi-step, four steps. Fields: Name, Number, Email, Company, Role, then **Preferred programme**, **Number of attendees** (banded), **Possible date**, **Possible venue** (all four added 2026-09-06 at the client's request — a name and a free-text message was not enough to quote against), optional context, consent. Frontend only. Added 2026-09-19: an optional **Also interested in** checkbox list of the other programmes, so one inquiry can cover more than one; the primary is prefilled when the visitor arrives from a programme card.
    - **Possible date** has two modes (2026-09-07): "Pick dates" — a from/to pair of native date pickers, one date for a single session or both for a range — and "Not fixed yet", a free-text fallback for "Q1 2027" or "after the audit", which a date input cannot express. Either mode composes into the same single string, so nothing downstream branches.
 8. **Support band** — call / text / email, for anyone not ready to fill a form.
 9. **Footer** (global)
@@ -338,7 +335,7 @@ what-happens-next timeline, then the **reply-commitment block on full brand grou
 the corporate mirror of the workshop confirmation's payment block, carrying the "within 2
 business days" promise, the discovery-call shape and the call-us-sooner number. Then a
 corporate primer video slot, a read-back of the submitted programme / attendees / date /
-venue, a credibility block, and the support band. `noindex`.
+venue (plus any "also interested in" programmes), a credibility block, and the support band. `noindex`.
 
 > The full-brand-ground block is the treatment to reach for whenever a page has **one
 > commitment that must not be scrolled past** — a held seat, a reply window. It earns its
@@ -364,6 +361,17 @@ No standalone contact page needed at this phase — contact info lives in footer
 ### Data Privacy
 
 Consent checkbox (PH Data Privacy Act) on both Workshop Registration and Corporate Training Inquiry forms. No separate TOS page needed for this phase.
+
+---
+
+## Phase 2 handoff — lead capture (added 2026-09-19, client feedback)
+
+Every submission from any form — workshop registration and corporate inquiry today,
+anything added later — must (1) create a CRM record with status **`NEW`** and (2) email
+the owners that someone filled out the form. Record first, email second; a failed email
+never loses a lead, and a failed record write never shows the visitor a confirmation.
+Full contract (fields, `source` values, failure handling): README →
+"Backend / CRM / CMS — not yet built".
 
 ---
 

@@ -5,6 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { ArrowLeft, ArrowRight, MapPin, Ticket } from "lucide-react"
 import { Reveal } from "@/app/_components/reveal"
+import { WorkshopTagPills } from "@/app/_components/workshop-tags"
 import { type Workshop } from "@/lib/workshops"
 
 /**
@@ -49,6 +50,8 @@ import { type Workshop } from "@/lib/workshops"
  * the original chronological order exactly. The pinned "more coming soon"
  * card is just appended as the last item, so it lands wherever the list
  * naturally ends — no odd/even special-casing needed.
+ *
+ * Every card carries its tag pills top-left, always visible (2026-09-19).
  */
 
 const EASE = "cubic-bezier(0.22, 1, 0.36, 1)"
@@ -299,6 +302,11 @@ export function EventCards({
           className="object-cover object-[center_26%]"
         />
         <div className="absolute inset-0 bg-linear-to-t from-black/75 via-black/40 to-black/5" />
+
+        <WorkshopTagPills
+          tags={w.tags}
+          className="absolute top-5 right-6 left-6 z-[1] lg:top-6 lg:right-8 lg:left-8"
+        />
 
         <div className="relative flex h-full w-full flex-col justify-end gap-3 px-6 py-8 text-left text-white lg:px-8">
           <p className="text-xs font-semibold tracking-[0.22em] text-white/75 uppercase">
