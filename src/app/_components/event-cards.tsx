@@ -47,9 +47,9 @@ import { type Workshop } from "@/lib/workshops"
  * the rest, offset downward (`lg:mt-20`) for a staggered, skewed look rather
  * than a strict row-aligned grid. Because the split is first-half/second-half
  * (not interleaved odd/even), stacking the two columns on mobile reproduces
- * the original chronological order exactly. The pinned "more coming soon"
- * card is just appended as the last item, so it lands wherever the list
- * naturally ends — no odd/even special-casing needed.
+ * the original chronological order exactly. On the grid, the pinned "more
+ * coming soon" card fills the shorter column: right when the count is odd,
+ * left when it's even (pass 4). On mobile it's last in the rail.
  *
  * Every card carries its tag pills top-left, always visible (2026-09-19).
  */
@@ -404,12 +404,9 @@ export function EventCards({
       <Reveal>
         {isGrid ? (
           // Left column holds the first half of the list, right holds the
-          // rest — the last real workshop always lands in the right column
-          // (it holds the later half) unless there are 0-1 workshops total,
-          // in which case right is empty and the last card is in left
-          // instead. The soon-card goes in whichever column does NOT hold
-          // that last real card, so it reads as an alternating close rather
-          // than stacking directly under the final workshop.
+          // rest. The soon-card goes in the shorter column, i.e. right when
+          // the count is odd and left when it's even (see the math at the
+          // push below).
           //
           // That desktop placement is rendered as a second, breakpoint-gated
           // copy (`hidden lg:flex`) inside the chosen column; a separate
@@ -426,10 +423,16 @@ export function EventCards({
               .slice(leftCount)
               .map((w, i) => renderCard(w, leftCount + i))
 
-            const lastCardIsRight = right.length > 0
+            // The soon-card fills whichever column ends higher (pass 4, 2026-09-24).
+            // Every grid card is lg:h-128 (512px), the gap is 32px and the right
+            // column starts 80px lower (lg:mt-20). Odd n: left holds one extra card
+            // and ends 512 + 32 − 80 = 464px lower than right → soon goes right.
+            // Even n: equal counts, right ends 80px lower → soon goes left.
+            // Holds for every n ≥ 1. Re-derive if card height, gap or the offset changes.
+            const soonRight = workshops.length % 2 === 1
             const soonDesktop = renderSoonCard("soon-desktop", "hidden lg:flex")
-            if (lastCardIsRight) left.push(soonDesktop)
-            else right.push(soonDesktop)
+            if (soonRight) right.push(soonDesktop)
+            else left.push(soonDesktop)
 
             return (
               <div className={GRID_ROW}>
