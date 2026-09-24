@@ -1,7 +1,9 @@
 /**
  * Adrian's six areas of specialization. Short `blurb` for the landing teaser +
  * corporate page grid; longer `detail` for the About page's expanded version.
- * Copy is representative around the PRD's capability list.
+ * Copy is representative around the PRD's capability list. `usefulFor` feeds
+ * the corporate page's programme carousel only; the landing section does not
+ * read it.
  */
 import {
   Compass,
@@ -19,9 +21,13 @@ export type Specialization = {
   title: string
   blurb: string
   detail: string
+  /** "Useful for" bullets on the corporate carousel's expanded card — who this
+   *  programme is for. TODO: representative copy; Adrian to confirm. */
+  usefulFor: string[]
   icon: LucideIcon
 }
 
+// TODO: Adrian to confirm the usefulFor bullets (representative, 2026-09-19)
 export const SPECIALIZATIONS: Specialization[] = [
   {
     key: "leadership",
@@ -30,6 +36,12 @@ export const SPECIALIZATIONS: Specialization[] = [
       "Turning strong individual performers into leaders who set standards and grow the people around them.",
     detail:
       "Programs that move managers from running tasks to leading people — accountability conversations, coaching in the moment, delegation that develops, and the personal standards a team rises to meet.",
+    usefulFor: [
+      "New and first-time managers promoted from strong individual roles",
+      "Supervisors who still take the work back instead of delegating it",
+      "Mid-level leaders who need to hold people accountable without losing their trust",
+      "Companies building a leadership bench ahead of growth or succession",
+    ],
     icon: Compass,
   },
   {
@@ -39,6 +51,12 @@ export const SPECIALIZATIONS: Specialization[] = [
       "High-energy, story-led keynotes that leave an audience with something to use, not just a feeling.",
     detail:
       "Conference and company-event keynotes on leadership, culture and performance — built to land with a room of hundreds and still feel personal, and always tied to a concrete takeaway.",
+    usefulFor: [
+      "Conventions, kick-offs and awards nights that need a high-energy opener",
+      "Sales and leadership summits of 100 to 1,000+ people",
+      "Moments of change — a merger, a relaunch, a hard year — when the room needs a reset",
+      "Events that want a takeaway people still use next week, not just a good mood",
+    ],
     icon: Mic,
   },
   {
@@ -48,6 +66,12 @@ export const SPECIALIZATIONS: Specialization[] = [
       "The rituals and standards that compound a group of good people into a team that wins.",
     detail:
       "How culture actually forms — the small repeatable rituals, scoreboards and streaks — and how to catch and correct drift early before it sets. For teams that need to hold their edge under pressure.",
+    usefulFor: [
+      "Teams that grew fast and lost the habits that made them good",
+      "Departments working in silos that need to operate as one team",
+      "Leadership teams relaunching values that currently live only on a poster",
+      "Organisations coming out of a restructure, redundancy or merger",
+    ],
     icon: Users,
   },
   {
@@ -57,6 +81,12 @@ export const SPECIALIZATIONS: Specialization[] = [
       "Saying it so it moves people — clarity, structure and presence, in the room and on stage.",
     detail:
       "Message structure, executive presence, handling the tough question, and presenting so the point survives the meeting. Practical work for leaders and client-facing teams.",
+    usefulFor: [
+      "Leaders who present to boards, clients or large internal audiences",
+      "Client-facing and sales teams whose pitch has to land the first time",
+      "Technical experts who need to explain complex work to non-experts",
+      "Managers handling feedback, difficult conversations and tough questions",
+    ],
     icon: MessagesSquare,
   },
   {
@@ -66,6 +96,12 @@ export const SPECIALIZATIONS: Specialization[] = [
       "Equipping in-house facilitators and coaches to run sessions that change behaviour, not just the mood.",
     detail:
       "Session design, facilitation craft, and coaching skill for internal L&D teams — so the capability stays in the company after the external trainer leaves.",
+    usefulFor: [
+      "In-house L&D teams and internal facilitators",
+      "Subject-matter experts asked to train their own colleagues",
+      "Team leads rolling out a coaching culture internally",
+      "Companies that want the capability to stay after the external trainer leaves",
+    ],
     icon: GraduationCap,
   },
   {
@@ -75,6 +111,12 @@ export const SPECIALIZATIONS: Specialization[] = [
       "The signal you send before you say a word — presence, positioning and consistency.",
     detail:
       "For leaders and client-facing professionals: aligning how you show up with what you want to be known for, across the room, the deck and the profile.",
+    usefulFor: [
+      "Senior leaders stepping into more visible, external-facing roles",
+      "Client-facing professionals in banking, insurance, real estate and consulting",
+      "Newly promoted executives whose presence needs to match the title",
+      "Teams representing the company at events, pitches and online",
+    ],
     icon: UserRoundCheck,
   },
 ]
