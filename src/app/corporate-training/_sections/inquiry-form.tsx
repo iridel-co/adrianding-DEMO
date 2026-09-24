@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -25,7 +25,20 @@ import { cn } from "@/lib/utils"
  * Step 3 (programme / headcount / date / venue) is the client's own ask — a
  * name and a free-text message was not enough to quote against, so those four
  * are now captured explicitly.
+ *
+ * Prefill (2026-09-19): the corporate carousel's Inquire button hands off a
+ * programme two ways — a `?program=<key>` URL (read on mount, deep-link /
+ * reload safe) and a `PROGRAM_INQUIRE_EVENT` window event (re-applies a
+ * programme even if the URL didn't change, e.g. a second click after the
+ * visitor picked something else by hand). Also new: an optional
+ * "Also interested in" checkbox list, so one inquiry can cover more than one
+ * programme.
  */
+
+// Must match the constant in _components/program-carousel.tsx — see PLAN-feedback-2.md.
+const PROGRAM_INQUIRE_EVENT = "ad:program-inquire"
+
+const SPEC_TITLES = SPECIALIZATIONS.map((s) => s.title) as [string, ...string[]]
 
 const PROGRAMS = [
   ...SPECIALIZATIONS.map((s) => s.title),
@@ -52,6 +65,7 @@ const schema = z.object({
   venue: z.string().min(2, "Where would this run?"),
   context: z.string().optional(),
   consent: z.literal(true, { message: "You need to agree to continue." }),
+  alsoInterested: z.array(z.enum(SPEC_TITLES)).optional(),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -61,7 +75,7 @@ const STEPS: { title: string; fields: (keyof FormValues)[] }[] = [
   { title: "Your company", fields: ["company", "role"] },
   {
     title: "Your programme",
-    fields: ["program", "attendees", "targetDate", "venue"],
+    fields: ["program", "alsoInterested", "attendees", "targetDate", "venue"],
   },
   { title: "Confirm", fields: ["consent"] },
 ]
@@ -80,6 +94,8 @@ export function CorporateInquiryForm() {
   const [dateMode, setDateMode] = useState<"pick" | "text">("pick")
   const [dateFrom, setDateFrom] = useState("")
   const [dateTo, setDateTo] = useState("")
+  const formRef = useRef<HTMLFormElement>(null)
+  const [prefilled, setPrefilled] = useState<string | null>(null)
 
   const {
     register,
@@ -87,12 +103,91 @@ export function CorporateInquiryForm() {
     trigger,
     getValues,
     setValue,
+    watch,
     reset,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     mode: "onTouched",
+    defaultValues: { alsoInterested: [] },
   })
+
+  const primary = watch("program")
+  const also = watch("alsoInterested") ?? []
+
+  const toggleAlso = (title: string) => {
+    setValue(
+      "alsoInterested",
+      also.includes(title) ? also.filter((t) => t !== title) : [...also, title],
+      { shouldDirty: true }
+    )
+  }
+
+  /** Finds the specialization for a carousel key and prefills the programme
+   *  select. Unknown keys are ignored silently — a stale or hand-edited URL
+   *  must not error, it just leaves the form as-is. */
+  const applyProgram = (key: string, focus: boolean) => {
+    const spec = SPECIALIZATIONS.find((s) => s.key === key)
+    if (!spec) return
+    setValue("program", spec.title as FormValues["program"], {
+      shouldValidate: false,
+      shouldDirty: true,
+    })
+    const current = getValues("alsoInterested") ?? []
+    if (current.includes(spec.title)) {
+      setValue(
+        "alsoInterested",
+        current.filter((t) => t !== spec.title),
+        { shouldDirty: true }
+      )
+    }
+    setPrefilled(spec.title)
+    if (focus) {
+      requestAnimationFrame(() =>
+        formRef.current?.focus({ preventScroll: true })
+      )
+    }
+  }
+
+  // Deep link: `/corporate-training?program=<key>#inquiry`.
+  useEffect(() => {
+    const key = new URLSearchParams(window.location.search).get("program")
+    if (key) applyProgram(key, false)
+    // Only ever read on mount — the event handler below covers later changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Second entry point: a click on an Inquire button already on this page,
+  // which may not change the URL if the visitor picked the same programme
+  // twice, or is already on this page.
+  useEffect(() => {
+    const onInquire = (e: Event) => {
+      const key = (e as CustomEvent<{ key?: unknown }>).detail?.key
+      if (typeof key === "string") applyProgram(key, true)
+    }
+    window.addEventListener(PROGRAM_INQUIRE_EVENT, onInquire)
+    return () => window.removeEventListener(PROGRAM_INQUIRE_EVENT, onInquire)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // The primary programme can never also be an extra.
+  useEffect(() => {
+    const current = getValues("alsoInterested") ?? []
+    if (primary && current.includes(primary)) {
+      setValue(
+        "alsoInterested",
+        current.filter((t) => t !== primary),
+        { shouldDirty: true }
+      )
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [primary])
+
+  // If the visitor changes the select away from the prefilled programme by
+  // hand, the confirmation line is no longer accurate — drop it.
+  useEffect(() => {
+    if (prefilled && primary !== prefilled) setPrefilled(null)
+  }, [primary, prefilled])
 
   /**
    * Demo shortcut — see `_components/demo-fill.tsx`. The date picker keeps its
@@ -118,6 +213,7 @@ export function CorporateInquiryForm() {
       context:
         "New supervisors promoted from the floor this year — we need them leading, not just scheduling.",
       consent: true,
+      alsoInterested: [SPECIALIZATIONS[3].title],
     })
   }
 
@@ -174,6 +270,7 @@ export function CorporateInquiryForm() {
       attendees: v.attendees,
       targetDate: v.targetDate,
       venue: v.venue,
+      alsoInterested: v.alsoInterested ?? [],
     })
     router.push("/corporate-training/inquiry-received")
   }
@@ -182,8 +279,10 @@ export function CorporateInquiryForm() {
 
   return (
     <form
+      ref={formRef}
+      tabIndex={-1}
       onSubmit={handleSubmit(onSubmit)}
-      className="bg-background text-foreground rounded-xl p-6 shadow-2xl sm:p-10"
+      className="bg-background text-foreground rounded-xl p-6 shadow-2xl outline-none sm:p-10"
     >
       <div className="flex items-center gap-2">
         {STEPS.map((s, i) => (
@@ -202,6 +301,13 @@ export function CorporateInquiryForm() {
         </p>
         <DemoFillButton onFill={fillSample} />
       </div>
+      {prefilled && step < 2 && (
+        <p className="text-muted-foreground mt-3 text-sm">
+          Enquiring about{" "}
+          <span className="text-foreground font-medium">{prefilled}</span> — you
+          can change this on step 3.
+        </p>
+      )}
 
       <div ref={paneRef} className="mt-6 space-y-5">
         {step === 0 && (
@@ -250,10 +356,7 @@ export function CorporateInquiryForm() {
 
         {step === 2 && (
           <>
-            <Field
-              label="Preferred topic or programme"
-              error={errors.program?.message}
-            >
+            <Field label="Preferred programme" error={errors.program?.message}>
               <SelectField defaultValue="" {...register("program")}>
                 <option value="" disabled>
                   Select a programme
@@ -264,6 +367,27 @@ export function CorporateInquiryForm() {
                   </option>
                 ))}
               </SelectField>
+            </Field>
+            <Field label="Also interested in (optional)">
+              <p className="text-muted-foreground -mt-0.5 mb-2 text-xs">
+                Tick any others you&rsquo;d like the proposal to cover.
+              </p>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {SPECIALIZATIONS.filter((s) => s.title !== primary).map((s) => (
+                  <label
+                    key={s.key}
+                    className="border-input hover:border-foreground/40 has-[:checked]:border-brand has-[:checked]:bg-brand/5 flex min-h-11 cursor-pointer items-start gap-3 rounded-md border px-3 py-2.5 text-sm transition-colors"
+                  >
+                    <input
+                      type="checkbox"
+                      className="accent-brand mt-0.5 size-4 shrink-0"
+                      checked={also.includes(s.title)}
+                      onChange={() => toggleAlso(s.title)}
+                    />
+                    <span>{s.title}</span>
+                  </label>
+                ))}
+              </div>
             </Field>
             <Field
               label="Number of attendees"
@@ -372,6 +496,10 @@ export function CorporateInquiryForm() {
               <Row k="Company" v={getValues("company") || "—"} />
               <Row k="Role" v={getValues("role") || "—"} />
               <Row k="Programme" v={getValues("program") || "—"} />
+              <Row
+                k="Also interested in"
+                v={(getValues("alsoInterested") ?? []).join(", ") || "—"}
+              />
               <Row k="Attendees" v={getValues("attendees") || "—"} />
               <Row k="Target date" v={getValues("targetDate") || "—"} />
               <Row k="Venue" v={getValues("venue") || "—"} />

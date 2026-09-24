@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Building2, CalendarDays, MapPin, Users } from "lucide-react"
+import { Building2, CalendarDays, Layers, MapPin, Users } from "lucide-react"
 import { Reveal } from "@/app/_components/reveal"
 import { SplitReveal } from "@/app/_components/split-reveal"
 import { readHandoff, type CorporateHandoff } from "@/app/_lib/handoff"
@@ -90,6 +90,21 @@ export function InquirySummary() {
               </div>
             )
           })}
+          {/* Only renders when the visitor ticked at least one extra programme
+              — with no handoff or an empty list, the "four things we ask for"
+              copy above stays true. */}
+          {handoff?.alsoInterested?.length ? (
+            <div className="bg-muted/50 rounded-lg p-6 sm:col-span-2">
+              <dl>
+                <dt className="text-muted-foreground flex items-center gap-1.5 text-xs tracking-[0.1em] uppercase">
+                  <Layers className="size-3.5" /> Also interested in
+                </dt>
+                <dd className="text-foreground mt-2 text-lg font-medium">
+                  {handoff.alsoInterested.join(", ")}
+                </dd>
+              </dl>
+            </div>
+          ) : null}
         </Reveal>
       </div>
     </section>
