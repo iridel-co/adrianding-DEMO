@@ -12,17 +12,25 @@ import {
 } from "@/lib/specializations"
 
 /**
- * Landing — the six areas Adrian goes deep on. Each is a reveal card: at rest
- * it's a plain editorial row (sans-serif title + one line of copy, a hairline
- * between), unchanged from before; hovering a row (or tapping, on touch)
- * expands it and wipes a photo in. Sits on the muted ground between the
- * credibility block and the workshop/corporate fork.
+ * Landing — Coach Adrian's six in-house corporate training programmes, framed
+ * explicitly as run for companies and their teams (2026-09-24 copy pass).
+ * Each is a reveal card: at rest it shows the title and full blurb; hovering
+ * or keyboard-focusing a card (desktop, real pointer only) swaps the blurb
+ * for "Useful for" + 4 bullets and an Inquire button, and grows the card.
+ * Touch devices and screens below `lg` never expand — every card is static
+ * at the detail height. Sits on the muted ground between the credibility
+ * block and the workshop/corporate fork.
+ *
+ * Reads `SPECIALIZATIONS` (the real six) on purpose, never
+ * `CORPORATE_PROGRAMMES` — the four placeholder programmes are corporate-page
+ * only.
  */
 
 const CARDS: SpecCard[] = SPECIALIZATIONS.map((spec) => ({
   key: spec.key,
   title: spec.title,
   blurb: spec.blurb,
+  usefulFor: spec.usefulFor,
   image: SPECIALIZATION_IMAGES[spec.key],
   imageAlt: SPECIALIZATION_IMAGE_ALTS[spec.key],
   imagePosition: SPECIALIZATION_IMAGE_POSITIONS[spec.key],
@@ -37,13 +45,18 @@ export function LandingSpecializations() {
               card stack on the right scrolls past. */}
           <div className="lg:sticky lg:top-28 lg:self-start">
             <SplitReveal className="font-serif text-[2.5rem] leading-[1.05] tracking-[-0.02em] lg:text-[3rem]">
-              Six programs,
+              In-house programs,
               <br />
               <span className="text-brand">two decades</span> deep
             </SplitReveal>
             <p className="text-muted-foreground mt-6 text-lg leading-relaxed">
-              Every engagement is built from these — run for a boardroom, a
-              conference stage, or a room of individual professionals.
+              Coach Adrian&rsquo;s corporate training programmes, run in-house
+              for companies and their teams — at your office or offsite, and
+              shaped around your people and goals.
+              <span className="hidden lg:pointer-fine:inline">
+                {" "}
+                Hover one to see who it&rsquo;s for.
+              </span>
             </p>
           </div>
 
