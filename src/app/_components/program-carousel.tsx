@@ -40,10 +40,12 @@ import { smoothScrollToElement } from "@/app/_lib/smooth-scroll-to"
  * is the default" order — `interactive` starts `false` on SSR and first
  * paint, so both layouts hydrate safely (§10).
  *
- * The inset: the header and rail share a 96rem column (widened 2026-09-24
- * from 80rem at Chan's request — see `RAIL` and the header wrapper below),
- * so the row starts 32px from the left edge instead of being centred on a
- * narrower column.
+ * The inset (pass 4, 2026-09-24): the rail starts at a constant 40px
+ * (`lg:pl-10`) at every desktop width, identical to the landing workshops
+ * row (`ROW` in `event-cards.tsx`). The header stays on the page's 80rem
+ * column like every other heading, which is also what the landing workshops
+ * section does. History: 80rem column → 96rem column (pass 3) → constant
+ * 40px (pass 4).
  *
  * B <-> C contract (see PLAN-feedback-2.md): clicking Inquire replaces the
  * URL with `/corporate-training?program=<key>#inquiry` (so a reload / shared
@@ -87,7 +89,7 @@ const DURATION_MS = 420 // = SpecRevealCards' 0.42s
 const PROGRAM_INQUIRE_EVENT = "ad:program-inquire" // Must match the constant in corporate-training/_sections/inquiry-form.tsx — see PLAN-feedback-2.md.
 
 const RAIL =
-  "no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-6 px-6 pb-1 sm:scroll-px-8 sm:px-8 lg:snap-none lg:gap-5 lg:scroll-px-0 lg:pr-0 lg:pb-0 lg:pl-[max(2rem,calc((100vw-96rem)/2+2rem))]"
+  "no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-6 px-6 pb-1 sm:scroll-px-8 sm:px-8 lg:snap-none lg:gap-5 lg:scroll-px-0 lg:pr-0 lg:pb-0 lg:pl-10"
 
 const CARD =
   "group relative h-[32rem] w-[82vw] max-w-[22rem] shrink-0 snap-start overflow-hidden rounded-3xl contain-layout lg:h-[34rem] lg:w-auto lg:max-w-none lg:flex-[0_0_22rem]"
@@ -97,6 +99,19 @@ const CARD =
 // don't reflow while the card widens.
 const DETAIL_INTERACTIVE = "w-full pt-1 lg:w-[30rem]"
 const DETAIL_STATIC = "w-full pt-1"
+
+// Desktop + pointer card title. Extra-bold at all sizes (pass 4, 2026-09-24).
+// max-w keeps the text from reflowing while the card widens (see SIBLING_REM).
+const TITLE_INTERACTIVE =
+  "max-w-[15.5rem] text-xl leading-tight font-extrabold tracking-[-0.01em] text-balance text-white lg:text-[1.65rem]"
+
+// Static (touch / below lg) card title — IDENTICAL literal in
+// spec-reveal-cards.tsx and program-carousel.tsx (feedback pass 4,
+// 2026-09-24): extra-bold like the workshop card titles, centred on
+// phones with 24px to the bullets (mb-2 + the column's 16px gap). From lg
+// (touch tablets only reach this) it drops back to left-aligned.
+const TITLE_STATIC =
+  "mx-auto mb-2 max-w-[15.5rem] text-center text-xl leading-tight font-extrabold tracking-[-0.01em] text-balance text-white lg:mx-0 lg:mb-0 lg:shrink-0 lg:text-left lg:text-[1.65rem]"
 
 // Same wipe-fill + colour-invert Register mechanic as `event-cards.tsx` —
 // copied literally so the glow/border still changes with the fill on hover
@@ -292,18 +307,25 @@ export function ProgramCarousel({
             </li>
           ))}
         </ul>
-        <a
-          href={`/corporate-training?program=${item.key}#inquiry`}
-          onClick={(e) => {
-            e.preventDefault()
-            inquire(item.key, reduce)
-          }}
-          className={`${REGISTER_PILL} pointer-events-auto mt-5 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none`}
-        >
-          Inquire
-          <span className="sr-only"> about {item.title}</span>
-          <ArrowRight className="size-4 transition-transform duration-300 group-hover/reg:translate-x-1" />
-        </a>
+        {/* Bottom-right (pass 4). In interactive mode this sits inside
+            the fixed 30rem `DETAIL_INTERACTIVE`, which is exactly the active
+            card's content width, so it lands at the card's bottom-right
+            without touching any width. ring-inset because `Collapse`'s
+            overflow-hidden clips an outer ring at this edge. */}
+        <div className="mt-5 flex justify-end">
+          <a
+            href={`/corporate-training?program=${item.key}#inquiry`}
+            onClick={(e) => {
+              e.preventDefault()
+              inquire(item.key, reduce)
+            }}
+            className={`${REGISTER_PILL} pointer-events-auto focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none focus-visible:ring-inset`}
+          >
+            Inquire
+            <span className="sr-only"> about {item.title}</span>
+            <ArrowRight className="size-4 transition-transform duration-300 group-hover/reg:translate-x-1" />
+          </a>
+        </div>
       </div>
     )
 
@@ -340,7 +362,7 @@ export function ProgramCarousel({
           />
         )}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col gap-3 p-6 lg:p-8">
-          <h3 className="max-w-[15.5rem] text-xl leading-tight font-semibold tracking-[-0.01em] text-balance text-white lg:text-[1.65rem]">
+          <h3 className={interactive ? TITLE_INTERACTIVE : TITLE_STATIC}>
             {item.title}
           </h3>
           {interactive ? (
@@ -364,7 +386,7 @@ export function ProgramCarousel({
 
   return (
     <div>
-      <div className="mx-auto max-w-[96rem] px-6 sm:px-8">
+      <div className="mx-auto max-w-7xl px-6 sm:px-8">
         <div className="mb-10 flex flex-col gap-6 lg:mb-14 lg:flex-row lg:items-end lg:justify-between">
           {/* Two dynamic siblings in one JSX position — the passed-in
               `heading` (owned by the caller) and the conditionally-rendered
