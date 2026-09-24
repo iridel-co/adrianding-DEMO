@@ -22,7 +22,10 @@ import { cn } from "@/lib/utils"
  * desktop (default card 0). On touch devices, and below `lg`, nothing
  * expands: every card is static at the expanded height, showing the detail
  * (bullets + Inquire), never the blurb, and there is no toggle element at
- * all — see RULES §14, "the touch control is the default".
+ * all — see RULES §14, "the touch control is the default". Inquire sits
+ * bottom-right. Static (touch / below lg) titles are extra-bold and centred
+ * on phones via `TITLE_STATIC`, the same literal as `program-carousel.tsx`
+ * (pass 4, 2026-09-24).
  *
  * The overlay `<button>` (interactive mode only) exists because the card's
  * content includes a real `<a>` Inquire link, and an `<a>` can't sit inside a
@@ -57,12 +60,12 @@ export type SpecCard = {
 
 const COLLAPSED_H = "11.5rem"
 const EXPANDED_H = "27rem"
-// Rail-panel height below `lg` — matches the `h-[27rem]` class the card
+// Rail-panel height below `lg` — matches the `h-[28rem]` class the card
 // carries before the viewport query resolves, so the two can never disagree.
-// Raised from 24rem -> 27rem (2026-09-24) so the static detail content
-// (bullets + Inquire) fits without clamping: the tallest static card content
-// at 360px wide measures 368px + 40px padding = 408 <= 432 (27rem).
-const RAIL_H = "27rem"
+// Raised 24rem → 27rem (2026-09-24) and 27rem → 28rem (pass 4): the heavier,
+// centred title with 24px to the bullets left the title only 20px from the
+// card top at 360px wide. 28rem gives about 36px.
+const RAIL_H = "28rem"
 
 // Alternating horizontal offset so the stack reads as a staggered, hand-set
 // column rather than a locked grid — even rows pulled left, odd rows pushed
@@ -70,8 +73,16 @@ const RAIL_H = "27rem"
 // horizontal rail, where an inset would just shrink them unevenly.
 const OFFSETS = ["lg:mr-[7%] lg:w-[93%]", "lg:ml-[7%] lg:w-[93%]"]
 
-const TITLE =
+const TITLE_INTERACTIVE =
   "text-xl leading-tight font-semibold tracking-[-0.01em] text-balance text-white lg:max-w-60 lg:shrink-0 lg:text-[1.65rem]"
+
+// Static (touch / below lg) card title — IDENTICAL literal in
+// spec-reveal-cards.tsx and program-carousel.tsx (feedback pass 4,
+// 2026-09-24): extra-bold like the workshop card titles, centred on
+// phones with 24px to the bullets (mb-2 + the column's 16px gap). From lg
+// (touch tablets only reach this) it drops back to left-aligned.
+const TITLE_STATIC =
+  "mx-auto mb-2 max-w-[15.5rem] text-center text-xl leading-tight font-extrabold tracking-[-0.01em] text-balance text-white lg:mx-0 lg:mb-0 lg:shrink-0 lg:text-left lg:text-[1.65rem]"
 
 // Same wipe-fill + colour-invert Register mechanic as `program-carousel.tsx`
 // — copied literally so the glow/border still changes with the fill on hover
@@ -113,7 +124,7 @@ export function SpecRevealCards({ items }: { items: SpecCard[] }) {
             // row's own box, so toggling one card can't force a layout recalc
             // outside the stack.
             className={cn(
-              "group relative h-[27rem] w-[78vw] max-w-96 shrink-0 snap-start overflow-hidden rounded-3xl contain-layout lg:h-auto lg:w-auto lg:max-w-none lg:shrink",
+              "group relative h-[28rem] w-[78vw] max-w-96 shrink-0 snap-start overflow-hidden rounded-3xl contain-layout lg:h-auto lg:w-auto lg:max-w-none lg:shrink",
               OFFSETS[i % OFFSETS.length]
             )}
             initial={false}
@@ -178,7 +189,11 @@ export function SpecRevealCards({ items }: { items: SpecCard[] }) {
             >
               {showDetail ? (
                 <div className="flex flex-col gap-4 p-5 sm:p-6 lg:flex-row lg:items-end lg:justify-between lg:gap-8 lg:p-8 xl:gap-12">
-                  <h3 className={TITLE}>{item.title}</h3>
+                  <h3
+                    className={interactive ? TITLE_INTERACTIVE : TITLE_STATIC}
+                  >
+                    {item.title}
+                  </h3>
                   <div className="w-full lg:max-w-sm">
                     <p className="text-sm font-semibold text-white">
                       Useful for
@@ -200,22 +215,24 @@ export function SpecRevealCards({ items }: { items: SpecCard[] }) {
                     {/* Plain <a>, not next/link: a full load is what triggers
                         the inquiry form's cold-load `#inquiry` landing
                         (commit 91a834e) and its `?program=` prefill. */}
-                    <a
-                      href={`/corporate-training?program=${item.key}#inquiry`}
-                      className={cn(
-                        INQUIRE_PILL,
-                        "pointer-events-auto mt-5 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
-                      )}
-                    >
-                      Inquire
-                      <span className="sr-only"> about {item.title}</span>
-                      <ArrowRight className="size-4 transition-transform duration-300 group-hover/reg:translate-x-1" />
-                    </a>
+                    <div className="mt-5 flex justify-end">
+                      <a
+                        href={`/corporate-training?program=${item.key}#inquiry`}
+                        className={cn(
+                          INQUIRE_PILL,
+                          "pointer-events-auto focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+                        )}
+                      >
+                        Inquire
+                        <span className="sr-only"> about {item.title}</span>
+                        <ArrowRight className="size-4 transition-transform duration-300 group-hover/reg:translate-x-1" />
+                      </a>
+                    </div>
                   </div>
                 </div>
               ) : (
                 <div className="flex flex-row items-end justify-between gap-8 p-8 xl:gap-12">
-                  <h3 className={TITLE}>{item.title}</h3>
+                  <h3 className={TITLE_INTERACTIVE}>{item.title}</h3>
                   <p className="max-w-sm text-right text-sm leading-relaxed text-white/85 xl:text-base">
                     {item.blurb}
                   </p>
