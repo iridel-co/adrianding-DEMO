@@ -30,6 +30,8 @@ export type CorporateHandoff = {
   attendees: string
   targetDate: string
   venue: string
+  /** Optional extra programmes (titles). Absent on payloads saved before 2026-09-19. */
+  alsoInterested?: string[]
 }
 
 export type Handoff = WorkshopHandoff | CorporateHandoff
