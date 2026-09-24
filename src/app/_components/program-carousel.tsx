@@ -12,29 +12,38 @@ import Image from "next/image"
 import { ArrowLeft, ArrowRight, Check } from "lucide-react"
 import { Reveal } from "@/app/_components/reveal"
 import { useReducedMotionSafe } from "@/app/_lib/use-reduced-motion-safe"
+import { useIsTouch } from "@/app/_lib/use-is-touch"
 import { smoothScrollToElement } from "@/app/_lib/smooth-scroll-to"
 
 /**
- * Corporate Training page only — "Programs we run". A horizontal rail of six
- * programme cards, ~3.5 visible at 1440px. Hovering (desktop, pointer + hover
- * capable) or tapping/focusing (touch/keyboard) a card widens it sideways to
- * reveal who the programme is for and an Inquire button; its siblings give up
- * exactly the width the active card gains, via `SIBLING_REM`, so the row's
- * total width never changes — nothing to the right of the hovered card jumps
- * and the arrows' enabled state can't flip mid-hover. That invariant also
- * keeps hover stable (RULES §14): the newly-active card's span always
- * contains its previous span, so the pointer can never fall off the card it
- * just entered — re-check the constants below before changing any of them.
+ * Corporate Training page only — "Programs we run in-house". A horizontal
+ * rail of ten programme cards (Adrian's six plus four 2026-09-24
+ * placeholders, from `CORPORATE_PROGRAMMES`), ~3.5 visible at 1440px.
  *
- * Hover expands (mouse enter/leave on the card, cleared on the rail's own
- * leave). A tap toggles open/closed on the same card, and switches straight
- * to a different card on tap. Keyboard focus expands, mirroring hover, but
- * only real `:focus-visible` focus — a tap's synthetic focus does not also
- * fire this, or a tap would open-then-immediately-look-focused-open with no
- * way to tell it apart from a second tap closing it.
+ * Interactive only with a desktop-width screen **and** a real pointer
+ * (`useIsTouch`, RULES §14 — a tablet is desktop-wide and cannot hover).
+ * At rest a card shows its title and full description. Hovering or
+ * keyboard-focusing (desktop + pointer only) widens it sideways to reveal
+ * who the programme is for and an Inquire button, swapping out the
+ * description; its siblings give up exactly the width the active card
+ * gains, via `SIBLING_REM`, so the row's total width never changes —
+ * nothing to the right of the hovered card jumps and the arrows' enabled
+ * state can't flip mid-hover. That invariant also keeps hover stable
+ * (RULES §14): the newly-active card's span always contains its previous
+ * span, so the pointer can never fall off the card it just entered —
+ * re-check the constants below before changing any of them.
  *
- * Below `lg` the constant-width take-over is off entirely (cards are a fixed-
- * width swipe rail with snap) — see the `desktop` gate.
+ * On touch (any width) and below `lg`, nothing expands: every card is
+ * static — title, "Useful for" bullets and Inquire, no description, no
+ * toggle button, and the constant-width take-over is off (cards are a
+ * fixed-width swipe rail with snap). This is the RULES §14 "touch control
+ * is the default" order — `interactive` starts `false` on SSR and first
+ * paint, so both layouts hydrate safely (§10).
+ *
+ * The inset: the header and rail share a 96rem column (widened 2026-09-24
+ * from 80rem at Chan's request — see `RAIL` and the header wrapper below),
+ * so the row starts 32px from the left edge instead of being centred on a
+ * narrower column.
  *
  * B <-> C contract (see PLAN-feedback-2.md): clicking Inquire replaces the
  * URL with `/corporate-training?program=<key>#inquiry` (so a reload / shared
@@ -72,16 +81,22 @@ const ACTIVE_REM = 34 // hovered / focused / tapped card
 // numbers the newly-active card's new span always contains its previous
 // span, so the pointer can't fall off the card it just entered. Re-check
 // that before changing any value.
-const SIBLING_REM = (n: number) => (n * REST_REM - ACTIVE_REM) / (n - 1) // 19.6 for n=6
+const SIBLING_REM = (n: number) => (n * REST_REM - ACTIVE_REM) / (n - 1) // 20.67rem for n=10 (19.6 for n=6)
 const EASE = "cubic-bezier(0.33, 1, 0.68, 1)" // = SpecRevealCards' [0.33,1,0.68,1]
 const DURATION_MS = 420 // = SpecRevealCards' 0.42s
 const PROGRAM_INQUIRE_EVENT = "ad:program-inquire" // Must match the constant in corporate-training/_sections/inquiry-form.tsx — see PLAN-feedback-2.md.
 
 const RAIL =
-  "no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-6 px-6 pb-1 sm:scroll-px-8 sm:px-8 lg:snap-none lg:gap-5 lg:scroll-px-0 lg:pr-0 lg:pb-0 lg:pl-[max(2rem,calc((100vw-80rem)/2+2rem))]"
+  "no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-6 px-6 pb-1 sm:scroll-px-8 sm:px-8 lg:snap-none lg:gap-5 lg:scroll-px-0 lg:pr-0 lg:pb-0 lg:pl-[max(2rem,calc((100vw-96rem)/2+2rem))]"
 
 const CARD =
   "group relative h-[32rem] w-[82vw] max-w-[22rem] shrink-0 snap-start overflow-hidden rounded-3xl contain-layout lg:h-[34rem] lg:w-auto lg:max-w-none lg:flex-[0_0_22rem]"
+
+// Static (touch / below lg) detail wrapper: full width, no fixed rail width.
+// Interactive (desktop + pointer) detail wrapper: fixed width so the bullets
+// don't reflow while the card widens.
+const DETAIL_INTERACTIVE = "w-full pt-1 lg:w-[30rem]"
+const DETAIL_STATIC = "w-full pt-1"
 
 // Same wipe-fill + colour-invert Register mechanic as `event-cards.tsx` —
 // copied literally so the glow/border still changes with the fill on hover
@@ -177,25 +192,27 @@ export function ProgramCarousel({
 
   // Mount-gated so SSR and the first client render agree (RULES §10).
   const [desktop, setDesktop] = useState(false)
-  const [canHover, setCanHover] = useState(false)
+  const touch = useIsTouch()
+  // Hover take-over only with a real pointer on a desktop-width screen
+  // (RULES §14). Both start `false`, so SSR and first paint are the static
+  // layout — the rule's "touch control is the default".
+  const interactive = desktop && !touch
   useEffect(() => {
     const mqDesktop = window.matchMedia("(min-width: 1024px)")
-    const mqHover = window.matchMedia("(hover: hover) and (pointer: fine)")
-    const sync = () => {
-      setDesktop(mqDesktop.matches)
-      setCanHover(mqHover.matches)
-    }
+    const sync = () => setDesktop(mqDesktop.matches)
     sync()
     mqDesktop.addEventListener("change", sync)
-    mqHover.addEventListener("change", sync)
-    return () => {
-      mqDesktop.removeEventListener("change", sync)
-      mqHover.removeEventListener("change", sync)
-    }
+    return () => mqDesktop.removeEventListener("change", sync)
   }, [])
 
   // null = all cards at rest, equal width.
   const [active, setActive] = useState<number | null>(null)
+
+  // Drop any active card if interactivity turns off mid-session (mouse
+  // unplugged, window resized below lg).
+  useEffect(() => {
+    if (!interactive) setActive(null)
+  }, [interactive])
 
   const railRef = useRef<HTMLDivElement>(null)
   const [edges, setEdges] = useState({ left: false, right: false })
@@ -241,14 +258,14 @@ export function ProgramCarousel({
   const hasOverflow = edges.left || edges.right
 
   const renderCard = (item: ProgramCard, i: number) => {
-    const isOpen = active === i
+    const isOpen = interactive && active === i
     const basis =
       active === null
         ? REST_REM
         : active === i
           ? ACTIVE_REM
           : SIBLING_REM(items.length)
-    const style: CSSProperties | undefined = desktop
+    const style: CSSProperties | undefined = interactive
       ? {
           flexGrow: 0,
           flexShrink: 0,
@@ -258,12 +275,44 @@ export function ProgramCarousel({
       : undefined
     const panelId = `program-${item.key}-detail`
 
+    const detail = (
+      <div className={interactive ? DETAIL_INTERACTIVE : DETAIL_STATIC}>
+        <p className="text-sm font-semibold text-white">Useful for</p>
+        <ul className="mt-2 space-y-1.5">
+          {item.usefulFor.map((b) => (
+            <li
+              key={b}
+              className="flex gap-2.5 text-sm leading-snug text-white/90"
+            >
+              <Check
+                className="mt-0.5 size-4 shrink-0 text-white/70"
+                aria-hidden
+              />
+              {b}
+            </li>
+          ))}
+        </ul>
+        <a
+          href={`/corporate-training?program=${item.key}#inquiry`}
+          onClick={(e) => {
+            e.preventDefault()
+            inquire(item.key, reduce)
+          }}
+          className={`${REGISTER_PILL} pointer-events-auto mt-5 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none`}
+        >
+          Inquire
+          <span className="sr-only"> about {item.title}</span>
+          <ArrowRight className="size-4 transition-transform duration-300 group-hover/reg:translate-x-1" />
+        </a>
+      </div>
+    )
+
     return (
       <div
         key={item.key}
         className={CARD}
         style={style}
-        onMouseEnter={() => canHover && setActive(i)}
+        onMouseEnter={interactive ? () => setActive(i) : undefined}
       >
         <Image
           fill
@@ -275,61 +324,39 @@ export function ProgramCarousel({
         />
         <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/35 to-black/10" />
         <div
-          className={`absolute inset-0 bg-black/35 transition-opacity duration-300 motion-reduce:transition-none ${isOpen ? "opacity-100" : "opacity-0"}`}
+          className={`absolute inset-0 bg-black/35 transition-opacity duration-300 motion-reduce:transition-none ${!interactive || isOpen ? "opacity-100" : "opacity-0"}`}
         />
-        <button
-          type="button"
-          aria-expanded={isOpen}
-          aria-controls={panelId}
-          aria-label={`${item.title} — who it's for`}
-          className="absolute inset-0 z-10 cursor-pointer rounded-3xl outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-inset"
-          onClick={() =>
-            canHover ? setActive(i) : setActive((a) => (a === i ? null : i))
-          }
-          onFocus={(e) => {
-            if (e.currentTarget.matches(":focus-visible")) setActive(i)
-          }}
-        />
+        {interactive && (
+          <button
+            type="button"
+            aria-expanded={isOpen}
+            aria-controls={panelId}
+            aria-label={`${item.title} — who it's for`}
+            className="absolute inset-0 z-10 cursor-pointer rounded-3xl outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-inset"
+            onClick={() => setActive(i)}
+            onFocus={(e) => {
+              if (e.currentTarget.matches(":focus-visible")) setActive(i)
+            }}
+          />
+        )}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col gap-3 p-6 lg:p-8">
           <h3 className="max-w-[15.5rem] text-xl leading-tight font-semibold tracking-[-0.01em] text-balance text-white lg:text-[1.65rem]">
             {item.title}
           </h3>
-          <Collapse open={!isOpen}>
-            <p className="line-clamp-3 max-w-[15.5rem] text-sm leading-relaxed text-white/85 lg:text-base">
-              {item.blurb}
-            </p>
-          </Collapse>
-          <Collapse open={isOpen} id={panelId} inert={!isOpen}>
-            <div className="w-full pt-1 lg:w-[30rem]">
-              <p className="text-sm font-semibold text-white">Useful for</p>
-              <ul className="mt-2 space-y-1.5">
-                {item.usefulFor.map((b) => (
-                  <li
-                    key={b}
-                    className="flex gap-2.5 text-sm leading-snug text-white/90"
-                  >
-                    <Check
-                      className="mt-0.5 size-4 shrink-0 text-white/70"
-                      aria-hidden
-                    />
-                    {b}
-                  </li>
-                ))}
-              </ul>
-              <a
-                href={`/corporate-training?program=${item.key}#inquiry`}
-                onClick={(e) => {
-                  e.preventDefault()
-                  inquire(item.key, reduce)
-                }}
-                className={`${REGISTER_PILL} pointer-events-auto mt-5 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none`}
-              >
-                Inquire
-                <span className="sr-only"> about {item.title}</span>
-                <ArrowRight className="size-4 transition-transform duration-300 group-hover/reg:translate-x-1" />
-              </a>
-            </div>
-          </Collapse>
+          {interactive ? (
+            <>
+              <Collapse open={!isOpen}>
+                <p className="max-w-[15.5rem] text-sm leading-relaxed text-white/85 lg:text-base">
+                  {item.blurb}
+                </p>
+              </Collapse>
+              <Collapse open={isOpen} id={panelId} inert={!isOpen}>
+                {detail}
+              </Collapse>
+            </>
+          ) : (
+            detail
+          )}
         </div>
       </div>
     )
@@ -337,7 +364,7 @@ export function ProgramCarousel({
 
   return (
     <div>
-      <div className="mx-auto max-w-7xl px-6 sm:px-8">
+      <div className="mx-auto max-w-[96rem] px-6 sm:px-8">
         <div className="mb-10 flex flex-col gap-6 lg:mb-14 lg:flex-row lg:items-end lg:justify-between">
           {/* Two dynamic siblings in one JSX position — the passed-in
               `heading` (owned by the caller) and the conditionally-rendered
@@ -353,7 +380,7 @@ export function ProgramCarousel({
       <Reveal>
         <div
           ref={railRef}
-          onMouseLeave={() => canHover && setActive(null)}
+          onMouseLeave={() => interactive && setActive(null)}
           onBlur={(e) => {
             if (!e.currentTarget.contains(e.relatedTarget as Node | null))
               setActive(null)
