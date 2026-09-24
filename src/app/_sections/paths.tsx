@@ -82,6 +82,15 @@ import { TextSweepReveal } from "@/app/_components/text-sweep-reveal"
  *
  * The grid is animated in as one unit (no `Reveal` stagger) — stagger writes an
  * inline transform onto each direct child.
+ *
+ * Shrunk-card body fade (2026-09-25): below ~1280px the take-over's yielded
+ * card gets narrow enough that its own blurb wraps into a tall, edge-crowding
+ * column (measured 6 lines at 1024px, 4-5 at 1152px, vs. 2-3 at rest). `CARD`
+ * makes each card a size container at `lg` only (`lg:@container`) and the
+ * blurb `<p>` fades to `opacity-0`/`invisible` below a measured 440px
+ * inline-size threshold — title and CTA are unaffected, and the paragraph
+ * keeps its layout box (no `display:none`) so the card never changes height.
+ * Below `lg` cards never shrink, so the container query never engages there.
  */
 
 type Path = {
@@ -141,7 +150,7 @@ const PATHS: readonly [Path, Path] = [
 ]
 
 const CARD =
-  "group relative flex min-h-[54svh] min-w-0 flex-col justify-end overflow-hidden md:min-h-[104svh]"
+  "group relative flex min-h-[54svh] min-w-0 flex-col justify-end overflow-hidden md:min-h-[104svh] lg:@container"
 
 // Column split for the container: resting 50/50, or ~2/3 to the hovered card.
 const COLS = ["1.7fr 0.85fr", "0.85fr 1.7fr"] as const
@@ -409,7 +418,19 @@ function PathCard({
         <h3 className="mt-4 text-[2rem] leading-[1.05] font-bold tracking-[-0.02em] lg:text-[2.75rem]">
           {p.title}
         </h3>
-        <p className="mt-4 max-w-md leading-relaxed text-white/80">{p.blurb}</p>
+        {/* Body-text fade (measured 2026-09-25, see block comment above): the
+            card is a size container only at `lg` (`lg:@container` on CARD) so
+            the shrunk half of the take-over never crowds its own edge with a
+            tall narrow wrap. 440px is the card's own inline-size (padding
+            included) — below it the paragraph was measuring under ~28ch/line
+            and 4+ wrapped lines vs. 2-3 at rest; at and above it the wrap
+            matches rest. Title and CTA are untouched. `visibility` is included
+            in the transition list so it flips at the fade's end, not its
+            start (native CSS behaviour, no JS). Layout box is left in place
+            (no `display:none`) so the card never changes height. */}
+        <p className="mt-4 max-w-md leading-relaxed text-pretty text-white/80 transition-[opacity,visibility] duration-650 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none lg:@max-[439px]:invisible lg:@max-[439px]:opacity-0">
+          {p.blurb}
+        </p>
         {/* Right-aligned on mobile; `sm:` restores the original left-aligned,
             edge-flush pill (`-ml-4` cancels the pill's own left padding
             against the card's padding edge — mirrored as `-mr-4` here for the
