@@ -1,9 +1,17 @@
 /**
- * Adrian's six areas of specialization. Short `blurb` for the landing teaser +
- * corporate page grid; longer `detail` for the About page's expanded version.
- * Copy is representative around the PRD's capability list. `usefulFor` feeds
- * the corporate page's programme carousel only; the landing section does not
- * read it.
+ * `SPECIALIZATIONS` — Adrian's six real areas of specialization. Read by the
+ * landing page, the About page's "Core program tracks" count, and the site
+ * CTA marquee (`FOCUS_TAGS`), so it stays exactly six and byte-identical
+ * inside the array. Short `blurb` for the landing teaser; longer `detail`
+ * for the About page's expanded version. `usefulFor` feeds both the landing
+ * cards and the corporate carousel.
+ *
+ * `PLACEHOLDER_PROGRAMMES` — four demo-only entries (added 2026-09-24) so the
+ * corporate carousel and inquiry form can be judged with a longer list. Not
+ * confirmed with Adrian — each carries its own TODO.
+ *
+ * `CORPORATE_PROGRAMMES` — both lists combined (real six first), read only by
+ * the corporate page's programme carousel and its inquiry form.
  */
 import {
   Compass,
@@ -12,6 +20,10 @@ import {
   MessagesSquare,
   GraduationCap,
   UserRoundCheck,
+  TrendingUp,
+  HeartHandshake,
+  RefreshCw,
+  Brain,
   type LucideIcon,
 } from "lucide-react"
 import { placeholderImg } from "@/lib/images"
@@ -25,6 +37,10 @@ export type Specialization = {
    *  programme is for. TODO: representative copy; Adrian to confirm. */
   usefulFor: string[]
   icon: LucideIcon
+  /** Demo-only programme, not confirmed with Adrian — shown on the corporate
+   *  page (carousel + inquiry form) so the long list can be judged. Never on the
+   *  landing page, About numbers or the site CTA (those read `SPECIALIZATIONS`). */
+  placeholder?: true
 }
 
 // TODO: Adrian to confirm the usefulFor bullets (representative, 2026-09-19)
@@ -121,6 +137,90 @@ export const SPECIALIZATIONS: Specialization[] = [
   },
 ]
 
+/**
+ * Four placeholder programmes (added 2026-09-24) so the corporate carousel and
+ * the inquiry form can be seen with a long list. Plausible for Adrian's
+ * practice (sales, service, change, EQ) but NOT confirmed — confirm or delete
+ * each with Adrian before handoff.
+ */
+export const PLACEHOLDER_PROGRAMMES: Specialization[] = [
+  // TODO: placeholder programme — confirm with Adrian
+  {
+    key: "sales-leadership",
+    title: "Sales Leadership & Coaching",
+    blurb:
+      "Helping sales managers coach, not just chase — so the whole floor lifts its numbers, not only the stars.",
+    detail:
+      "For sales managers who got the job by selling: how to coach reps in the field and in the huddle, run a pipeline review that changes behaviour, and build a floor where the middle of the team moves, not just the stars.",
+    usefulFor: [
+      "Sales managers promoted from top-producer roles",
+      "Teams where a few stars carry the target and the rest trail behind",
+      "Organisations launching a new product, territory or sales process",
+      "Leaders who want weekly coaching huddles that actually move numbers",
+    ],
+    icon: TrendingUp,
+    placeholder: true,
+  },
+  // TODO: placeholder programme — confirm with Adrian
+  {
+    key: "customer-service",
+    title: "Customer Service Excellence",
+    blurb:
+      "Service customers talk about — the standards, language and recovery habits every frontliner can use.",
+    detail:
+      "Service standards, the language that de-escalates, and a recovery routine for when things go wrong — practised on real scenarios from your own counters, calls and chats.",
+    usefulFor: [
+      "Frontline, contact-centre and branch teams who face customers every day",
+      "Hospitality, retail, banking and healthcare service teams",
+      "Companies whose satisfaction scores or reviews have started to slip",
+      "Supervisors who handle escalations and need a recovery playbook",
+    ],
+    icon: HeartHandshake,
+    placeholder: true,
+  },
+  // TODO: placeholder programme — confirm with Adrian
+  {
+    key: "change-resilience",
+    title: "Change Management & Resilience",
+    blurb:
+      "Keeping teams steady and productive through restructures, new systems and hard years, without burning out.",
+    detail:
+      "How people actually experience change, how managers lead them through it, and the personal habits that keep a team steady and productive while the ground moves.",
+    usefulFor: [
+      "Organisations going through a restructure, merger or leadership change",
+      "Teams rolling out a new system, process or operating model",
+      "Managers leading people through change they didn't choose",
+      "Teams showing fatigue, cynicism or burnout after a hard year",
+    ],
+    icon: RefreshCw,
+    placeholder: true,
+  },
+  // TODO: placeholder programme — confirm with Adrian
+  {
+    key: "emotional-intelligence",
+    title: "Emotional Intelligence at Work",
+    blurb:
+      "Self-awareness, composure and empathy as working skills — better calls under pressure, fewer blow-ups.",
+    detail:
+      "Recognising what you and others are feeling, staying composed under pressure, and turning that awareness into better conversations, decisions and working relationships.",
+    usefulFor: [
+      "Managers promoted for technical skill who now need people skills",
+      "Teams where friction, silence or blow-ups get in the way of the work",
+      "High-pressure roles in sales, operations and service where composure matters",
+      "Leaders building a culture of honest feedback and psychological safety",
+    ],
+    icon: Brain,
+    placeholder: true,
+  },
+]
+
+/** Everything the corporate page offers — the six real programmes first, then
+ *  the placeholders. Read by the corporate carousel and the inquiry form only. */
+export const CORPORATE_PROGRAMMES: Specialization[] = [
+  ...SPECIALIZATIONS,
+  ...PLACEHOLDER_PROGRAMMES,
+]
+
 /* TODO: replace the placeholderImg() Unsplash stand-ins with real program
    photos once the client supplies them — one landscape shot per program. */
 export const SPECIALIZATION_IMAGES: Record<string, string> = {
@@ -136,6 +236,15 @@ export const SPECIALIZATION_IMAGES: Record<string, string> = {
     1400,
     1200,
     "top"
+  ),
+  // Placeholder programmes (2026-09-24) — Unsplash stand-ins, same TODO as above.
+  "sales-leadership": placeholderImg("1600880292203-757bb62b4baf", 1400, 800),
+  "customer-service": placeholderImg("1556745757-8d76bdb6984b", 1400, 800),
+  "change-resilience": placeholderImg("1542744173-8e7e53415bb0", 1400, 800),
+  "emotional-intelligence": placeholderImg(
+    "1515187029135-18ee286d815b",
+    1400,
+    800
   ),
 }
 
@@ -154,4 +263,10 @@ export const SPECIALIZATION_IMAGE_ALTS: Record<string, string> = {
   "train-the-trainer": "An internal facilitator running a training session",
   "personal-branding":
     "A professional in a considered, confident portrait setting",
+  "sales-leadership":
+    "A sales manager and a rep celebrating a closed deal at the office",
+  "customer-service": "A customer paying at a service counter",
+  "change-resilience": "A leader walking a team through a plan in a boardroom",
+  "emotional-intelligence":
+    "Colleagues listening closely to one another in a group discussion",
 }
