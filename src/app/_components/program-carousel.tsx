@@ -62,7 +62,8 @@ export type ProgramCard = {
 
 const REST_REM = 22 // every card at rest
 const ACTIVE_REM = 34 // hovered / focused / tapped card
-const GAP_REM = 1.25 // gap-5
+// Rail gap is `gap-5` (1.25rem) — see RAIL below. No sibling-width math reads
+// this value; it stays as a comment for whoever edits the gap next.
 // Siblings give up exactly what the active card takes, so the row's total
 // width never changes — nothing to the right of the hovered card jumps, the
 // scroll range is constant, and the arrows' enabled state never flips

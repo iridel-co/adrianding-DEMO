@@ -8,6 +8,8 @@ import { z } from "zod"
 import { ArrowLeft, ArrowRight, ChevronDown, Phone } from "lucide-react"
 import { gsap, useGSAP } from "@/app/_lib/gsap"
 import { saveHandoff } from "@/app/_lib/handoff"
+import { smoothScrollToElement } from "@/app/_lib/smooth-scroll-to"
+import { useReducedMotionSafe } from "@/app/_lib/use-reduced-motion-safe"
 import { DemoFillButton } from "@/app/_components/demo-fill"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -33,6 +35,17 @@ import { cn } from "@/lib/utils"
  * visitor picked something else by hand). Also new: an optional
  * "Also interested in" checkbox list, so one inquiry can cover more than one
  * programme.
+ *
+ * Deep-link landing (2026-09-24): a cold load of
+ * `/corporate-training?program=<key>#inquiry` prefills correctly above but
+ * used to strand the visitor at scrollY ~100-650 instead of at this section
+ * (4000+px down). The browser's *native* fragment jump fires immediately on
+ * load — well before webfonts swap, the Programs carousel's images decode,
+ * and hydration settle — and nothing re-corrects it afterward, so it lands
+ * against a page that is still shifting under it. Fixed by landing ourselves,
+ * once, after the same settle signals `ScrollRefresh` uses (fonts ready +
+ * window load), via the existing `smoothScrollToElement` helper — and only if
+ * the visitor hasn't already started scrolling by hand.
  */
 
 // Must match the constant in _components/program-carousel.tsx — see PLAN-feedback-2.md.
@@ -82,6 +95,7 @@ const STEPS: { title: string; fields: (keyof FormValues)[] }[] = [
 
 export function CorporateInquiryForm() {
   const router = useRouter()
+  const reduce = useReducedMotionSafe()
   const [step, setStep] = useState(0)
   const [submitting, setSubmitting] = useState(false)
   const paneRef = useRef<HTMLDivElement>(null)
@@ -169,6 +183,76 @@ export function CorporateInquiryForm() {
     return () => window.removeEventListener(PROGRAM_INQUIRE_EVENT, onInquire)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Cold-load landing correction (2026-09-24) — see the file doc-comment.
+  // The browser's native `#inquiry` fragment jump fires before layout has
+  // settled, so it lands short. Re-land ourselves once both settle signals
+  // `ScrollRefresh` uses (webfonts ready, window load) have fired — unless
+  // the visitor has already started scrolling by hand, which we treat as
+  // "let them be".
+  useEffect(() => {
+    if (window.location.hash !== "#inquiry") return
+
+    let interacted = false
+    const markInteracted = () => {
+      interacted = true
+    }
+    const interactionEvents = [
+      "wheel",
+      "touchstart",
+      "keydown",
+      "pointerdown",
+    ] as const
+    interactionEvents.forEach((type) =>
+      window.addEventListener(type, markInteracted, { passive: true })
+    )
+
+    let settled = false
+    let frame = 0
+    const land = () => {
+      if (settled || interacted) return
+      settled = true
+      const target = document.getElementById("inquiry")
+      if (!target) return
+      if (reduce) target.scrollIntoView({ block: "start", behavior: "instant" })
+      else smoothScrollToElement(target)
+    }
+    const queueLand = () => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(land)
+    }
+
+    let fontsReady = !document.fonts
+    let pageLoaded = document.readyState === "complete"
+    const tryLand = () => {
+      if (fontsReady && pageLoaded) queueLand()
+    }
+    document.fonts?.ready.then(() => {
+      fontsReady = true
+      tryLand()
+    })
+    const onLoad = () => {
+      pageLoaded = true
+      tryLand()
+    }
+    if (pageLoaded) tryLand()
+    else window.addEventListener("load", onLoad)
+
+    // Catch-all for late shifts the two signals above miss (lazy sections
+    // expanding, a marquee measuring itself) — same reasoning as
+    // `ScrollRefresh`.
+    const ro = new ResizeObserver(tryLand)
+    ro.observe(document.body)
+
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener("load", onLoad)
+      interactionEvents.forEach((type) =>
+        window.removeEventListener(type, markInteracted)
+      )
+      ro.disconnect()
+    }
+  }, [reduce])
 
   // The primary programme can never also be an extra.
   useEffect(() => {
