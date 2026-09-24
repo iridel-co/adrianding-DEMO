@@ -5,14 +5,14 @@ import {
   type SpecCard,
 } from "@/app/_components/spec-reveal-cards"
 import {
-  SPECIALIZATIONS,
+  CORPORATE_PROGRAMMES,
   SPECIALIZATION_IMAGES,
   SPECIALIZATION_IMAGE_ALTS,
   SPECIALIZATION_IMAGE_POSITIONS,
 } from "@/lib/specializations"
 
 /**
- * Landing — Coach Adrian's six in-house corporate training programmes, framed
+ * Landing — Coach Adrian's in-house corporate training programmes, framed
  * explicitly as run for companies and their teams (2026-09-24 copy pass).
  * Each is a reveal card: at rest it shows the title and full blurb; hovering
  * or keyboard-focusing a card (desktop, real pointer only) swaps the blurb
@@ -21,12 +21,15 @@ import {
  * at the detail height. Sits on the muted ground between the credibility
  * block and the workshop/corporate fork.
  *
- * Reads `SPECIALIZATIONS` (the real six) on purpose, never
- * `CORPORATE_PROGRAMMES` — the four placeholder programmes are corporate-page
- * only.
+ * Reads `CORPORATE_PROGRAMMES` — all ten: Adrian's real six, then the four
+ * placeholder programmes (pass 5, 2026-09-24, Chan's call; the placeholders
+ * are still TODO-confirm-with-Adrian in `lib/specializations.ts`). The About
+ * "Core program tracks" figure and the site CTA marquee deliberately stay on
+ * `SPECIALIZATIONS` (the real six). Ten rows needed no layout change: the
+ * placeholder blurbs/bullets fit the same 11.5rem / 27rem / 28rem heights.
  */
 
-const CARDS: SpecCard[] = SPECIALIZATIONS.map((spec) => ({
+const CARDS: SpecCard[] = CORPORATE_PROGRAMMES.map((spec) => ({
   key: spec.key,
   title: spec.title,
   blurb: spec.blurb,
@@ -60,7 +63,7 @@ export function LandingSpecializations() {
             </p>
           </div>
 
-          {/* Right — the six reveal cards. A horizontal snap rail below `lg`
+          {/* Right — the ten reveal cards. A horizontal snap rail below `lg`
               (six stacked cards ran ~2 phone screens on their own), the
               vertical expand-on-hover stack from `lg` up. `-mx-6`/`px-6`
               lets the rail bleed to the viewport edges while its first card

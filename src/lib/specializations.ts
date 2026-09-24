@@ -1,17 +1,17 @@
 /**
  * `SPECIALIZATIONS` — Adrian's six real areas of specialization. Read by the
- * landing page, the About page's "Core program tracks" count, and the site
- * CTA marquee (`FOCUS_TAGS`), so it stays exactly six and byte-identical
- * inside the array. Short `blurb` for the landing teaser; longer `detail`
- * for the About page's expanded version. `usefulFor` feeds both the landing
- * cards and the corporate carousel.
+ * About page's "Core program tracks" count and the site CTA marquee
+ * (`FOCUS_TAGS`), so it stays exactly six and byte-identical inside the
+ * array. Longer `detail` for the About page's expanded version; `blurb` and
+ * `usefulFor` feed the landing cards and the corporate carousel.
  *
  * `PLACEHOLDER_PROGRAMMES` — four demo-only entries (added 2026-09-24) so the
  * corporate carousel and inquiry form can be judged with a longer list. Not
  * confirmed with Adrian — each carries its own TODO.
  *
- * `CORPORATE_PROGRAMMES` — both lists combined (real six first), read only by
- * the corporate page's programme carousel and its inquiry form.
+ * `CORPORATE_PROGRAMMES` — both lists combined (real six first), read by the
+ * landing "In-house programs" cards (since pass 5, 2026-09-24), the
+ * corporate page's programme carousel, and its inquiry form.
  */
 import {
   Compass,
@@ -37,9 +37,10 @@ export type Specialization = {
    *  programme is for. TODO: representative copy; Adrian to confirm. */
   usefulFor: string[]
   icon: LucideIcon
-  /** Demo-only programme, not confirmed with Adrian — shown on the corporate
-   *  page (carousel + inquiry form) so the long list can be judged. Never on the
-   *  landing page, About numbers or the site CTA (those read `SPECIALIZATIONS`). */
+  /** Demo-only programme, not confirmed with Adrian — shown wherever
+   *  `CORPORATE_PROGRAMMES` is read (landing cards, corporate carousel,
+   *  inquiry form) so the long list can be judged. Never in the About numbers
+   *  or the site CTA (those read `SPECIALIZATIONS`). */
   placeholder?: true
 }
 
@@ -214,8 +215,9 @@ export const PLACEHOLDER_PROGRAMMES: Specialization[] = [
   },
 ]
 
-/** Everything the corporate page offers — the six real programmes first, then
- *  the placeholders. Read by the corporate carousel and the inquiry form only. */
+/** Everything Adrian offers in-house — the six real programmes first, then
+ *  the placeholders. Read by the landing cards, the corporate carousel and
+ *  the inquiry form. */
 export const CORPORATE_PROGRAMMES: Specialization[] = [
   ...SPECIALIZATIONS,
   ...PLACEHOLDER_PROGRAMMES,

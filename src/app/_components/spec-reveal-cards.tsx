@@ -9,7 +9,8 @@ import { useIsTouch } from "@/app/_lib/use-is-touch"
 import { cn } from "@/lib/utils"
 
 /**
- * The six programs as a vertical stack of expand-on-hover image cards (adapted
+ * The programmes (all ten on the landing page since pass 5, 2026-09-24) as a
+ * vertical stack of expand-on-hover image cards (adapted
  * from the `HoverExpand` primitive / 21st.dev). Every row is a rounded, cropped
  * photo with the program title laid over it behind a scrim — so even
  * collapsed it reads as an image, never a blank band.
@@ -39,7 +40,7 @@ import { cn } from "@/lib/utils"
  * visible) with this rest/detail split, reusing the interaction pattern
  * `program-carousel.tsx` established for the corporate carousel.
  *
- * Below `lg` the same six cards are a horizontal snap rail instead (the
+ * Below `lg` the same cards are a horizontal snap rail instead (the
  * calling section supplies the scroller; these are its fixed-width panels) —
  * stacked, six of them ran to about two phone screens on their own. The
  * expand/collapse height tween is desktop-only for the same reason: in the
