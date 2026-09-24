@@ -47,7 +47,7 @@ import { smoothScrollToElement } from "@/app/_lib/smooth-scroll-to"
  * section does. History: 80rem column → 96rem column (pass 3) → constant
  * 40px (pass 4).
  *
- * B <-> C contract (see PLAN-feedback-2.md): clicking Inquire replaces the
+ * B <-> C contract (see docs/feedback-passes/PLAN-feedback-2.md): clicking Inquire replaces the
  * URL with `/corporate-training?program=<key>#inquiry` (so a reload / shared
  * link preselects the programme) *and* dispatches a `PROGRAM_INQUIRE_EVENT`
  * window CustomEvent with `{ key }` (so a second click on the same programme,
@@ -86,7 +86,7 @@ const ACTIVE_REM = 34 // hovered / focused / tapped card
 const SIBLING_REM = (n: number) => (n * REST_REM - ACTIVE_REM) / (n - 1) // 20.67rem for n=10 (19.6 for n=6)
 const EASE = "cubic-bezier(0.33, 1, 0.68, 1)" // = SpecRevealCards' [0.33,1,0.68,1]
 const DURATION_MS = 420 // = SpecRevealCards' 0.42s
-const PROGRAM_INQUIRE_EVENT = "ad:program-inquire" // Must match the constant in corporate-training/_sections/inquiry-form.tsx — see PLAN-feedback-2.md.
+const PROGRAM_INQUIRE_EVENT = "ad:program-inquire" // Must match the constant in corporate-training/_sections/inquiry-form.tsx — see docs/feedback-passes/PLAN-feedback-2.md.
 
 const RAIL =
   "no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-6 px-6 pb-1 sm:scroll-px-8 sm:px-8 lg:snap-none lg:gap-5 lg:scroll-px-0 lg:pr-0 lg:pb-0 lg:pl-10"

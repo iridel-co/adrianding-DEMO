@@ -54,7 +54,7 @@ import { cn } from "@/lib/utils"
  * the visitor hasn't already started scrolling by hand.
  */
 
-// Must match the constant in _components/program-carousel.tsx — see PLAN-feedback-2.md.
+// Must match the constant in _components/program-carousel.tsx — see docs/feedback-passes/PLAN-feedback-2.md.
 const PROGRAM_INQUIRE_EVENT = "ad:program-inquire"
 
 const SPEC_TITLES = CORPORATE_PROGRAMMES.map((s) => s.title) as [

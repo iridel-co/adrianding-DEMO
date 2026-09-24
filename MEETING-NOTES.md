@@ -116,7 +116,6 @@ Sept 19 Meeting Notes:
 
 - workshops needs to be more explicit in the curriculum that oyu offer. possibly we could have filters or tags or badges to what it targets. Programs We Run.
 - INLINE WINS
-- remove location
 - marine corp, 2go, opascor
 - every inquiry filled should notify email and pop as new in CRM
 - how low can we go for a PARTNERSHIP
