@@ -83,14 +83,60 @@ import { TextSweepReveal } from "@/app/_components/text-sweep-reveal"
  * The grid is animated in as one unit (no `Reveal` stagger) — stagger writes an
  * inline transform onto each direct child.
  *
- * Shrunk-card body fade (2026-09-25): below ~1280px the take-over's yielded
- * card gets narrow enough that its own blurb wraps into a tall, edge-crowding
- * column (measured 6 lines at 1024px, 4-5 at 1152px, vs. 2-3 at rest). `CARD`
- * makes each card a size container at `lg` only (`lg:@container`) and the
- * blurb `<p>` fades to `opacity-0`/`invisible` below a measured 440px
- * inline-size threshold — title and CTA are unaffected, and the paragraph
- * keeps its layout box (no `display:none`) so the card never changes height.
- * Below `lg` cards never shrink, so the container query never engages there.
+ * Shrunk-card body fade (2026-09-25, revised): the first pass (commit
+ * 55fd2f1) made each card an `lg:@container` and faded the blurb off a
+ * *live* `@max-[439px]` container query — janky, because the fade tracked
+ * the card's inline-size continuously through the whole 650ms
+ * `grid-template-columns` transition (started late, finished ~1.3s after the
+ * transition itself), and the blurb kept reflowing to the animating width
+ * the whole time, which grew/shrank its wrapped line count and, because the
+ * copy block is bottom-anchored (`justify-end`), visibly moved the title.
+ *
+ * Fixed by deciding both things ahead of time, from the viewport, instead of
+ * tracking the card's own animated size:
+ *
+ * 1. Width lock — the blurb gets a fixed width, in `vw` rather than a
+ *    container-relative unit, so it depends only on the *viewport* and can
+ *    never change mid-transition regardless of what the card's own animated
+ *    grid track is doing: `lg:w-[min(28rem,calc(100vw/3-10rem))]`.
+ *    First attempt pinned this to the *resting* (50/50) width instead — it
+ *    matched today's rest appearance exactly, but on real measurement (see
+ *    `Verification`) it overflowed the *yielded* (1/3-width) card by 40–85px
+ *    for any viewport where a resting-width blurb happens to still be
+ *    visible (above `W`, see below), clipping mid-word against `CARD`'s
+ *    `overflow-hidden`. Pinning to the yielded fraction instead (the
+ *    narrowest state the blurb is ever shown in) guarantees it always fits
+ *    its own card, in every hover state, at every `lg` width — the resting
+ *    column is consequently a little narrower than before on very wide
+ *    screens (down from 28rem to ~1/3 of viewport minus padding, e.g. 320px
+ *    at 1440 vs. 448px previously), which is the correct trade: a narrower
+ *    intact paragraph over a wider clipped one. Because it's viewport-driven
+ *    either way, it cannot change mid-transition, so the blurb's height (and
+ *    therefore the title's position above it) is constant at every point of
+ *    the hover/unhover cycle, verified via `getBoundingClientRect().top` at
+ *    rest, mid-hover and settled.
+ * 2. Fade — the container-query check is replaced with the container's own
+ *    `active` state (the same state that drives the take-over itself), so
+ *    the trigger is genuinely the hover, not a width poll. Whether that
+ *    trigger is allowed to fade anything at all is decided per viewport: the
+ *    grid's fr ratio (`1.7fr 0.85fr`) makes the yielded card exactly
+ *    `viewport / 3`, so it crosses the old 440px readability threshold at
+ *    `viewport = 1320` (measured: 440.0px at 1320, 439.7px at 1319) — below
+ *    that, `lg:max-[1319px]:` fades the yielded card's blurb; at/above it,
+ *    the fade classes never apply and the (width-locked) blurb just stays
+ *    visible. Fade-out is instant on hover start (0ms delay, 200ms
+ *    opacity/visibility transition); fade-in on un-hover carries a 250ms
+ *    delay before the same 200ms transition, so the text doesn't reappear
+ *    until the card has mostly regrown (the grid's
+ *    `cubic-bezier(0.22,1,0.36,1)` ease-out front-loads most of the growth).
+ *    `motion-reduce:transition-none` keeps both edges instant, and `!reduce`
+ *    gates the fade trigger itself — under reduced motion the columns never
+ *    resize, so nothing should ever visually disappear.
+ *
+ * Title and CTA are unaffected; the paragraph keeps its layout box (no
+ * `display:none`) so the card never changes height, and `CARD`'s existing
+ * `overflow-hidden` still clips it. Below `lg` cards never shrink, so none
+ * of this engages there.
  */
 
 type Path = {
@@ -150,7 +196,12 @@ const PATHS: readonly [Path, Path] = [
 ]
 
 const CARD =
-  "group relative flex min-h-[54svh] min-w-0 flex-col justify-end overflow-hidden md:min-h-[104svh] lg:@container"
+  "group relative flex min-h-[54svh] min-w-0 flex-col justify-end overflow-hidden md:min-h-[104svh]"
+
+// Anti-reflow width lock (2026-09-25) — shared by the title and the blurb,
+// see the "Shrunk-card body fade" block comment below for why. `vw`-based so
+// it depends on the viewport, never the card's own animated grid-track width.
+const LOCKED_WIDTH = "lg:w-[min(28rem,calc(100vw/3-10rem))] lg:max-w-none"
 
 // Column split for the container: resting 50/50, or ~2/3 to the hovered card.
 const COLS = ["1.7fr 0.85fr", "0.85fr 1.7fr"] as const
@@ -311,6 +362,10 @@ function PathCard({
   touch: boolean
 }) {
   const isActive = active === index
+  // This card is the take-over's yielded (narrowed) side. Gated on `!reduce`
+  // because the grid never resizes under reduced motion (see `gridStyle`
+  // below) — nothing should fade if nothing is actually shrinking.
+  const isYielded = !reduce && active !== null && !isActive
   // Scroll parallax — foreground travels further and opposite the background.
   const bgY = useTransform(progress, [0, 1], ["-6%", "6%"])
   const fgY = useTransform(progress, [0, 1], ["7%", "-9%"])
@@ -415,20 +470,31 @@ function PathCard({
         <p className="text-xs font-semibold tracking-[0.16em] text-white/70 uppercase">
           {p.eyebrow}
         </p>
-        <h3 className="mt-4 text-[2rem] leading-[1.05] font-bold tracking-[-0.02em] lg:text-[2.75rem]">
+        {/* `LOCKED_WIDTH` here too (2026-09-25): the title itself reflows
+            with the card exactly like the blurb did — "Train your team"
+            wraps from 1 to 3 lines once its card narrows past ~200px of
+            content width, which grew *this* element's own box and moved
+            *itself* (measured +92px). Same fix, same reason: pin it to a
+            viewport-driven width so it can never change size mid-transition. */}
+        <h3
+          className={`mt-4 text-[2rem] leading-[1.05] font-bold tracking-[-0.02em] lg:text-[2.75rem] ${LOCKED_WIDTH}`}
+        >
           {p.title}
         </h3>
-        {/* Body-text fade (measured 2026-09-25, see block comment above): the
-            card is a size container only at `lg` (`lg:@container` on CARD) so
-            the shrunk half of the take-over never crowds its own edge with a
-            tall narrow wrap. 440px is the card's own inline-size (padding
-            included) — below it the paragraph was measuring under ~28ch/line
-            and 4+ wrapped lines vs. 2-3 at rest; at and above it the wrap
-            matches rest. Title and CTA are untouched. `visibility` is included
-            in the transition list so it flips at the fade's end, not its
-            start (native CSS behaviour, no JS). Layout box is left in place
+        {/* Body-text width lock + fade (revised 2026-09-25, see block comment
+            above): `LOCKED_WIDTH` pins the blurb to a viewport-driven width so it
+            never reflows mid-transition (title stays put); `isYielded`
+            (the container's own hover state, not a width poll) plus the
+            `lg:max-[1319px]:` viewport band decides whether this card's
+            blurb is allowed to fade at all. Layout box is left in place
             (no `display:none`) so the card never changes height. */}
-        <p className="mt-4 max-w-md leading-relaxed text-pretty text-white/80 transition-[opacity,visibility] duration-650 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none lg:@max-[439px]:invisible lg:@max-[439px]:opacity-0">
+        <p
+          className={`mt-4 max-w-md leading-relaxed text-pretty text-white/80 motion-reduce:transition-none motion-reduce:duration-0 ${LOCKED_WIDTH} lg:max-[1319px]:transition-[opacity,visibility] lg:max-[1319px]:duration-200 lg:max-[1319px]:ease-out ${
+            isYielded
+              ? "lg:max-[1319px]:invisible lg:max-[1319px]:opacity-0 lg:max-[1319px]:delay-0"
+              : "lg:max-[1319px]:delay-[250ms]"
+          }`}
+        >
           {p.blurb}
         </p>
         {/* Right-aligned on mobile; `sm:` restores the original left-aligned,
@@ -440,9 +506,17 @@ function PathCard({
             still. `cta-beat-target` is animated from globals.css by the
             `data-beat` attribute AttentionOnView sets; keeping the keyframe on
             this inner span means it never contends with the card's own
-            framer-motion transforms. */}
+            framer-motion transforms.
+            `lg:whitespace-nowrap` (2026-09-25): the real source of the
+            title-rise bug the blurb width-lock above was written for — the
+            longer corporate CTA text wraps to two lines once its card
+            narrows past ~300px, and because the copy block is
+            bottom-anchored (`justify-end`), that extra line pushed the
+            title up ~65px, dwarfing whatever the blurb was doing. Pinned to
+            one line at `lg` for the same reason the blurb is width-locked:
+            the take-over must never change this card's content height. */}
         <AttentionOnView className="mt-8 flex justify-end sm:justify-start">
-          <span className="group/cta hover:bg-brand hover:text-brand-foreground cta-beat-target -mr-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-semibold tracking-[0.08em] text-black uppercase transition-colors duration-300 sm:mr-0 sm:-ml-4 sm:text-sm sm:tracking-[0.12em]">
+          <span className="group/cta hover:bg-brand hover:text-brand-foreground cta-beat-target -mr-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-semibold tracking-[0.08em] text-black uppercase transition-colors duration-300 sm:mr-0 sm:-ml-4 sm:text-sm sm:tracking-[0.12em] lg:whitespace-nowrap">
             {p.cta}
             <ArrowRight className="size-4 transition-transform group-hover/cta:translate-x-1" />
           </span>
