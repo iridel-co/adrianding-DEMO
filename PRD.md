@@ -267,10 +267,18 @@ the page. What was missing was any way _out_ of it: the course pages linked to
 
 Generated at build time, one JPEG per course (PNG is over WhatsApp's ~300KB
 preview ceiling — see `lib/og-jpeg.ts`), straight off the `Workshop` record:
-`image` → the photo, `title`, `schedule` (weekday and time range stripped) and
-`venue` → the type. Nothing about a card is authored by hand, so **when the
-catalogue becomes CMS-managed the cards follow for free** — publishing a new
-workshop mints its own preview card with no design step and no upload.
+`image` → the photo (cropped, normalized, duotoned by `lib/og-photo.ts`),
+`title`, `schedule` (weekday and time range stripped), and `venue`/`city` → the
+date/address block, laid out by `lib/og-card.tsx` with fonts from
+`lib/og-fonts.ts`. The current look — full-bleed treated photo, eyebrow/title
+top-left, date/address bottom-left, vertical "Adrian Ding" wordmark chopped at
+the right edge — is layout "L1" + wordmark "E6 soft glow," approved by Chan on
+2026-09-28. Nothing about a card is authored by hand, so **when the catalogue
+becomes CMS-managed the cards follow for free** — publishing a new workshop
+mints its own preview card with no design step and no upload. Full
+implementation guide, with file pointers and the testing workflow:
+`README.md` → [Share images (Open Graph
+cards)](README.md#share-images-open-graph-cards).
 
 What the build team needs to carry over:
 
@@ -278,23 +286,32 @@ What the build team needs to carry over:
   upload next to the course record; it would drift from the course the moment a
   date or venue is edited. If a client ever needs to override the photo alone,
   override `image`, not the card.
-- **Satori's format constraints are not the site's.** Fonts must be TTF (the
-  `.woff2` the site serves throws "Unsupported OpenType signature"), and course
-  photos must be JPEG or PNG — `.webp` fails to decode. `src/app/og-assets/`
-  holds the TTF cuts for exactly this reason. Any image pipeline that converts
-  course photos to `.webp` wholesale will silently break every card.
+- **Satori still needs TTF fonts, but the photo-format trap is gone.** The
+  `.woff2` fonts the site serves throw "Unsupported OpenType signature" in
+  Satori — `src/app/og-assets/` holds the TTF cuts for exactly this reason.
+  Course photos no longer need a JPEG/PNG mirror: `og-photo.ts` runs any format
+  `sharp` can decode (including the site's `.webp`) through the crop/duotone
+  treatment and hands Satori an already-encoded JPEG data URI, so a CMS media
+  pipeline that only stores `.webp` is fine as-is.
 - **`params` is a Promise in Next 15 metadata routes.** Typing it as a plain
   object compiles clean and renders the same fallback card for every slug —
   which is how it shipped the first time here, caught only because all eight
-  output files were byte-identical. Worth a test that asserts two cards differ.
+  output files were byte-identical. `scripts/check-og.mjs` (`npm run
+check:og`) now guards this after every build by decoding each card and
+  checking dimensions/size, one per slug.
 - **Regenerate on republish.** Cards are static build output, so a CMS edit must
-  trigger a rebuild (or revalidation) of that course's `opengraph-image` route,
-  or the preview keeps showing the old date.
+  trigger a rebuild (or revalidation, e.g. `revalidatePath` on the workshop page
+  and its `opengraph-image` route) of that course's route, or the preview keeps
+  showing the old date. Separately, social platforms cache previews on their own
+  side — after a real content change, re-scrape via Facebook's Sharing Debugger
+  or LinkedIn's Post Inspector, or a stale card can outlive the rebuild.
 - **Photo choice is editorial, not automatic.** The card crops the course's
-  `image` full-bleed, so a photo that reads fine as a small card on the list page
-  can put a third-party banner or a stray logo into Adrian's ad preview. Whoever
-  publishes a course should see the card before it goes out — a preview of the
-  generated card in the CMS editor is worth building.
+  `image` full-bleed with `sharp`'s attention-based auto-crop, so a busy source
+  photo (e.g. a projector screen full of text) can land in the crop and put the
+  wrong thing in Adrian's ad preview. Whoever publishes a course should see the
+  card before it goes out — a preview of the generated card in the CMS editor is
+  worth building. A missing/unreadable image never fails the build; it falls
+  back to the site's own mono room plate.
 
 The FAQ opens on **hover** on desktop (controlled accordion, `onMouseEnter` sets the open
 item and Radix's `onValueChange` still handles click/keyboard, so both drive one piece of

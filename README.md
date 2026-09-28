@@ -29,6 +29,7 @@ decisions) and the dev team (architecture, gotchas, setup) building Phase 2.
   - [Animation architecture (GSAP)](#animation-architecture-gsap)
   - [Gotchas](#gotchas)
   - [Images](#images)
+  - [Share images (Open Graph cards)](#share-images-open-graph-cards)
   - [Quality gates](#quality-gates)
   - [Deploy](#deploy)
 - [Next steps](#next-steps)
@@ -57,20 +58,20 @@ decisions) and the dev team (architecture, gotchas, setup) building Phase 2.
 
 ## Phase 2 map
 
-| Feature                            | Current mock (file)                                                                                   | Phase 2 system                                                 | Notes & traps                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| ---------------------------------- | ----------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Workshops catalogue                | `src/lib/workshops.ts` (static array, incl. `NEXT_WORKSHOP` derived export, `WORKSHOP_TAGS` taxonomy) | CMS                                                            | Field shape (`problem`, `outcomes`, `whatToExpect`, `primerBlurb`, `seatsLeft`, `tags`) is the contract to replicate. `tags` becomes a fixed multi-select taxonomy (1–3/course), not free text — the `/workshops` filter chips derive from it.                                                                                                                                                                                                                                                                                                                                                                                               |
-| Workshop registration form         | `workshops/[slug]/_sections/registration-form.tsx`                                                    | CRM (lead capture)                                             | React Hook Form + Zod, client-side only. Must: (1) create CRM record with status `NEW` first, (2) then email owners. Record write failing must block the visitor from reaching the confirmation page; email failing must not (retry the email, keep the record). Full contract in `PRD.md` → "Phase 2 handoff — lead capture".                                                                                                                                                                                                                                                                                                               |
-| Corporate inquiry form             | `corporate-training/_sections/inquiry-form.tsx`                                                       | CRM (lead capture)                                             | Same contract as above. Captures primary programme + "Also interested in" multi-select (`?program=<key>#inquiry` prefill).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| Staff login                        | `src/app/staff-login/page.tsx`                                                                        | Auth (Google, staff-only)                                      | No provider, no session, no protected routes yet. Confirm with Adrian what staff actually need to do here before building real auth — the "why" isn't settled, only the login screen is.                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| Email templates page               | `src/app/email-templates/_sections/templates.tsx`                                                     | Resend (or equivalent) transactional email                     | 3 templates previewed: workshop registration confirmation, payment confirmation (triggered by staff marking a registrant PAID in the CRM), corporate inquiry acknowledgment. This page is copy/layout only — no send-trigger wiring. It is separate from the owner "new inquiry" notification email required by the lead-capture contract above.                                                                                                                                                                                                                                                                                             |
-| Testimonials                       | `src/lib/testimonials.ts`                                                                             | CMS content, sourced from `Coach_Adrian_Ding_Website_2025.pdf` | Every quote is a placeholder; no headshots supplied. Don't paraphrase when swapping in real ones — use them verbatim.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| Gallery                            | `src/lib/gallery.ts`                                                                                  | CMS                                                            | Static array is the schema to match, incl. `relatedWorkshop` relation. All events/photos/reflections copy are representative stand-ins. Deferred by the client — not a blocker, just not final content.                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| Companies logos                    | `src/lib/companies.ts`                                                                                | CMS or static asset list                                       | 44/91 roster companies have logo artwork (`co-*` files in `public/images/logos/`); the other 47 render as name chips by design, so gaps stay visible. Priority categories with zero artwork: Finance, Real Estate, Hotels, Food & Retail, SMEs.                                                                                                                                                                                                                                                                                                                                                                                              |
-| Timeline                           | `src/lib/timeline.ts`                                                                                 | CMS                                                            | Founding year and milestone wording need client confirmation.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| Specializations                    | `src/lib/specializations.ts`                                                                          | CMS                                                            | Programme copy and `usefulFor` bullets need Adrian's sign-off; several photos are `placeholderImg()` Unsplash stand-ins pending real photography.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| Social cards (per-course OG image) | `src/app/workshops/[slug]/opengraph-image.tsx`, `src/app/opengraph-image.tsx`                         | Derived from CMS record — **not a CMS field**                  | Generated at build time from the `Workshop` record (`image`, `title`, `schedule`, `venue`) — never add an "upload OG image" field, it would drift the moment a date changes. Satori needs TTF fonts + JPEG/PNG (`.webp`/`.woff2` fail to decode) — see [Gotchas](#gotchas). A CMS edit must trigger a rebuild/revalidation of that course's route or the card goes stale. `params` is a `Promise` in metadata routes — typing it as a plain object compiles but silently renders the same fallback card for every slug (this shipped broken once already). Full contract: `PRD.md` → "Phase 2 handoff — the social cards belong in the CMS". |
-| Analytics / SEO metadata           | `src/app/layout.tsx` (`metadataBase`, OG/Twitter tags)                                                | Analytics provider (GA4/Plausible/etc. — TBD)                  | `NEXT_PUBLIC_SITE_URL` must be set to the real serving host before delivery — see [Environment variables](#environment-variables). No analytics package is installed yet.                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Feature                            | Current mock (file)                                                                                                        | Phase 2 system                                                 | Notes & traps                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Workshops catalogue                | `src/lib/workshops.ts` (static array, incl. `NEXT_WORKSHOP` derived export, `WORKSHOP_TAGS` taxonomy)                      | CMS                                                            | Field shape (`problem`, `outcomes`, `whatToExpect`, `primerBlurb`, `seatsLeft`, `tags`) is the contract to replicate. `tags` becomes a fixed multi-select taxonomy (1–3/course), not free text — the `/workshops` filter chips derive from it.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| Workshop registration form         | `workshops/[slug]/_sections/registration-form.tsx`                                                                         | CRM (lead capture)                                             | React Hook Form + Zod, client-side only. Must: (1) create CRM record with status `NEW` first, (2) then email owners. Record write failing must block the visitor from reaching the confirmation page; email failing must not (retry the email, keep the record). Full contract in `PRD.md` → "Phase 2 handoff — lead capture".                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| Corporate inquiry form             | `corporate-training/_sections/inquiry-form.tsx`                                                                            | CRM (lead capture)                                             | Same contract as above. Captures primary programme + "Also interested in" multi-select (`?program=<key>#inquiry` prefill).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| Staff login                        | `src/app/staff-login/page.tsx`                                                                                             | Auth (Google, staff-only)                                      | No provider, no session, no protected routes yet. Confirm with Adrian what staff actually need to do here before building real auth — the "why" isn't settled, only the login screen is.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Email templates page               | `src/app/email-templates/_sections/templates.tsx`                                                                          | Resend (or equivalent) transactional email                     | 3 templates previewed: workshop registration confirmation, payment confirmation (triggered by staff marking a registrant PAID in the CRM), corporate inquiry acknowledgment. This page is copy/layout only — no send-trigger wiring. It is separate from the owner "new inquiry" notification email required by the lead-capture contract above.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Testimonials                       | `src/lib/testimonials.ts`                                                                                                  | CMS content, sourced from `Coach_Adrian_Ding_Website_2025.pdf` | Every quote is a placeholder; no headshots supplied. Don't paraphrase when swapping in real ones — use them verbatim.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| Gallery                            | `src/lib/gallery.ts`                                                                                                       | CMS                                                            | Static array is the schema to match, incl. `relatedWorkshop` relation. All events/photos/reflections copy are representative stand-ins. Deferred by the client — not a blocker, just not final content.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Companies logos                    | `src/lib/companies.ts`                                                                                                     | CMS or static asset list                                       | 44/91 roster companies have logo artwork (`co-*` files in `public/images/logos/`); the other 47 render as name chips by design, so gaps stay visible. Priority categories with zero artwork: Finance, Real Estate, Hotels, Food & Retail, SMEs.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| Timeline                           | `src/lib/timeline.ts`                                                                                                      | CMS                                                            | Founding year and milestone wording need client confirmation.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| Specializations                    | `src/lib/specializations.ts`                                                                                               | CMS                                                            | Programme copy and `usefulFor` bullets need Adrian's sign-off; several photos are `placeholderImg()` Unsplash stand-ins pending real photography.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| Social cards (per-course OG image) | `src/app/workshops/[slug]/opengraph-image.tsx`, `src/app/opengraph-image.tsx`, `src/lib/{og-photo,og-fonts,og-card}.ts(x)` | Derived from CMS record — **not a CMS field**                  | Generated at build time from the `Workshop` record (`image`, `title`, `schedule`, `venue`, `city`) — never add an "upload OG image" field, it would drift the moment a date changes. Design (layout "L1" + wordmark "E6 soft glow") was approved by Chan on 2026-09-28; changes go through him. Fonts still need TTF (`.woff2` fails to decode); photos no longer have a format trap — `og-photo.ts` runs any format `sharp` reads (incl. `.webp`) through crop/duotone and hands Satori an inlined JPEG data URI, so the old "source must be JPEG/PNG" constraint is gone. See [Share images (Open Graph cards)](#share-images-open-graph-cards) for the full implementation guide and [Gotchas](#gotchas) for the remaining Satori traps. A CMS edit must trigger a rebuild/revalidation of that course's route or the card goes stale. `params` is a `Promise` in metadata routes — typing it as a plain object compiles but silently renders the same fallback card for every slug (this shipped broken once already). Full contract: `PRD.md` → "Phase 2 handoff — the social cards belong in the CMS". |
+| Analytics / SEO metadata           | `src/app/layout.tsx` (`metadataBase`, OG/Twitter tags)                                                                     | Analytics provider (GA4/Plausible/etc. — TBD)                  | `NEXT_PUBLIC_SITE_URL` must be set to the real serving host before delivery — see [Environment variables](#environment-variables). No analytics package is installed yet.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 
 The `src/lib/*.ts` files above are the seams Phase 2 replaces with real CMS data — treat
 each one's shape as the data contract a CMS schema should match.
@@ -171,10 +172,12 @@ specific to this codebase — not a generic backend checklist.
 
 **Image pipeline**
 
-- Course/gallery photos ship as `.webp` on the site but the OG-card route needs JPEG/PNG
-  copies of the same images (`src/app/og-assets/`, `src/lib/og-jpeg.ts`). If a CMS media
-  library becomes the source of truth, does image upload auto-generate both formats, or does
-  someone maintain a manual JPEG mirror?
+- Resolved as of the `og-photo.ts` rewrite: no manual JPEG/PNG mirror is needed anymore
+  — `treatOgPhoto()` runs any format `sharp` can decode (including the site's `.webp`)
+  through crop/duotone at build time and hands Satori an already-encoded JPEG data URI.
+  See [Share images](#share-images-open-graph-cards). Still open: if a CMS media library
+  becomes the source of truth, `ogPhotoForPath()`'s `public/`-relative file read needs
+  swapping for a remote fetch into a buffer — `treatOgPhoto(buf)` itself needs no change.
 
 **Hosting / analytics**
 
@@ -314,6 +317,7 @@ npm run lint:fix     # ESLint --fix
 npm run format       # Prettier --write .
 npm run format:check # Prettier --check . (part of `validate`)
 npm run typecheck    # tsc --noEmit
+npm run check:og     # smoke-tests built share-image cards, run after `npm run build`
 ```
 
 ### Stack
@@ -380,17 +384,18 @@ route. Every route folder follows the same convention: `page.tsx` is imports + c
 - **Shared/repeated content** lives in `src/lib/*.ts` instead, since multiple pages or
   cards read the same data:
 
-  | File                                                     | Backs                               |
-  | -------------------------------------------------------- | ----------------------------------- |
-  | `workshops.ts`                                           | workshop cards + detail pages, tags |
-  | `workshop-faq.ts`                                        | registration FAQ                    |
-  | `gallery.ts`                                             | past-event cards + detail pages     |
-  | `testimonials.ts`                                        | testimonial quotes across pages     |
-  | `timeline.ts`                                            | About page journey/milestones       |
-  | `companies.ts`                                           | "companies served" logo marquee     |
-  | `specializations.ts`                                     | corporate programme cards           |
-  | `certifications.ts`                                      | About page accrediting-body list    |
-  | `images.ts`, `utils.ts`, `og-jpeg.ts`, `gallery-blur.ts` | helpers, not content                |
+  | File                                                      | Backs                                                                          |
+  | --------------------------------------------------------- | ------------------------------------------------------------------------------ |
+  | `workshops.ts`                                            | workshop cards + detail pages, tags                                            |
+  | `workshop-faq.ts`                                         | registration FAQ                                                               |
+  | `gallery.ts`                                              | past-event cards + detail pages                                                |
+  | `testimonials.ts`                                         | testimonial quotes across pages                                                |
+  | `timeline.ts`                                             | About page journey/milestones                                                  |
+  | `companies.ts`                                            | "companies served" logo marquee                                                |
+  | `specializations.ts`                                      | corporate programme cards                                                      |
+  | `certifications.ts`                                       | About page accrediting-body list                                               |
+  | `images.ts`, `utils.ts`, `gallery-blur.ts`                | helpers, not content                                                           |
+  | `og-jpeg.ts`, `og-photo.ts`, `og-fonts.ts`, `og-card.tsx` | share-image card pipeline — see [Share images](#share-images-open-graph-cards) |
 
   These `src/lib/*.ts` files are the seams Phase 2 replaces with real CMS data — see the
   [Phase 2 map](#phase-2-map) for the full approval/Phase-2 status of each.
@@ -508,19 +513,23 @@ scrollY 5300 instead of 4298 — a full viewport late.
   font toggle reloads the page instead of flipping a live attribute.
 - **ScrollTrigger positions need a refresh after fonts load** — see `<ScrollRefresh />`
   above. Don't reintroduce a scroll reveal that skips it.
-- **`next/og` (Satori) can't read `.webp` images or `.woff2` fonts.** Both
-  `opengraph-image.tsx` routes (`src/app/opengraph-image.tsx` and
-  `src/app/workshops/[slug]/opengraph-image.tsx`) read assets from
-  `src/app/og-assets/` (PNG + TTF) instead of the site's normal `.webp`/`.woff2` files,
-  and inline them as base64 data URIs — Satori doesn't resolve root-relative
-  `/images/...` paths. Regenerate those TTF/PNG copies from the originals if the source
-  fonts or portrait change. This is also why `grep -rn "<img" src/` isn't empty — the two
-  OG routes use a raw `<img>` inside `ImageResponse`, which is correct there (`next/image`
-  doesn't work inside Satori's renderer); every other `<img>` in `src/` would be a bug.
+- **`next/og` (Satori) can't read `.woff2` fonts, and never sees the source photo
+  format at all.** Both `opengraph-image.tsx` routes read fonts from
+  `src/app/og-assets/` (TTF, not the site's normal `.woff2`) and inline them via
+  `loadOgFonts()` in `src/lib/og-fonts.ts` — Satori doesn't resolve root-relative
+  `/images/...` paths either way. Photos are different: `src/lib/og-photo.ts`'s
+  `treatOgPhoto()` runs the source through `sharp` (which reads `.webp`/`.jpg`/`.png`/
+  `.avif` fine) and always hands Satori an already-encoded JPEG data URI, so Satori
+  itself never touches the original file format — see
+  [Share images (Open Graph cards)](#share-images-open-graph-cards). This is also why
+  `grep -rn "<img" src/` isn't empty — the two OG routes use a raw `<img>` inside
+  `ImageResponse`, which is correct there (`next/image` doesn't work inside Satori's
+  renderer); every other `<img>` in `src/` would be a bug.
 - **Verify OG cards against `next build`, not `next dev`.** Turbopack dev rejects the
-  inlined PNGs with "Input buffer contains unsupported image format" while the
-  production render of the identical code is fine. Check
-  `.next/server/app/opengraph-image.body` after a build.
+  inlined bitmaps (the treated photo, the TTF-derived glyphs) with "Input buffer
+  contains unsupported image format" while the production render of the identical code
+  is fine. Check `.next/server/app/opengraph-image.body` after a build, or run
+  `npm run check:og` (see [Share images](#share-images-open-graph-cards)).
 - **`params` is a Promise in these metadata routes.** `workshops/[slug]/opengraph-image.tsx`
   types `params` as `Promise<{ slug: string }>` and awaits it — typing it as a plain
   object compiles fine and silently yields `undefined` for every slug, rendering the same
@@ -556,13 +565,127 @@ scrollY 5300 instead of 4298 — a full viewport late.
 this diverges from the base template's flat-file rule because of the volume of company
 logos and per-event gallery photos. Company logo files are named `co-<slug>.<ext>`.
 
-`src/app/og-assets/` is deliberately not `.webp`/`.woff2` — see [Gotchas](#gotchas).
+`src/app/og-assets/` holds `TheSeasons-Bold.ttf` and `RedHatDisplay-600.ttf` — TTF, not
+the site's `.woff2`, for the reason in [Gotchas](#gotchas). `ad-hero-portrait.png` also
+still lives there from an earlier card design; the current pipeline (see below) doesn't
+read it — safe to delete, flagged here rather than removed silently.
+
+### Share images (Open Graph cards)
+
+Full-bleed treated workshop photo behind eyebrow + title pinned top-left, date + address
+pinned bottom-left, and a vertical "Adrian Ding" wordmark — soft white glow behind black
+type, rotated -90°, chopped at the card's right edge — running the full height of the
+card. The landing card swaps the date/address block for "ADRIANDING.COM". This is layout
+**"L1"** with wordmark treatment **"E6 soft glow"**, the version Chan approved on
+**2026-09-28** out of five rounds of mockups — any further change to the look goes
+through him, not a unilateral dev tweak.
+
+**How a card is produced**
+
+1. **Route** — `src/app/opengraph-image.tsx` (site-wide) or
+   `src/app/workshops/[slug]/opengraph-image.tsx` (per course, one per
+   `generateStaticParams` slug from `src/lib/workshops.ts`).
+2. **Workshop record fields used** (per-course route only; the site-wide route uses
+   fixed copy + the mascot plate): `image` (source photo), `title`, `schedule` (only the
+   date portion — weekday and time range are stripped), `venue`, `city`.
+3. **Photo treatment** — `src/lib/og-photo.ts`'s `ogPhotoForPath()` reads the workshop's
+   `image` from `public/`, then `treatOgPhoto()`:
+   - `sharp().resize(1200, 630, { fit: "cover", position: sharp.strategy.attention })` —
+     subject-aware auto-crop, no per-photo crop box to maintain.
+   - `.normalise().gamma(1.6)` — stretches the histogram, then lifts shadows without
+     blowing out highlights.
+   - a charcoal → warm-cream duotone (grayscale + contrast boost, then a two-color remap)
+     so every future workshop photo reads as one consistent family.
+   - Runs on **any format `sharp` can read** (jpg/png/webp/avif) — the old "photos must
+     be JPEG/PNG for Satori" trap is gone; the treated output is what gets inlined as a
+     JPEG data URI, so Satori never sees the source format at all.
+   - **Missing/unreadable image**: `ogPhotoForPath()` warns to the console with the
+     workshop's slug and falls back to the site's own mono room plate
+     (`public/images/mascot/ad-bg-2.png`, itself run through the same treatment) — a bad
+     or missing photo must never fail the build.
+4. **Layout** — `src/lib/og-card.tsx` exports the shared pieces both routes compose:
+   `ogScrim()`, `ogMaroonBar()`, `ogEyebrow()`, `ogTitle()`, `ogWordmarkSpine()`
+   (the layered glow copies behind the black wordmark), and `addressLine(venue, city)`
+   (appends the city only when `venue` doesn't already name it).
+5. **Fonts** — `src/lib/og-fonts.ts`'s `loadOgFonts()`, see below.
+6. **Encoding / size budget** — `ImageResponse` only emits PNG; `src/lib/og-jpeg.ts`'s
+   `ogJpeg()` re-encodes it to JPEG at quality 78 (baseline, 4:2:0 chroma) because
+   WhatsApp's link-preview fetcher drops any `og:image` over ~300 KB and falls back to a
+   text-only card. `scripts/check-og.mjs` enforces the ceiling — see Testing below.
+
+**Adding a new workshop today (mock data)**
+
+1. Add a record to `WORKSHOPS` in `src/lib/workshops.ts` with a real `image` path,
+   `title`, `schedule`, `venue`, `city`.
+2. `npm run build && npm run check:og` — the build prerenders that slug's card
+   (`generateStaticParams` builds its param list off every `WORKSHOPS` entry, no status
+   filter), and `check:og` asserts it exists, decodes, is exactly 1200×630, and is under
+   300 KB.
+
+**Phase 2 / CMS wiring**
+
+- Cards stay a **derived asset, never a CMS field** — don't add an "OG image" upload next
+  to the course record; it drifts the moment a date or venue is edited. If a client needs
+  to override the photo alone, override `image`, not the card.
+- To feed a remote image (once photos come from a CMS media library instead of `public/`),
+  fetch it into a `Buffer` and call `treatOgPhoto(buf)` directly — it takes any buffer
+  `sharp` can decode and returns the same treated data URI; only `ogPhotoForPath()`'s
+  `public/`-relative read needs swapping for the CMS fetch, the treatment itself is
+  unchanged.
+- Cards are **static build output**. Publishing or editing a workshop must trigger
+  revalidation/rebuild of that course's `opengraph-image` route (e.g. Next's on-demand
+  revalidation — `revalidatePath` on both the workshop page and its `opengraph-image`
+  route) or the CMS edit won't show in new previews; which mechanism (on-demand
+  revalidation, a webhook, a full rebuild) is still an [open question for the
+  team](#open-questions-for-the-team).
+- Social platforms cache link previews independently of your rebuild. After a real
+  content change, re-scrape the URL via Facebook's Sharing Debugger and LinkedIn's Post
+  Inspector (X and iMessage generally re-fetch on their own) or stakeholders will see a
+  stale card even though the site is current.
+
+**Fonts**
+
+Satori needs TTF/OTF — it throws on `.woff2`. Cards use `TheSeasons-Bold.ttf` +
+`RedHatDisplay-600.ttf` from `src/app/og-assets/`, loaded once by `loadOgFonts()` and
+shared by both routes. `OG_SERIF` in `src/lib/og-fonts.ts` is the single switch point —
+swapping the card family to Prata (if Adrian doesn't license The Seasons, see [Decisions
+pending](#decisions-pending-client--chan)) is a one-line filename change there and
+nothing else in either route needs to change. **License note:** Satori renders
+server-side at build time, which may fall under a different license tier than the
+client-side webfont use elsewhere on the site — confirm with whichever foundry licenses
+the chosen serif before shipping real cards.
+
+**Known limits**
+
+- The attention-crop can pick a busy area of a photo — e.g. a projector-screen full of
+  text on the "Building Winning Cultures" workshop photo. Fix options: a better-composed
+  source photo, or an optional per-photo focal-point field (not implemented — `sharp`'s
+  attention strategy is the only crop logic today).
+- Titles near the long-title threshold (`isLong = title.length > 28` in the per-course
+  route) are worth eyeballing — the cutoff is a character count, not a measured wrap, so
+  a title just under 28 characters with wide letterforms could still crowd the shorter
+  font size.
+- `addressLine()`'s city-append branch (appends `city` only when `venue` doesn't already
+  name it) is untested on a non-Cebu venue — every current workshop's `venue` already
+  contains "Cebu," so the branch that appends the city has never actually fired against
+  real data.
+
+**Testing**
+
+- `npm run check:og` — run after `npm run build`. Reads `.next/server/app/` directly (no
+  server, no browser) and asserts, for the site-wide card and every workshop slug: the
+  file exists, decodes as JPEG or PNG, is exactly 1200×630, and is under 300 KB.
+- To eyeball a card locally: `npm run dev` or `npm run build && npm run start`, then
+  visit `/opengraph-image` and `/workshops/<slug>/opengraph-image` directly in the
+  browser (per the `next build`-only gotcha above, `next dev`'s Turbopack may reject the
+  inlined bitmaps even though `next start` renders the identical code fine).
 
 ### Quality gates
 
 ```bash
 npm run validate                        # typecheck + lint + format check
 npx prettier --check "src/**/*.{ts,tsx,css}"  # format:check flags graphify-out/ too; scope to src/ to isolate real issues
+npm run build && npm run check:og       # share-image cards: format/size/dimensions, see Share images
 grep -rn "placeholderImg(" src/lib/specializations.ts  # 11 calls — Unsplash stand-ins, real photography pending
 grep -rn "<img" src/                    # 2 hits, both inside the OG image routes — expected, see Gotchas
 grep -rn "TODO" src/                    # 37 hits — each maps to an open item in PRD.md / this README

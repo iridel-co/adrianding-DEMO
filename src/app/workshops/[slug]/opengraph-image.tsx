@@ -1,7 +1,20 @@
 import { ImageResponse } from "next/og"
 import { ogJpeg } from "@/lib/og-jpeg"
-import { readFile } from "node:fs/promises"
-import { join } from "node:path"
+import { ogPhotoForPath } from "@/lib/og-photo"
+import { OG_SANS, loadOgFonts } from "@/lib/og-fonts"
+import {
+  OG_ACCENT,
+  OG_CONTENT_LEFT,
+  OG_CONTENT_WIDTH,
+  OG_INK,
+  OG_MARGIN,
+  addressLine,
+  ogEyebrow,
+  ogMaroonBar,
+  ogScrim,
+  ogTitle,
+  ogWordmarkSpine,
+} from "@/lib/og-card"
 import { WORKSHOPS, getWorkshop } from "@/lib/workshops"
 
 export const runtime = "nodejs"
@@ -13,52 +26,47 @@ export function generateStaticParams() {
   return WORKSHOPS.map((w) => ({ slug: w.slug }))
 }
 
-const ASSETS = join(process.cwd(), "src/app/og-assets")
-
 /**
- * Per-course social card.
+ * Per-course social card, layout L1 + wordmark E6 — approved out of
+ * `og-mockups/round5/` (see that folder's `NOTES.md` for the full A-through-5
+ * round history). Eyebrow + title pinned top-left, date + venue pinned
+ * bottom-left, the "Adrian Ding" wordmark carried on every card as a soft-glow
+ * vertical spine chopped at the right edge, full-bleed duotoned photo behind
+ * everything.
  *
- * The client's traffic model sends an ad straight to a course page, and those
- * links get forwarded, pasted into group chats and shared — all of which
- * previewed with the site-wide card before this existed, so every course looked
- * like the same generic link. This gives each one its own photo, title and date.
+ * Same Satori constraints as before: fonts must be TTF, every absolutely
+ * positioned element needs explicit numeric width/height, assets are inlined
+ * as data URIs. `params` is a Promise (Next 15+ metadata-route contract) —
+ * typing it as a plain object compiles fine and silently yields `undefined`
+ * for every slug.
  *
- * Same Satori constraints as the root card (`src/app/opengraph-image.tsx`):
- * fonts must be TTF, every absolutely positioned element needs explicit numeric
- * width/height, and assets are inlined as data URIs because root-relative paths
- * do not resolve. Course photos are JPEG, which Satori does decode — unlike the
- * `.webp` the site itself serves.
- *
- * Verify against `next build`, not `next dev` (Turbopack dev rejects the inlined
- * bitmaps that the production render handles fine).
+ * Verify against `next build`, not `next dev` (Turbopack dev rejects the
+ * inlined bitmaps that the production render handles fine).
  */
 export default async function WorkshopOgImage({
   params,
 }: {
-  // Next 15 hands `params` to metadata routes as a Promise, exactly as it does
-  // to the page. Typing it as a plain object compiles fine and silently yields
-  // `undefined` for every slug, so all eight cards render the same fallback.
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
   const workshop = getWorkshop(slug)
 
-  const [photo, seasons, redHat] = await Promise.all([
-    readFile(
-      join(
-        process.cwd(),
-        "public",
-        workshop?.image ?? "/images/gallery/sunlife/photo-3.jpg"
-      )
-    ),
-    readFile(join(ASSETS, "TheSeasons-Bold.ttf")),
-    readFile(join(ASSETS, "RedHatDisplay-600.ttf")),
+  const [photoSrc, fonts] = await Promise.all([
+    ogPhotoForPath(workshop?.image, slug),
+    loadOgFonts(),
   ])
-  const photoSrc = `data:image/jpeg;base64,${photo.toString("base64")}`
 
   // Drop the weekday and the time range — a social card has room for the date
   // and nothing else, and "Friday" is not what makes someone click.
-  const dateLine = workshop?.schedule.split("·")[0]?.replace(/^\w+day,\s*/, "")
+  const dateLine = workshop?.schedule
+    .split("·")[0]
+    ?.replace(/^\w+day,\s*/, "")
+    .trim()
+  const address = workshop
+    ? addressLine(workshop.venue, workshop.city)
+    : "SEDA Ayala Center Cebu, E-bloc"
+  const title = workshop?.title ?? "Workshop"
+  const isLong = title.length > 28
 
   const card = new ImageResponse(
     <div
@@ -67,7 +75,7 @@ export default async function WorkshopOgImage({
         height: "100%",
         display: "flex",
         position: "relative",
-        background: "#141414",
+        background: OG_INK,
       }}
     >
       <img
@@ -84,113 +92,60 @@ export default async function WorkshopOgImage({
           objectFit: "cover",
         }}
       />
+      {ogScrim()}
+      {ogWordmarkSpine()}
+      {ogMaroonBar()}
       <div
         style={{
           position: "absolute",
-          left: 0,
-          top: 0,
-          width: 1200,
-          height: 630,
-          display: "flex",
-          background:
-            "linear-gradient(90deg, rgba(10,6,6,0.94) 0%, rgba(10,6,6,0.78) 46%, rgba(10,6,6,0.16) 100%)",
-        }}
-      />
-      {/* Brand rule down the left edge — the one maroon element, so the card
-          is recognisably his at thumbnail size. */}
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          top: 0,
-          width: 14,
-          height: 630,
-          display: "flex",
-          background: "#980F09",
-        }}
-      />
-
-      <div
-        style={{
-          position: "absolute",
-          left: 78,
-          top: 0,
-          width: 760,
-          height: 630,
+          left: OG_CONTENT_LEFT,
+          top: OG_MARGIN,
           display: "flex",
           flexDirection: "column",
-          justifyContent: "center",
+          width: OG_CONTENT_WIDTH,
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            fontFamily: "RedHat",
-            fontSize: 18,
-            letterSpacing: 3.6,
-            color: "rgba(255,255,255,0.72)",
-          }}
-        >
-          PUBLIC WORKSHOP · CEBU
+        {ogEyebrow("PUBLIC WORKSHOP")}
+        <div style={{ marginTop: 18, display: "flex" }}>
+          {ogTitle(title, isLong)}
         </div>
-        <div
-          style={{
-            display: "flex",
-            marginTop: 24,
-            fontFamily: "TheSeasons",
-            fontSize: workshop && workshop.title.length > 28 ? 68 : 84,
-            color: "#ffffff",
-            lineHeight: 1.04,
-            letterSpacing: -1,
-          }}
-        >
-          {workshop?.title ?? "Workshop"}
-        </div>
+      </div>
+      <div
+        style={{
+          position: "absolute",
+          left: OG_CONTENT_LEFT,
+          bottom: OG_MARGIN,
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
         {dateLine && (
           <div
             style={{
               display: "flex",
-              marginTop: 30,
-              fontFamily: "RedHat",
-              fontSize: 26,
-              color: "#e0554a",
+              fontFamily: OG_SANS,
+              fontSize: 34,
+              fontWeight: 600,
+              color: OG_ACCENT,
             }}
           >
-            {dateLine.trim()}
+            {dateLine}
           </div>
         )}
         <div
           style={{
             display: "flex",
-            marginTop: 14,
-            fontFamily: "RedHat",
-            fontSize: 21,
-            color: "rgba(255,255,255,0.74)",
+            marginTop: 8,
+            fontFamily: OG_SANS,
+            fontSize: 30,
+            color: "rgba(255,255,255,0.82)",
           }}
         >
-          {workshop?.venue ?? "SEDA Ayala Center Cebu"}
-        </div>
-        <div
-          style={{
-            display: "flex",
-            marginTop: 46,
-            fontFamily: "RedHat",
-            fontSize: 19,
-            letterSpacing: 2.6,
-            color: "rgba(255,255,255,0.6)",
-          }}
-        >
-          WITH COACH ADRIAN DING
+          {address}
         </div>
       </div>
     </div>,
-    {
-      ...size,
-      fonts: [
-        { name: "TheSeasons", data: seasons, style: "normal", weight: 700 },
-        { name: "RedHat", data: redHat, style: "normal", weight: 600 },
-      ],
-    }
+    { ...size, fonts }
   )
 
   // WhatsApp drops any card over ~300 KB — see `ogJpeg`.
