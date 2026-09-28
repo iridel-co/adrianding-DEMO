@@ -9,6 +9,15 @@ decisions behind it.
 This README is the handoff document for both audiences: the PM (scope, status, open
 decisions) and the dev team (architecture, gotchas, setup) building Phase 2.
 
+> **Font notice — in effect until Chan says otherwise (2026-09-28).** We are not allowed to
+> use **The Seasons** or **Abramo** yet. The share cards already use Prata instead. The
+> website itself still defaults to The Seasons and loads Abramo from demo-only copies in
+> `src/app/fonts/`; that is deliberate for the client review, and it stays until Chan
+> decides. Do not deploy this site anywhere public, and do not use either font in new work,
+> until they are licensed or the site is switched to Prata. See
+> [Decisions pending](#decisions-pending-client--chan) and
+> [Hero font switch](#hero-font-switch).
+
 ## Table of contents
 
 - [Status at a glance](#status-at-a-glance)
