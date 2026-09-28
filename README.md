@@ -229,8 +229,10 @@ To remove:
 
 **Font licensing:** **The Seasons** and **Abramo** in `src/app/fonts/` are web-sourced demo
 copies of commercial fonts — swap for licensed files (same filenames) before any real
-handoff. A TTF copy of The Seasons also lives in `src/app/og-assets/` for the social cards
-and needs the same swap. **Abramo is loaded but currently unused** in visible copy
+handoff. **The social cards no longer use The Seasons** (see
+[Share images](#share-images-open-graph-cards)) — they render in Prata, so there's no TTF
+swap needed there unless Chan later licenses The Seasons and moves the cards back to it.
+**Abramo is loaded but currently unused** in visible copy
 (reserved for future callouts) — confirm with Adrian whether to keep licensing it (see also
 [Known issues / tech debt](#known-issues--tech-debt)).
 
@@ -273,8 +275,9 @@ To remove:
   `src/lib/specializations.ts` where the actual Unsplash stand-ins are). Must be empty before
   delivery per the [Quality gates](#quality-gates) checklist.
 - **Two unlicensed commercial fonts** still installed as demo-only web copies: The Seasons
-  (`src/app/fonts/TheSeasons-{Regular,Bold}.woff2` + TTF cuts in `src/app/og-assets/` for the
-  social cards) and Abramo (`Abramo-Regular.woff2` — see note above on it being unused).
+  (`src/app/fonts/TheSeasons-{Regular,Bold}.woff2`, website only — the social cards were
+  switched to Prata on 2026-09-28, see [Share images](#share-images-open-graph-cards)) and
+  Abramo (`Abramo-Regular.woff2` — see note above on it being unused).
 - **No `NEXT_PUBLIC_SITE_URL` set** — falls back to Vercel env vars or `localhost:3000`,
   which is correct for preview deploys but must be set explicitly at handoff, then verified
   with `curl -s <host>/ | grep 'og:image'`.
@@ -565,7 +568,7 @@ scrollY 5300 instead of 4298 — a full viewport late.
 this diverges from the base template's flat-file rule because of the volume of company
 logos and per-event gallery photos. Company logo files are named `co-<slug>.<ext>`.
 
-`src/app/og-assets/` holds `TheSeasons-Bold.ttf` and `RedHatDisplay-600.ttf` — TTF, not
+`src/app/og-assets/` holds `Prata-Regular.ttf` and `RedHatDisplay-600.ttf` — TTF, not
 the site's `.woff2`, for the reason in [Gotchas](#gotchas). `ad-hero-portrait.png` also
 still lives there from an earlier card design; the current pipeline (see below) doesn't
 read it — safe to delete, flagged here rather than removed silently.
@@ -645,15 +648,20 @@ through him, not a unilateral dev tweak.
 
 **Fonts**
 
-Satori needs TTF/OTF — it throws on `.woff2`. Cards use `TheSeasons-Bold.ttf` +
+Satori needs TTF/OTF — it throws on `.woff2`. Cards use `Prata-Regular.ttf` +
 `RedHatDisplay-600.ttf` from `src/app/og-assets/`, loaded once by `loadOgFonts()` and
-shared by both routes. `OG_SERIF` in `src/lib/og-fonts.ts` is the single switch point —
-swapping the card family to Prata (if Adrian doesn't license The Seasons, see [Decisions
-pending](#decisions-pending-client--chan)) is a one-line filename change there and
-nothing else in either route needs to change. **License note:** Satori renders
-server-side at build time, which may fall under a different license tier than the
-client-side webfont use elsewhere on the site — confirm with whichever foundry licenses
-the chosen serif before shipping real cards.
+shared by both routes. **Cards render in Prata, not The Seasons, as of 2026-09-28** — The
+Seasons is a paid commercial face and Chan doesn't have a license for it (including the
+separate server-side-rendering rights Satori would need, on top of any webfont license —
+see the license note below). `OG_SERIF` in `src/lib/og-fonts.ts` is the single switch
+point: reverting to The Seasons once it's licensed is a one-line filename/weight change
+there (Prata is one weight only, 400; The Seasons Bold is 700 — update both the file and
+the `weight`), **plus re-measuring the wordmark geometry in `og-card.tsx`'s `SPINE`
+constant and `OG_SCALE`'s title sizes** — Prata's metrics don't match The Seasons' 1:1
+(caps run taller and wider), so the two fonts' fitted geometry isn't interchangeable.
+**License note:** Satori renders server-side at build time, which may fall under a
+different license tier than the client-side webfont use elsewhere on the site — confirm
+with whichever foundry licenses the chosen serif before shipping real cards.
 
 **Known limits**
 

@@ -13,7 +13,15 @@ export const OG_ACCENT = "#c9453a"
 export const OG_SCRIM =
   "linear-gradient(90deg, rgba(8,6,6,0.92) 0%, rgba(8,6,6,0.62) 46%, rgba(8,6,6,0.3) 78%, rgba(8,6,6,0.5) 100%)"
 
-export const OG_SCALE = { eyebrow: 32, longTitle: 84, shortTitle: 118 } as const
+// Title sizes scaled ~0.93 for the 2026-09-28 Prata swap (Prata's caps run
+// ~14% taller and wider than The Seasons at the same fontSize — same ratio
+// the site's own font-switch toggle uses, see `layout.tsx`). Verified this
+// keeps the same ~2-line wrap for every current workshop title at the same
+// `maxWidth` (measured via the approach in `measure-titles.mjs`, scratchpad
+// of the font swap) — line count and proportions match the previous
+// The Seasons render, nothing collides with the bottom block or the
+// wordmark column. `eyebrow` is sans (Red Hat Display), unaffected.
+export const OG_SCALE = { eyebrow: 32, longTitle: 78, shortTitle: 110 } as const
 export const OG_MARGIN = 44
 export const OG_CONTENT_LEFT = 68
 /** Clears the wordmark spine (starts at x:1112) with ~30px to spare. */
@@ -35,12 +43,22 @@ export function addressLine(venue: string, city: string): string {
 
 /**
  * Vertical "Adrian Ding" wordmark, rotated -90deg and chopped at the right
- * canvas edge (`left:1112` + rotated width `128.8` runs past the 1200px
- * canvas — Satori doesn't draw what's off-canvas, no `overflow:hidden`
- * needed). Geometry (`originX:1112, originY:605, fontSize:112`) is the exact
- * measured value from `og-mockups/round2b/measure.mjs`: the full name fits
- * bottom-anchored inside the 630px canvas height with ~24.5px margin, cut
- * off only on the right.
+ * canvas edge (`left:1112` + rotated width (`height` below) runs past the
+ * 1200px canvas — Satori doesn't draw what's off-canvas, no
+ * `overflow:hidden` needed). `originX:1112` is fixed by the content-column
+ * layout (`OG_CONTENT_RIGHT_LIMIT`), not by the font.
+ *
+ * `originY:605` fixes the wordmark's bottom margin at a constant
+ * `630 - 605 = 25px` regardless of font — the top margin is whatever's left
+ * after the rendered text width (`605 - textWidth`). `fontSize:103` is the
+ * Prata value that puts that rendered width at ~583px (measured by the
+ * approach in `og-mockups/round2b/measure.mjs`, re-run for Prata in the
+ * 2026-09-28 font-license swap), giving a ~22px top margin — matching the
+ * previous The Seasons geometry's ~24.5px within a few px, full name intact,
+ * chop still right-edge only. `height` is `fontSize * 1.15`, the same
+ * line-height multiplier the original geometry used, so the horizontal chop
+ * stays proportionally similar (~26% of the rotated footprint vs. the
+ * original ~32%).
  *
  * Rendering is "E6 soft glow" from `og-mockups/round5/emboss.mjs`: three
  * decreasing-opacity white copies stacked behind the black text (offsets
@@ -52,8 +70,8 @@ const SPINE = {
   left: 1112,
   top: 605,
   width: 1400,
-  height: 128.8,
-  fontSize: 112,
+  height: 103 * 1.15,
+  fontSize: 103,
 }
 
 function spineCopy(
