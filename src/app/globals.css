@@ -192,6 +192,31 @@
   }
 }
 
+/* Client-review font toggle (<FontSwitch>, hero-editorial.tsx) — repoints the
+   display-serif variable to the free alternate when the visitor picks "Free
+   alternative". Every consumer of this font (`.font-serif`, `.pull-quote`,
+   and any inline `font-serif` utility class across the site — `.font-accent`
+   / Abramo is untouched, nothing on the site uses it) reads
+   `var(--font-the-seasons)` directly rather than through Tailwind's
+   `--font-serif` theme token, so redeclaring this one custom property is
+   enough — no per-component change needed.
+   `--font-the-seasons` is itself set on <body> via next/font's generated
+   variable class (`.__className_xxxx { --font-the-seasons: … }`, specificity
+   0,1,0). This selector targets the same element with a compound selector
+   (0,1,1) so it wins on specificity alone, regardless of CSS source order —
+   Tailwind v4's `@theme inline` block above still resolves fine since it's
+   also just `var(--font-the-seasons)`.
+   Prata ships one weight only; the five `font-serif font-bold` headings
+   (paths.tsx, timeline.tsx) would otherwise get browser-synthesized fake
+   bold, which reads as smeared/doubled strokes on a display serif.
+   `font-synthesis-weight: none` on the same body scope turns that off, so
+   `font-bold` on Prata text simply renders at its one real weight instead —
+   no component change needed, same reasoning as the variable swap above. */
+html[data-fonts="alt"] body {
+  --font-the-seasons: var(--font-prata);
+  font-synthesis-weight: none;
+}
+
 @layer utilities {
   .font-serif {
     font-family: var(--font-the-seasons), Georgia, "Times New Roman", serif;

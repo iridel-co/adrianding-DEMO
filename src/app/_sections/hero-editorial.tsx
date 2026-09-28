@@ -3,6 +3,7 @@
 import Image from "next/image"
 import { Facebook, Instagram, Linkedin, Youtube } from "lucide-react"
 import { Marquee } from "@/app/_components/marquee"
+import { FontSwitch } from "@/app/_components/font-switch"
 import { SiteNavbar } from "@/app/_components/site-navbar"
 import { gsap, useGSAP, EASE, DUR } from "@/app/_lib/gsap"
 
@@ -270,6 +271,9 @@ export function HeroEditorial() {
             ))}
           </div>
         </div>
+
+        {/* Client-review-only: paid vs. free font pair comparison. */}
+        <FontSwitch />
       </div>
     </>
   )

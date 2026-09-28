@@ -39,6 +39,8 @@ Two paths:
 
 Either way the decision has to be his, because it is his legal exposure.
 
+_Prata (scaled to 93% via `size-adjust`, to match The Seasons' cap/x-height) is wired into the live site's font toggle for him to compare directly._
+
 ## 3. Copy he should read back
 
 - **"equip further top producers"** in the Exceptional Salesmanship intro is his
