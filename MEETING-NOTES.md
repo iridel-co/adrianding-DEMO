@@ -8,7 +8,8 @@
 > inline on 2026-09-19, and the slide-in-card/pop-up variants plus the switcher were deleted
 > from the codebase (`about-prompt.tsx` now exports only the inline `AboutPromptAnchor`).
 > Item 2 (fonts) is still open, but the demo now has a live comparison tool — see
-> `HANDOFF.md` §3 and §4. Everything else below is unchanged.
+> `README.md` → Temporary review tools and Decisions pending. Everything else below is
+> unchanged.
 
 ---
 
