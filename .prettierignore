@@ -1,6 +1,9 @@
 # Dependencies
 node_modules/
 
+# Generated knowledge graph (graphify)
+graphify-out/
+
 # Build outputs
 .next/
 out/

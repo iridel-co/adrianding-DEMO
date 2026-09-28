@@ -1,8 +1,8 @@
 {
-  "name": "iridel-demo-template",
-  "version": "1.2.0",
+  "name": "adrianding-demo",
+  "version": "0.1.0",
   "private": true,
-  "description": "Iridel Demo Template - A warm, minimal, accessibility-first Next.js starter with unified design system",
+  "description": "Iridel client demo for Coach Adrian Ding — editorial hero, workshop-forward funnel, GSAP motion",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

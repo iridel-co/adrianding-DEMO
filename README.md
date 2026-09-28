@@ -1,322 +1,387 @@
 # Coach Adrian Ding — Demo Site
 
-A full multi-page Next.js site built to pitch Coach Adrian Ding on a real rebuild of
-adrianding.com. **This is a client-facing demo, not production** — every form, login, and
-content list is frontend-only. Read this file before touching code, then read `PRD.md`
-(scope, copy, and asset status — source of truth for what each page should say).
-
-**Stack:** Next.js 15 · React 19 · Tailwind CSS 4 · TypeScript · Radix UI · GSAP 3 +
-`@gsap/react` · Framer Motion (hero quote-reveal only) · React Hook Form + Zod · Lucide React
+A multi-page Next.js site built to pitch Coach Adrian Ding on a rebuild of
+adrianding.com. **Frontend-only** — every form, login, and content list is UI without a
+backend. For project status, what's mocked vs. real, the Phase 2 scope map, and open
+questions, see [HANDOFF.md](HANDOFF.md). `PRD.md` is the scope/copy source of truth;
+`MEETING-NOTES.md` has the client decisions behind it.
 
 ---
 
 ## Setup
 
+| Requirement     | Value                                                                                         |
+| --------------- | --------------------------------------------------------------------------------------------- |
+| Node            | `>=18.0.0` (`package.json` → `engines`; no `.nvmrc` committed — this session ran Node 23.9.0) |
+| Package manager | npm (only a `package-lock.json` is committed)                                                 |
+
 ```bash
 npm install
-npm run dev
+npm run dev      # http://localhost:3000
+npm run build    # production build
+npm run start    # serve the production build
+npm run validate # typecheck + lint + format check — run before any handoff
 ```
 
-Open [http://localhost:3000](http://localhost:3000). No backend.
+No backend, no database, no `.env` file required to run it.
 
-One optional environment variable: `NEXT_PUBLIC_SITE_URL`. It sets `metadataBase` — the host
-every canonical/`og:url`/`og:image` URL is resolved against. Unset, the build resolves itself
-(`VERCEL_PROJECT_PRODUCTION_URL` → `VERCEL_URL` → `localhost:3000`), which is what you want on
-every preview deploy. **Don't hard-code `adrianding.com`** — that's the client's existing live
-site, and pointing `og:image` there makes link previews 404 silently.
+### Environment variables
 
----
+| Variable               | Required | Purpose                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ---------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SITE_URL` | No       | Sets `metadataBase` in `src/app/layout.tsx` — the host every canonical / `og:url` / `og:image` URL resolves against. Unset, it falls back to `VERCEL_PROJECT_PRODUCTION_URL` → `VERCEL_URL` → `http://localhost:3000`, which is correct on every Vercel preview deploy. **Never hard-code `adrianding.com`** — that's the client's existing live site; pointing `og:image` there makes link previews 404 silently. Set it explicitly only when this build is served from a domain Vercel doesn't already know about. |
 
-## Current status
+### Other scripts
 
-This repo is being shown to Adrian Ding for approval. **Nothing here is wired to a real
-backend.** Once he signs off on direction and content, the next phase builds the CRM/CMS/auth
-layer described below.
-
-Routes shipped: `/` (landing), `/about`, `/workshops` + `/workshops/[slug]` +
-`/workshops/[slug]/registered`, `/corporate-training` + `/corporate-training/inquiry-received`,
-`/gallery` + `/gallery/[slug]`, `/staff-login`, `/email-templates`.
-
-| Route                                  | Sections                                                                                                                      |
-| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `/`                                    | editorial hero · quote-reveal · companies marquee · stats · paths · workshops-open · specializations · testimonials · gallery |
-| `/about`                               | hero · story · journey/timeline · certifications · FAQ                                                                        |
-| `/workshops`                           | hero · list (calendar)                                                                                                        |
-| `/workshops/[slug]`                    | hero · overview · proof · details · testimonials · FAQ · register CTA · support band · sticky register bar                    |
-| `/workshops/[slug]/registered`         | confirmation · payment urgency · primer · what to expect · support band — `noindex`                                           |
-| `/corporate-training`                  | hero · why · programs · companies · testimonials · credentials · inquiry form/CTA · support band                              |
-| `/corporate-training/inquiry-received` | acknowledgment · reply commitment · submitted summary · primer · credibility · support band — `noindex`                       |
-| `/gallery`                             | floating wall grid                                                                                                            |
-| `/gallery/[slug]`                      | event hero · photo wall                                                                                                       |
-| `/staff-login`                         | UI shell only — see below                                                                                                     |
-| `/email-templates`                     | copy/layout preview only — see below                                                                                          |
-
-### The two funnels
-
-Both entry paths end at a form, and both forms end at a confirmation page.
-
-1. **Ad → course page.** The client's traffic model (AIM / Oxford style): an ad for one
-   workshop links straight to `/workshops/<slug>`, never the homepage. That page therefore
-   has to stand alone — it opens on the `problem` field rather than the course title, and
-   carries the credential band, testimonials, registration FAQ, client logos and a sticky
-   register bar so a cold visitor can convert without seeing another page.
-2. **Homepage → fork.** Hero → belief quote → logos + figures (one credibility block) →
-   `#which-path` → the open-workshop list. Proof runs straight into the decision; the
-   deeper capability material sits after it.
-
-**Form → confirmation handoff.** Both forms write the submitted values to `sessionStorage`
-via `src/app/_lib/handoff.ts`, then `router.push` to their confirmation route, which reads
-them back **in a `useEffect`, never during render** — `sessionStorage` doesn't exist during
-SSR, so branching the first client render on it hydration-mismatches. The prerendered HTML
-is always the generic copy and the personalised version swaps in after mount. Every
-confirmation section must therefore look complete when the handoff is `null` (direct visit,
-private mode, blocked site data).
+```bash
+npm run lint        # ESLint (src/)
+npm run lint:css    # Stylelint (src/**/*.css)
+npm run lint:fix     # ESLint --fix
+npm run format       # Prettier --write .
+npm run format:check # Prettier --check . (part of `validate`)
+npm run typecheck    # tsc --noEmit
+```
 
 ---
 
-## What still needs Adrian Ding's approval
+## Stack
 
-Content is real-looking but **representative, not final** in these files. Every workshop
-card, gallery event, and testimonial needs his input before it ships — don't treat any of
-this as locked copy.
+Versions as pinned in `package.json` (run `npm ls <pkg>` for the resolved version if a
+range differs):
 
-| File                                         | What's pending                                                                                                                                                                                        |
-| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/lib/workshops.ts`                       | Each workshop card + detail page: title, curriculum outline, inclusions, **price**, plus the newer `problem` / `outcomes` / `whatToExpect` / `primerBlurb` / `seatsLeft` fields — all representative. |
-| `src/lib/workshop-faq.ts`                    | Registration FAQ — the transfer window, the 48-hour seat hold, and whether an official receipt is issued by default all need confirming.                                                              |
-| `.../registered/_sections/payment.tsx`       | Bank account name/number and the GCash QR are placeholders. So is the 48-hour hold window.                                                                                                            |
-| `src/lib/gallery.ts`                         | Each past event (parent grid card + child page): name, date, blurb, photo set, and Adrian's "reflections" copy — written in his voice as a placeholder, not his actual notes.                         |
-| `src/lib/testimonials.ts`                    | Every quote is a placeholder pending the real ones from `Coach_Adrian_Ding_Website_2025.pdf`. No headshots supplied yet.                                                                              |
-| `src/lib/timeline.ts`                        | Founding year and milestone wording need confirmation.                                                                                                                                                |
-| `src/app/about/_sections/certifications.tsx` | Confirm the exact accrediting-body names and years (AET / CPD).                                                                                                                                       |
-| `src/app/_sections/stats.tsx`                | Industry count is a placeholder pending client confirmation.                                                                                                                                          |
-| `src/lib/companies.ts` / logo marquee        | 47 of 91 companies have no logo artwork and render as name chips — see `PRD.md` → **Companies Served — Roster**.                                                                                      |
-| `src/app/fonts/`                             | **The Seasons** and **Abramo** are web-sourced demo copies of commercial fonts — swap for licensed files (same filenames) before any real handoff. See `PRD.md` → **Fonts**.                          |
+| Layer      | Package                                                          | Version                          |
+| ---------- | ---------------------------------------------------------------- | -------------------------------- |
+| Framework  | `next`                                                           | `16.3.0`                         |
+| UI         | `react` / `react-dom`                                            | `19.2.1`                         |
+| Language   | `typescript`                                                     | `^5`                             |
+| Styling    | `tailwindcss` (+ `@tailwindcss/postcss`)                         | `^4`                             |
+| Components | Radix UI primitives (`@radix-ui/react-*`)                        | see `package.json`               |
+| Motion     | `gsap` / `@gsap/react`                                           | `^3.15.0` / `^2.1.2`             |
+| Motion     | `framer-motion`                                                  | `^13.1.1`                        |
+| Forms      | `react-hook-form` + `@hookform/resolvers` + `zod`                | `^7.68.0` / `^5.2.2` / `^4.1.13` |
+| Icons      | `lucide-react`                                                   | `^0.557.0`                       |
+| Images     | `sharp` (build-time recompression, not a runtime dep of the app) | `^0.35.4`                        |
 
-Before editing a card in gallery/workshops/testimonials, check whether the change is
-cosmetic (safe to make now) or content (needs AD's sign-off first) — when unsure, ask rather
-than inventing details on his behalf.
-
----
-
-## Backend / CRM / CMS — not yet built
-
-Everything below is UI only. This is the actual scope of work once Adrian Ding approves:
-
-- **Workshops & gallery are static arrays**, not CMS-managed. `src/lib/workshops.ts` and
-  `src/lib/gallery.ts` are the shape a future CMS schema should match — use them as the data
-  contract when wiring a real CMS (fields, relations like `relatedWorkshop`, etc).
-- **Registration forms don't submit anywhere.** `workshops/[slug]/_sections/registration-form.tsx`
-  (workshop signup) and `corporate-training/_sections/*` (inquiry form) validate with Zod
-  client-side only — no CRM write, no confirmation email. They hand off through
-  `sessionStorage` and redirect to a confirmation route; that route is what a real
-  submission would land on, but nothing is transmitted or persisted.
-- **Every form submission must notify the owners and land in the CRM as `NEW`** (client
-  ask, 2026-09-19). This covers _both_ entry points — workshop registration
-  (`workshops/[slug]/_sections/registration-form.tsx`) and the corporate inquiry
-  (`corporate-training/_sections/inquiry-form.tsx`) — and any form added later. On submit
-  the backend must, server-side:
-  1. **Create the CRM record first, with status `NEW`** — every field the form collects
-     (corporate: the primary programme _and_ the "Also interested in" list; workshop: the
-     course slug and its date), plus `source` (`workshop-registration` |
-     `corporate-inquiry`) and a submitted-at timestamp. `NEW` is the only status the site
-     sets; the rest of the lifecycle is the CRM's, to be agreed with Adrian.
-  2. **Then email the owners** a "new inquiry" notification: who, which form, the key
-     fields, and a link to the CRM record.
-     The record is the source of truth. If the email fails, the lead still exists and still
-     shows as `NEW` (retry the email, never the record). If the record write fails, the
-     visitor must see an error and must **not** be sent to the confirmation page. Owner
-     recipient addresses are TBD with Adrian — configuration, not code. The visitor-facing
-     acknowledgement emails in `/email-templates` are a separate send and do not replace the
-     owner notification.
-- **Workshop `tags`** (`WORKSHOP_TAGS` in `src/lib/workshops.ts`) become a fixed CMS
-  taxonomy field (multi-select, 1–3 per course), not free text — the /workshops filter
-  chips are derived from it.
-- **The confirmation pages are the UI for a process that is still manual.** The four-step
-  tracker on `/workshops/[slug]/registered` (registered → payment sent → staff confirms →
-  primer email) is the client's actual flow drawn out. Step 3 is a human marking a row as
-  paid in a CRM that does not exist yet.
-- **`/staff-login` is a UI shell** — no auth provider, no session, no protected routes behind
-  it. Needs real auth (and a reason to exist — confirm with AD what staff actually need to do
-  there) before it's real.
-- **`/email-templates` is copy/layout only.** The actual send-trigger wiring (e.g. Resend) is
-  explicitly Phase 2 per the signed quote — not built here.
-- **No payment/tracking.** Workshop pricing displays but nothing charges or records
-  attendance.
-
-Treat `src/lib/*.ts` as the CMS content model to replicate, and the two forms above as the
-CRM lead-capture entry points.
+The build runs **Next.js 16.3.0**. A few source comments (e.g. the `params`-is-a-Promise
+note in the OG image routes) still say "Next 15"; the behavior they describe still holds
+in 16.
 
 ---
 
-## Architecture
+## Project structure
 
 ```
 src/
   app/
-    page.tsx                composition only, no copy
-    layout.tsx               metadata + fonts + <ScrollRefresh />
-    opengraph-image.tsx      generated 1200x630 social card (next/og)
-    og-assets/               PNG/TTF copies Satori can read — see below
-    globals.css              design tokens + custom utilities
-    _sections/*.tsx           homepage sections
-    _components/*.tsx         site-wide chunks (navbar, footer, CTA, GSAP primitives)
-    about/ workshops/ workshops/[slug]/
-    corporate-training/ gallery/ gallery/[slug]/
+    page.tsx                  composition only, no copy
+    layout.tsx                 metadata, fonts, <ScrollRefresh />, font-toggle init script
+    opengraph-image.tsx        site-wide 1200x630 social card (next/og)
+    og-assets/                 TTF/PNG copies Satori can read (see Gotchas)
+    globals.css                design tokens + custom utilities
+    fonts/                     The Seasons, Abramo, Prata (.woff2) — see Fonts below
+    _sections/*.tsx             homepage sections
+    _components/*.tsx           site-wide shared components (navbar, footer, GSAP primitives)
+    _lib/                       gsap.ts, handoff.ts, hooks (see below)
+    about/ workshops/ workshops/[slug]/ workshops/[slug]/registered/
+    corporate-training/ corporate-training/inquiry-received/
+    gallery/ gallery/[slug]/
     staff-login/ email-templates/
-      page.tsx                route metadata + composition
-      _sections/*.tsx          that route's sections
+      page.tsx                  route metadata + composition
+      _sections/*.tsx            that route's sections
+      opengraph-image.tsx        (workshops/[slug] only — per-course social card)
   components/
-    common/                  shared marketing/dashboard components (template)
-    ui/                      primitives (shadcn-style)
-  lib/                       companies.ts, gallery.ts, specializations.ts, testimonials.ts,
-                             timeline.ts, workshops.ts, images.ts, utils.ts
-public/images/               gallery/, hero/, icons/, logos/, mascot/ — subfoldered, not flat
+    common/                    shared marketing/dashboard components (template — don't edit)
+    ui/                        primitives, shadcn-style (template — don't edit)
+  lib/                         mock content modules (see below)
+public/images/                 gallery/, hero/, icons/, logos/, mascot/ — subfoldered, not flat
 ```
 
-Two rules carried from the template that still hold:
+### Routes
 
-1. **`page.tsx` files carry no copy.** Imports, metadata, and composition only.
-2. **Don't edit `src/components/`.** Content changes happen in `_sections/*.tsx` or `src/lib/*.ts`.
+| Route                                  | Notes                                                                   |
+| -------------------------------------- | ----------------------------------------------------------------------- |
+| `/`                                    | landing                                                                 |
+| `/about`                               |                                                                         |
+| `/workshops`                           | list/calendar                                                           |
+| `/workshops/[slug]`                    | course detail — has its own `opengraph-image.tsx`                       |
+| `/workshops/[slug]/registered`         | post-registration confirmation — `noindex`                              |
+| `/corporate-training`                  |                                                                         |
+| `/corporate-training/inquiry-received` | post-inquiry confirmation — `noindex`                                   |
+| `/gallery`                             |                                                                         |
+| `/gallery/[slug]`                      | event detail                                                            |
+| `/staff-login`                         | UI shell only, no auth — see [HANDOFF.md](HANDOFF.md)                   |
+| `/email-templates`                     | copy/layout preview only, no send wiring — see [HANDOFF.md](HANDOFF.md) |
+
+Every route folder follows the same convention: `page.tsx` is imports + composition +
+route metadata only; that route's copy and layout live in its own `_sections/*.tsx`.
 
 ### Where content lives
 
 - **Page-specific copy** (hero headings, one-off sections) is inline in that route's
   `_sections/*.tsx` file.
-- **Shared/repeated content** (workshops, gallery events, companies, testimonials, timeline,
-  specializations) lives in `src/lib/*.ts` instead, since multiple pages or cards read the
-  same data — see the approval table above before editing any of those.
+- **Shared/repeated content** lives in `src/lib/*.ts` instead, since multiple pages or
+  cards read the same data:
 
-### Notable custom pieces (not template scaffolding)
+  | File                                                     | Backs                               |
+  | -------------------------------------------------------- | ----------------------------------- |
+  | `workshops.ts`                                           | workshop cards + detail pages, tags |
+  | `workshop-faq.ts`                                        | registration FAQ                    |
+  | `gallery.ts`                                             | past-event cards + detail pages     |
+  | `testimonials.ts`                                        | testimonial quotes across pages     |
+  | `timeline.ts`                                            | About page journey/milestones       |
+  | `companies.ts`                                           | "companies served" logo marquee     |
+  | `specializations.ts`                                     | corporate programme cards           |
+  | `certifications.ts`                                      | About page accrediting-body list    |
+  | `images.ts`, `utils.ts`, `og-jpeg.ts`, `gallery-blur.ts` | helpers, not content                |
 
-Live in `src/app/_components/` and `src/app/_sections/`, built specifically for this demo:
+  These `src/lib/*.ts` files are the seams Phase 2 replaces with real CMS data — treat
+  each one's shape as the data contract a CMS schema should match. See
+  [HANDOFF.md](HANDOFF.md) for the full approval/Phase-2 status of each.
 
-- `hero-editorial.tsx` — the current landing hero: giant top-left wordmark, cover lines,
-  bottom-left CTA. Replaced an earlier scroll-pinned hero (deleted, along with the old
-  `/hero-lab` route).
-- `quote-reveal.tsx` — collision-proof responsive portrait/quote layout on the homepage.
-- `spec-reveal-cards.tsx`, `split-reveal.tsx`, `text-sweep-reveal.tsx`, `reveal.tsx` — GSAP
-  scroll-reveal primitives, all gated on `prefers-reduced-motion` via `gsap.matchMedia`.
-- `companies-marquee.tsx` — the "You're in great company" logo marquee.
-  **Do not edit this file, even for small audit fixes** — it's been tuned and is fragile to
-  touch; if something looks off, flag it rather than patching it directly.
-- `workshops-calendar.tsx`, `event-cards.tsx`, `timeline.tsx`, `counter.tsx`,
-  `countdown.tsx`, `marquee.tsx` — supporting motion/data-display pieces used across
-  workshops, gallery, and about.
-- `bloom-field-background.tsx`, `floating-copy.tsx` — decorative background/copy effects.
-- `scroll-refresh.tsx` — mounted once in the root layout. Re-runs `ScrollTrigger.refresh()`
-  after fonts load, on window load, and on any body resize. Without it every scroll reveal
-  fires up to a full viewport late, because ScrollTrigger resolves `start: "top 85%"` into an
-  absolute position at creation time — before the webfonts swap and SplitText re-wrap shift
-  everything below them.
-- `workshops-calendar.tsx` — marked days are real buttons (plain days are `div`s: a `disabled`
-  button swallows pointer events, so hover styling never lands). The day popover renders in a
-  portal on `document.body` and is positioned from the trigger's viewport rect, flipping its
-  anchored edge near the bottom of the screen. The marker circles are four hand-wobbled SVG
-  paths picked by `date % 4` — deterministic, never randomized, so SSR and client agree.
-- `workshops/[slug]/_sections/sticky-register-bar.tsx` — the fixed bottom "Register" bar on
-  open-workshop pages. It hides itself the instant the page's `<footer>` scrolls into view
-  (`document.querySelector("footer")` — there's only ever one per page), rather than the page
-  padding the footer to clear a bar that stays shown to the bottom. Padding the footer left a
-  dead gap under its decorative wordmark; not hiding the bar put a light `bg-background` bar
-  on top of the black footer. Don't reintroduce either — see `tasks/lessons.md` 2026-09-07.
+Two rules carried from the base template that still hold:
+
+1. **`page.tsx` files carry no copy.** Imports, metadata, and composition only.
+2. **Don't edit `src/components/`.** It's the template's shared UI layer; content and
+   layout changes happen in `_sections/*.tsx` or `src/lib/*.ts`.
 
 ---
 
 ## Design system
 
-### Colour
+Tokens live in `src/app/globals.css`. The site is **committed to light mode** — there is
+no theme toggle, so `.dark` utilities/tokens exist (carried from the template) but are
+inert on purpose.
 
-Tokens live in `src/app/globals.css`. Brand is a deep maroon/wine (`#980F09`).
+| Token                 | Value                        | Notes                                                                                                                   |
+| --------------------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `--brand`             | `oklch(0.4331 0.1689 29.22)` | `#980F09` deep maroon/wine — primary buttons/links                                                                      |
+| `--brand-accent`      | `oklch(0.615 0.23 29.22)`    | same hue, lifted for legibility as an inline accent on the cream quote sheet, and for the navbar CTA over dark sections |
+| `--brand-accent-dark` | `oklch(0.72 0.15 29.22)`     | dark-mode variant (inert — see above)                                                                                   |
+| `--radius`            | `0.25rem`                    | near-square                                                                                                             |
 
-| Token                 | Value                        | Notes                                                                                                                |
-| --------------------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `--brand`             | `oklch(0.4331 0.1689 29.22)` | `#980F09`, primary buttons/links                                                                                     |
-| `--brand-accent`      | `oklch(0.615 0.23 29.22)`    | Same hue, lifted for legibility as an inline accent word on the cream quote sheet — too light to double as `--brand` |
-| `--brand-accent-dark` | `oklch(0.72 0.15 29.22)`     | Dark-mode variant of the accent                                                                                      |
-| `--radius`            | `0.25rem`                    | Near-square                                                                                                          |
+### Typography
 
-Dark mode lifts `--brand` to `oklch(0.53 0.17 29.22)` (~+0.10 L) for contrast against a dark
-ground. Both light and dark tokens are defined — check both before shipping a color change.
+Three type families, loaded via `next/font` and exposed as CSS vars in
+`src/app/layout.tsx`:
+
+- `--font-red-hat` (`--font-sans`) — Red Hat Display, Google font, body/UI text.
+- `--font-the-seasons` (`--font-serif`) — display serif for the logo, headings, pull
+  quotes. Self-hosted from `src/app/fonts/`.
+- `--font-abramo` (`--font-accent`) — all-caps serif, special callouts only.
+- `--font-prata` — free stand-in for The Seasons, used only by the review-only font
+  toggle (see below).
+
+`globals.css` maps `font-sans` / `font-serif` / `font-accent` Tailwind utilities to these
+vars — use those utilities rather than `var(--font-the-seasons)` directly except in the
+handful of places already noted in `globals.css` (`html[data-fonts="alt"]` override).
 
 ### Buttons
 
-Glow and border color must shift on hover together with the fill — not just the fill alone.
-Check this specifically on any button variant you touch.
-
-Over a `data-navbar-theme="dark"` section, the navbar CTA takes `.nav-cta-dark`, which swaps
-`--brand` for the lifted `--brand-accent` — the deep maroon reads as a dark blob on black.
+Glow and border color must shift on hover together with the fill, not the fill alone —
+check this specifically on any button variant you touch.
 
 ### Motion
 
-Mount-time reveals are CSS keyframes, not JS. The gallery walls use `.animate-wall-tile-in`
-with an inline `--tile-i` index for the stagger, so the wall paints immediately instead of
-sitting blank until framer-motion hydrates (measured: 557–1041ms of empty grid before the
-change). Scroll- and interaction-driven motion stays on GSAP/framer-motion.
+- Mount-time reveals (e.g. the gallery wall tiles) are CSS keyframes, not JS, so they
+  paint immediately instead of sitting blank until a motion library hydrates.
+- Scroll- and interaction-driven motion is GSAP-first (see below); `framer-motion` is
+  used more broadly than just the hero — it backs `countdown.tsx`,
+  `spec-reveal-cards.tsx`, `text-sweep-reveal.tsx`, `timeline.tsx`,
+  `workshops-calendar.tsx`, `quote-reveal.tsx`, `paths.tsx`, `photo-wall.tsx`,
+  `site-navbar.tsx`, and `parallax-floating.tsx` — mostly simple `motion.div`
+  fades/hovers and `AnimatePresence` exits, not scroll orchestration.
 
 ### Hover states
 
-Gallery/photo tile hover should only scale the tile up. Never dim or white-out sibling tiles
-on hover — that reads as a bug, not an effect.
+Gallery/photo tile hover should only scale the tile up. Never dim or white-out sibling
+tiles on hover — that reads as a bug, not an effect.
+
+---
+
+## Animation architecture (GSAP)
+
+`src/app/_lib/gsap.ts` is the single registration point. Every animated component
+imports `gsap` + plugins + shared tokens (`EASE`, `EASE_IO`, `DUR`, `RISE`) from there so
+plugin registration happens exactly once, guarded to the client
+(`typeof window !== "undefined"`) since several plugins touch `window` and would throw
+during RSC/SSR evaluation.
+
+Registered plugins: `ScrollTrigger`, `SplitText`, `CustomEase`, `DrawSVGPlugin`,
+`Draggable`, `InertiaPlugin`, `Flip`, `useGSAP`. Two named eases are created once at
+registration: `ad-ease` (the site's signature long, quiet editorial ease-out) and
+`ad-ease-io` (for interactive/step transitions).
+
+### Primitives (`src/app/_components/`)
+
+| Component                                        | Does                                                               |
+| ------------------------------------------------ | ------------------------------------------------------------------ |
+| `reveal.tsx`                                     | scroll-in fade + rise, once, optional stagger over direct children |
+| `split-reveal.tsx`                               | heading reveal via `SplitText`, line/word split                    |
+| `spec-reveal-cards.tsx`, `text-sweep-reveal.tsx` | other scroll-reveal variants                                       |
+| `marquee.tsx`, `companies-marquee.tsx`           | logo/content marquees                                              |
+| `counter.tsx`, `countdown.tsx`                   | animated numbers                                                   |
+| `timeline.tsx`                                   | About page journey                                                 |
+| `testimonial-columns.tsx`                        | testimonial layout/animation                                       |
+| `scroll-refresh.tsx`                             | see below                                                          |
+
+### Reduced motion
+
+Gated via `gsap.matchMedia()` — e.g. `reveal.tsx` registers a
+`(prefers-reduced-motion: reduce)` branch that snaps straight to the resting state and a
+`(prefers-reduced-motion: no-preference)` branch that runs the real animation. 8 files
+under `src/app` use this pattern. `src/app/_lib/use-reduced-motion-safe.ts` and
+`src/app/_lib/use-is-touch.ts` provide the same gating for non-GSAP interactions —
+`useIsTouch` in particular exists because a tap on a touchscreen still synthesises
+`mouseenter`/`mousemove`, so pointer-driven effects (cursor parallax, hover take-overs)
+need to check this rather than trusting that mouse events mean a mouse.
+
+### `<ScrollRefresh />`
+
+Mounted once in `src/app/layout.tsx`, covers every route. `ScrollTrigger` resolves a
+trigger like `start: "top 85%"` into an absolute scroll position **at creation time**.
+Components on this site mount before layout is final — webfonts swap in, `SplitText`
+re-wraps text into spans, the sticky hero resizes — so triggers created before that
+settles are wrong by however much the page shifted. `ScrollRefresh` re-runs
+`ScrollTrigger.refresh()` (debounced via `requestAnimationFrame`) after
+`document.fonts.ready`, on window `load`, and on any `ResizeObserver` hit on
+`document.body`. Measured impact before this existed: a stats-grid reveal fired at
+scrollY 5300 instead of 4298 — a full viewport late.
+
+---
+
+## Gotchas
+
+- **`SplitText` splits are fixed at mount.** A component that splits a heading into
+  line/word spans measures against whichever font is active when it mounts. If the font
+  changes after that (see the font-toggle below), the split is stale — this is why the
+  font toggle reloads the page instead of flipping a live attribute.
+- **ScrollTrigger positions need a refresh after fonts load** — see `<ScrollRefresh />`
+  above. Don't reintroduce a scroll reveal that skips it.
+- **`next/og` (Satori) can't read `.webp` images or `.woff2` fonts.** Both
+  `opengraph-image.tsx` routes (`src/app/opengraph-image.tsx` and
+  `src/app/workshops/[slug]/opengraph-image.tsx`) read assets from
+  `src/app/og-assets/` (PNG + TTF) instead of the site's normal `.webp`/`.woff2` files,
+  and inline them as base64 data URIs — Satori doesn't resolve root-relative
+  `/images/...` paths. Regenerate those TTF/PNG copies from the originals if the source
+  fonts or portrait change. This is also why `grep -rn "<img" src/` isn't empty — the two
+  OG routes use a raw `<img>` inside `ImageResponse`, which is correct there (`next/image`
+  doesn't work inside Satori's renderer); every other `<img>` in `src/` would be a bug.
+- **Verify OG cards against `next build`, not `next dev`.** Turbopack dev rejects the
+  inlined PNGs with "Input buffer contains unsupported image format" while the
+  production render of the identical code is fine. Check
+  `.next/server/app/opengraph-image.body` after a build.
+- **`params` is a Promise in these metadata routes.** `workshops/[slug]/opengraph-image.tsx`
+  types `params` as `Promise<{ slug: string }>` and awaits it — typing it as a plain
+  object compiles fine and silently yields `undefined` for every slug, rendering the same
+  fallback card for all eight workshops.
+- **The landing hero is `sticky`; don't put `overflow-hidden` on an ancestor.**
+  `hero-editorial.tsx`'s own root is `sticky top-0 ... overflow-hidden` by design, but a
+  `sticky` element stops sticking the moment any ancestor clips overflow. If a future
+  section needs to clip content, use `overflow-x-clip` on that ancestor instead of
+  `overflow-hidden`, so the sticky hero above it keeps working.
+- **`companies-marquee.tsx` is fragile — don't edit it, even for small audit fixes.** It's
+  been tuned; if something looks off, flag it rather than patching it directly.
+- **`workshops-calendar.tsx`**: marked days are real `<button>`s, plain days are `<div>`s
+  — a `disabled` button swallows pointer events, so hover styling never lands on a plain
+  day. The day popover renders in a portal on `document.body`, positioned from the
+  trigger's viewport rect. Marker-circle wobble is picked by `date % 4` from four fixed
+  SVG paths — deterministic, not randomized, so SSR and client agree.
+- **`workshops/[slug]/_sections/sticky-register-bar.tsx`** hides itself the instant the
+  page's `<footer>` scrolls into view (`document.querySelector("footer")` — there's only
+  ever one per page) rather than padding the footer to clear a bar that stays shown.
+  Don't reintroduce footer padding or an always-shown bar — both were tried and reverted.
+- **Form → confirmation handoff never branches on `sessionStorage` during render.** Both
+  forms write submitted values to `sessionStorage` via `src/app/_lib/handoff.ts`, then
+  `router.push` to their confirmation route, which reads the value back in a `useEffect`.
+  `sessionStorage` doesn't exist during SSR, so branching the first client render on it
+  hydration-mismatches. Every confirmation section must render a complete generic state
+  when the handoff is `null` (direct visit, private mode, blocked site data).
+- **`useIsTouch()`** (`src/app/_lib/use-is-touch.ts`) gates pointer-only effects (cursor
+  parallax, hover take-overs) — see Reduced motion above.
+
+---
+
+## Temporary review tools
+
+Two things currently in the UI exist only for the client review. Both must be removed
+before go-live.
+
+### Hero font switch
+
+`src/app/_components/font-switch.tsx` — a toggle in the hero letting Adrian compare the
+paid **The Seasons** against free **Prata**. Persists the choice in `localStorage` under
+`adrianding-fonts` (`"current"` | `"alt"`); switching calls `window.location.reload()`
+rather than flipping a live attribute, because dozens of `SplitText`-split headings below
+the fold are sized against whichever font is active at mount (see Gotchas above). The
+saved choice is applied pre-paint by an inline `<Script id="font-init" strategy="beforeInteractive">`
+in `layout.tsx`, so a stored "alt" choice never flashes the default font on reload.
+
+To remove:
+
+1. Delete `src/app/_components/font-switch.tsx`.
+2. Remove its import and render in `src/app/_sections/hero-editorial.tsx`.
+3. In `src/app/layout.tsx`: remove the `prata` font load, its `.variable` class in the
+   `<body className>` string, and the `<Script id="font-init">` block.
+4. In `src/app/globals.css`: remove the `html[data-fonts="alt"] body` override block.
+
+Font licensing (full detail in [HANDOFF.md](HANDOFF.md)): **The Seasons** and **Abramo**
+in `src/app/fonts/` are web-sourced demo copies of commercial fonts — swap for licensed
+files (same filenames) before any real handoff. A TTF copy of The Seasons also lives in
+`src/app/og-assets/` for the social cards and needs the same swap. **Abramo is loaded but
+currently unused** in visible copy (reserved for future callouts) — confirm with Adrian
+whether to keep licensing it.
+
+### "Fill sample data" button
+
+`src/app/_components/demo-fill.tsx` (`DemoFillButton`) — a quiet pill on both multi-step
+forms that fills every step with sample data, so the funnel can be walked on a phone
+without typing.
+
+To remove:
+
+1. Delete `src/app/_components/demo-fill.tsx`.
+2. In `src/app/workshops/[slug]/_sections/registration-form.tsx` and
+   `src/app/corporate-training/_sections/inquiry-form.tsx`: remove the `DemoFillButton`
+   import, its render, and the `fillSample` function it calls.
+
+`src/app/_components/about-prompt.tsx` (`AboutPromptAnchor`) is **not** a review tool: it
+is the permanent "Know more about Coach Adrian" link on the workshop-detail and
+corporate-training pages. Adrian chose this inline version on 2026-09-19.
 
 ---
 
 ## Images
 
-`public/images/` is subfoldered (`gallery/`, `hero/`, `icons/`, `logos/`, `mascot/`) — this
-diverges from the base template's flat rule because of the volume of company logos and
-per-event gallery photos. Company logo files are named `co-<slug>.<ext>`.
+`public/images/` is subfoldered (`gallery/`, `hero/`, `icons/`, `logos/`, `mascot/`) —
+this diverges from the base template's flat-file rule because of the volume of company
+logos and per-event gallery photos. Company logo files are named `co-<slug>.<ext>`.
 
-Photographic sources are `.webp`. The three inner-page hero banners, `ad-photo-2` and the
-three certification logos were originally 1.5–3.1MB PNG/JPG; they were recompressed with
-`sharp(...).webp({quality: 86})` (~90–97% smaller) and the call sites repointed. The originals
-stay on disk unreferenced per the superseded-asset convention — check `PRD.md`'s asset table
-before adding any new large source image, and run `file <path>` rather than trusting the
-extension (`about-hero.jpg` was actually a PNG).
-
-`src/app/og-assets/` is deliberately _not_ webp: Satori (`next/og`) can read neither `.webp`
-images nor `.woff2` fonts, so the social card reads PNG/TTF conversions off disk and inlines
-them as data URIs. Verify that card against `next build` (`.next/server/app/opengraph-image.body`),
-not `next dev` — Turbopack dev rejects the inlined PNGs while the production render is fine.
-
-`grep -rn "placeholderImg" src/` currently returns 14 hits — these are the Unsplash
-stand-ins in `src/lib/specializations.ts` and elsewhere pending real client photography.
-Confirm each one against `PRD.md` before delivery.
+`src/app/og-assets/` is deliberately not `.webp`/`.woff2` — see Gotchas above.
 
 ---
 
-## Before this goes to the client for final delivery
-
-- [ ] Replace placeholder testimonials, quotes, and workshop prices — see the approval table
-      above.
-- [ ] Swap `The Seasons` / `Abramo` font files for licensed copies (same filenames) in
-      `src/app/fonts/`.
-- [ ] Fill in the 47 missing company logos or confirm the name-chip fallback is acceptable.
-- [ ] Confirm founding year / milestones in `src/lib/timeline.ts`.
-- [ ] Confirm AET/CPD accrediting-body names and years in `about/_sections/certifications.tsx`.
-- [ ] Resolve all 14 `placeholderImg` calls with real photography.
-- [ ] Set `NEXT_PUBLIC_SITE_URL` to the domain this build is actually served from, and
-      re-check the generated card with `curl -s <host>/ | grep 'og:image'`.
-- [ ] Decide scope and timeline for the CRM/CMS/auth work described above — not part of this
-      demo's delivery.
+## Quality gates
 
 ```bash
-npm run validate                # typecheck + lint + format check
-grep -rn "TODO" src/            # every hit maps to a row in the approval table above
-grep -rn "placeholderImg" src/  # must be empty before delivery
-grep -rn "<img" src/            # must be empty — next/image only
+npm run validate                        # typecheck + lint + format check
+npx prettier --check "src/**/*.{ts,tsx,css}"  # format:check flags graphify-out/ too; scope to src/ to isolate real issues
+grep -rn "placeholderImg(" src/lib/specializations.ts  # 11 calls — Unsplash stand-ins, real photography pending
+grep -rn "<img" src/                    # 2 hits, both inside the OG image routes — expected, see Gotchas
+grep -rn "TODO" src/                    # 37 hits — each maps to an open item in HANDOFF.md / PRD.md
 ```
+
+Current state (verified 2026-09-28): `npm run typecheck` and `npm run lint` both pass
+clean. `npm run format:check` reports issues only because `graphify-out/` (a generated
+knowledge-graph cache, not source) isn't yet excluded from Prettier's glob — `src/` itself
+is fully Prettier-clean. That `.prettierignore` gap is being fixed in parallel; if it's
+still open when you read this, add `graphify-out/` to `.prettierignore` rather than
+running `prettier --write .` at the repo root.
 
 ---
 
-## Scripts
+## Deploy
 
-```bash
-npm run dev           # dev server
-npm run build         # production build
-npm run validate      # typecheck + lint + format check (run before delivery)
-npm run lint          # ESLint
-npm run lint:css      # Stylelint
-npm run format        # Prettier (write)
-npm run typecheck     # TypeScript
-```
+No `vercel.json` or other deploy config is committed. The `NEXT_PUBLIC_SITE_URL` fallback
+chain in `layout.tsx` (`VERCEL_PROJECT_PRODUCTION_URL` → `VERCEL_URL` → localhost) assumes
+a **Vercel** deploy and needs those env vars if deployed elsewhere. No other
+platform-specific config exists in the repo.

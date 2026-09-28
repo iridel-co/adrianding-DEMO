@@ -428,6 +428,16 @@ Images live flat in `public/images/` (no subfolders — per Iridel template conv
 > The Seasons + Abramo are commercial faces; the installed woff2 are web-download copies for the
 > demo. Swap in licensed files (same filenames) before client handoff.
 
+> **Status as of 2026-09-28.** Decision still pending with Adrian. `src/app/_components/font-switch.tsx`
+> is now wired into the live hero so he can compare The Seasons directly against **Prata**
+> (SIL OFL, free, self-hosted with a 93% `size-adjust` to match The Seasons' cap/x-height) —
+> Iridel's fallback recommendation if he doesn't license. Toggle is a client-review tool only;
+> remove it and the Prata font load (see the component's own header comment for the exact
+> removal steps) once the decision lands. Separately: `.font-accent` (the CSS class that wires
+> up Abramo) currently has zero call sites anywhere in `src/app` or `src/components` — Abramo
+> is loaded but effectively unused on the rendered site. Confirm before treating it as
+> load-bearing for a licensing decision; it may not need one at all.
+
 ---
 
 ## Delivery

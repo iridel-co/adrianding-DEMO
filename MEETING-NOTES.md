@@ -4,6 +4,12 @@
 > decision or an asset the demo needs from him; nothing on this list is blocked
 > on us. Ordered by what costs the most if it stays unanswered.
 
+> **Status as of 2026-09-28.** Item 5.1 (About-prompt treatment) is resolved: Adrian chose
+> inline on 2026-09-19, and the slide-in-card/pop-up variants plus the switcher were deleted
+> from the codebase (`about-prompt.tsx` now exports only the inline `AboutPromptAnchor`).
+> Item 2 (fonts) is still open, but the demo now has a live comparison tool — see
+> `HANDOFF.md` §3 and §4. Everything else below is unchanged.
+
 ---
 
 ## 1. Pricing — currently invented
