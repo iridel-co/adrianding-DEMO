@@ -235,13 +235,12 @@ export function HeroEditorial() {
                 fraction of the wordmark's own font size (same clamps as `WORD`),
                 because Prata's line box leaves a tall empty band under the
                 baseline for the "g" tail; this keeps the gap proportional at
-                every size. The right fade is shorter than the Marquee's
-                default (7%) so the roles read nearly to the edge. */}
+                every size. Edge fades are the Marquee's default, 7% each side. */}
             <div className="he-line mt-[calc(0.75rem-0.14*clamp(3.85rem,14vw,9.5rem))] flex items-center gap-2.5 sm:mt-[calc(0.75rem-0.14*clamp(2.75rem,10vw,9.5rem))]">
               <Marquee
                 speed={22}
                 gap="2.75rem"
-                className="w-[calc(4.5*clamp(3.85rem,14vw,9.5rem))] [mask-image:linear-gradient(to_right,transparent,#000_7%,#000_97.5%,transparent)] text-[0.7rem] font-semibold tracking-[0.16em] text-white/80 uppercase [-webkit-mask-image:linear-gradient(to_right,transparent,#000_7%,#000_97.5%,transparent)] [text-shadow:0_1px_8px_rgba(0,0,0,0.55)] sm:w-[calc(4.5*clamp(2.75rem,10vw,9.5rem))] sm:text-[0.72rem] sm:tracking-[0.2em]"
+                className="w-[calc(4.5*clamp(3.85rem,14vw,9.5rem))] text-[0.7rem] font-semibold tracking-[0.16em] text-white/80 uppercase [text-shadow:0_1px_8px_rgba(0,0,0,0.55)] sm:w-[calc(4.5*clamp(2.75rem,10vw,9.5rem))] sm:text-[0.72rem] sm:tracking-[0.2em]"
               >
                 {ROLES.map((role) => (
                   <span
