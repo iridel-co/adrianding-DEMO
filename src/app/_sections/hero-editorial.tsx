@@ -3,7 +3,6 @@
 import Image from "next/image"
 import { Facebook, Instagram, Linkedin, Youtube } from "lucide-react"
 import { Marquee } from "@/app/_components/marquee"
-import { FontSwitch } from "@/app/_components/font-switch"
 import { SiteNavbar } from "@/app/_components/site-navbar"
 import { gsap, useGSAP, EASE, DUR } from "@/app/_lib/gsap"
 
@@ -76,7 +75,7 @@ const ROLES = [
 ]
 
 // No clip mask around the wordmark (see the wrapper below), so leading is free —
-// it can't chop the "theSeasons" caps or the "g" tail whatever the size. Sizing
+// it can't chop the caps height or the "g" tail whatever the size. Sizing
 // is still being tuned. The role marquee below is clipped short of the final "g"
 // (~89% width), so the descender has its own clear lane — no `pb` reserve needed.
 // Mobile gets its own, bigger clamp (`sm:` restores the original formula
@@ -271,9 +270,6 @@ export function HeroEditorial() {
             ))}
           </div>
         </div>
-
-        {/* Client-review-only: paid vs. free font pair comparison. */}
-        <FontSwitch />
       </div>
     </>
   )

@@ -13,14 +13,13 @@ export const OG_ACCENT = "#c9453a"
 export const OG_SCRIM =
   "linear-gradient(90deg, rgba(8,6,6,0.92) 0%, rgba(8,6,6,0.62) 46%, rgba(8,6,6,0.3) 78%, rgba(8,6,6,0.5) 100%)"
 
-// Title sizes scaled ~0.93 for the 2026-09-28 Prata swap (Prata's caps run
-// ~14% taller and wider than The Seasons at the same fontSize — same ratio
-// the site's own font-switch toggle uses, see `layout.tsx`). Verified this
-// keeps the same ~2-line wrap for every current workshop title at the same
-// `maxWidth` (measured via the approach in `measure-titles.mjs`, scratchpad
-// of the font swap) — line count and proportions match the previous
-// The Seasons render, nothing collides with the bottom block or the
-// wordmark column. `eyebrow` is sans (Red Hat Display), unaffected.
+// Title sizes scaled ~0.93 for Prata's metrics (its caps run ~14% taller and
+// wider than a standard display serif at the same fontSize — matches the
+// `size-adjust: 93%` used on the site's own Prata load, see `layout.tsx`).
+// Verified this keeps a ~2-line wrap for every current workshop title at the
+// same `maxWidth` (measured via the approach in `measure-titles.mjs`),
+// nothing collides with the bottom block or the wordmark column. `eyebrow`
+// is sans (Red Hat Display), unaffected.
 export const OG_SCALE = { eyebrow: 32, longTitle: 78, shortTitle: 110 } as const
 export const OG_MARGIN = 44
 export const OG_CONTENT_LEFT = 68
@@ -52,10 +51,8 @@ export function addressLine(venue: string, city: string): string {
  * `630 - 605 = 25px` regardless of font — the top margin is whatever's left
  * after the rendered text width (`605 - textWidth`). `fontSize:103` is the
  * Prata value that puts that rendered width at ~583px (measured by the
- * approach in `og-mockups/round2b/measure.mjs`, re-run for Prata in the
- * 2026-09-28 font-license swap), giving a ~22px top margin — matching the
- * previous The Seasons geometry's ~24.5px within a few px, full name intact,
- * chop still right-edge only. `height` is `fontSize * 1.15`, the same
+ * approach in `og-mockups/round2b/measure.mjs`), giving a ~22px top margin,
+ * full name intact, chop still right-edge only. `height` is `fontSize * 1.15`, the same
  * line-height multiplier the original geometry used, so the horizontal chop
  * stays proportionally similar (~26% of the rotated footprint vs. the
  * original ~32%).

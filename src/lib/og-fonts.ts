@@ -10,17 +10,14 @@ import { join } from "node:path"
  * TTF, not the site's own `.woff2` — Satori's font decoder throws on woff2.
  *
  * The serif is exported as `OG_SERIF`, one constant, so this is the one
- * switch point. Cards currently render with **Prata** (SIL OFL,
- * `Prata-Regular.ttf`) — The Seasons is a paid commercial face and Chan
- * doesn't have a license for it yet (2026-09-28). Prata ships one weight
- * only (400/regular), so `og-card.tsx` must never ask this family for 700 —
- * Satori fake-bolds or fails on a missing weight. Switching back to The
- * Seasons once it's licensed (including server-side rendering rights, which
- * is a separate grant from a webfont license) is: swap the filename/weight
- * below back to `TheSeasons-Bold.ttf` / 700, then re-check the wordmark fit
- * in `og-card.tsx` (`SPINE.fontSize` etc.) — Prata's metrics are wider/taller
- * than The Seasons', so the geometry was re-measured for it and doesn't
- * carry over as-is.
+ * switch point. Cards render with **Prata** (SIL OFL, `Prata-Regular.ttf`) —
+ * the site's permanent serif. Prata ships one weight only (400/regular), so
+ * `og-card.tsx` must never ask this family for 700 — Satori fake-bolds or
+ * fails on a missing weight. To swap the serif for a different family later,
+ * change `OG_SERIF` and the filename/weight below, then re-check the
+ * wordmark fit in `og-card.tsx` (`SPINE.fontSize` etc.) — a different
+ * family's metrics won't carry over as-is; the geometry there was measured
+ * for Prata specifically.
  */
 
 const ASSETS = join(process.cwd(), "src/app/og-assets")

@@ -23,9 +23,9 @@
 | Secondary   | `#222222` — near-black                                                              |
 | Neutral     | `#FFFFFF` — white                                                                   |
 | Tone        | Classy, sophisticated, "GQ meets Architectural Digest" — relatable Boomers to Gen Z |
-| Serif font  | The Seasons (logo, key words/pull quotes)                                           |
-| Body font   | Red Hat Display                                                                     |
-| Accent font | Abramo (special callouts only)                                                      |
+| Serif font  | Prata (logo, key words/pull quotes) — SIL OFL, free                                 |
+| Body font   | Red Hat Display — SIL OFL, free                                                     |
+| Accent font | none — dropped                                                                      |
 
 ### Competitive Differentiation
 
@@ -436,24 +436,20 @@ Images live flat in `public/images/` (no subfolders — per Iridel template conv
 
 ### Fonts (installed — `src/app/fonts/`, wired in `src/app/layout.tsx`)
 
-| Role                                       | Font                             | Source             | Var                                 |
-| ------------------------------------------ | -------------------------------- | ------------------ | ----------------------------------- |
-| Serif / display (logo, headings, wordmark) | **The Seasons** (Regular + Bold) | web-sourced woff2  | `--font-the-seasons` → `font-serif` |
-| Body                                       | **Red Hat Display** (300–900)    | `next/font/google` | `--font-red-hat` → `font-sans`      |
-| Accent (callouts only)                     | **Abramo** Serif                 | web-sourced woff2  | `--font-abramo` → `font-accent`     |
+| Role                                       | Font                          | Source                                           | Var                            |
+| ------------------------------------------ | ----------------------------- | ------------------------------------------------ | ------------------------------ |
+| Serif / display (logo, headings, wordmark) | **Prata** (Regular, 400 only) | SIL OFL, self-hosted woff2 via `next/font/local` | `--font-prata` → `font-serif`  |
+| Body                                       | **Red Hat Display** (300–900) | `next/font/google`, SIL OFL                      | `--font-red-hat` → `font-sans` |
+| Mono                                       | **Geist Mono**                | `next/font/google`, SIL OFL                      | `--font-geist-mono`            |
 
-> The Seasons + Abramo are commercial faces; the installed woff2 are web-download copies for the
-> demo. Swap in licensed files (same filenames) before client handoff.
-
-> **Status as of 2026-09-28.** Decision still pending with Adrian. `src/app/_components/font-switch.tsx`
-> is now wired into the live hero so he can compare The Seasons directly against **Prata**
-> (SIL OFL, free, self-hosted with a 93% `size-adjust` to match The Seasons' cap/x-height) —
-> Iridel's fallback recommendation if he doesn't license. Toggle is a client-review tool only;
-> remove it and the Prata font load (see the component's own header comment for the exact
-> removal steps) once the decision lands. Separately: `.font-accent` (the CSS class that wires
-> up Abramo) currently has zero call sites anywhere in `src/app` or `src/components` — Abramo
-> is loaded but effectively unused on the rendered site. Confirm before treating it as
-> load-bearing for a licensing decision; it may not need one at all.
+> **Decision (2026-09-29, Chan):** the site uses free, open-licensed fonts only. Prata
+> replaces The Seasons as the serif everywhere (site + share cards); no accent font — Abramo
+> is dropped entirely. All three families are SIL OFL, so there's nothing to license and
+> nothing to swap before handoff. Prata is self-hosted with a `size-adjust: 93%` declaration
+> to compensate for its taller cap-height/x-height relative to the original reference face,
+> and ships one weight only (400) — serif text is never bold. The earlier paid-font copies
+> (The Seasons, Abramo) are deleted from the repo; they still exist in git history, which is
+> fine since the repo is private.
 
 ---
 

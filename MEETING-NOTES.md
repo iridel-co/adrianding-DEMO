@@ -11,6 +11,11 @@
 > `README.md` → Temporary review tools and Decisions pending. Everything else below is
 > unchanged.
 
+> **Status as of 2026-09-29.** Item 2 (fonts) is resolved: Chan decided the site uses free,
+> open-licensed fonts only — Prata replaces The Seasons everywhere (site + share cards),
+> Red Hat Display and Geist Mono stay, Abramo is dropped. The font comparison toggle and the
+> paid font files are removed from the codebase. See `PRD.md` → Fonts for the record.
+
 ---
 
 ## 1. Pricing — currently invented

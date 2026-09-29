@@ -9,9 +9,9 @@ import { ScrollTrigger } from "@/app/_lib/gsap"
  *
  * ScrollTrigger resolves `start: "top 85%"` into an absolute scroll position
  * at *creation* time. On this site the components mount before the layout is
- * final — webfonts (The Seasons / Abramo) swap in, SplitText re-wraps the
- * quote into per-word spans, and the sticky hero + QuoteReveal track above the
- * fold resize as that happens. Every position cached before then is wrong by
+ * final — the Prata webfont swaps in, SplitText re-wraps the quote into
+ * per-word spans, and the sticky hero + QuoteReveal track above the fold
+ * resize as that happens. Every position cached before then is wrong by
  * however much the content above shifted.
  *
  * Measured on the landing page before this existed: the <LandingStats> grid

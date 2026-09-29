@@ -287,7 +287,7 @@ export function LandingPaths() {
       <div className="px-6 pt-16 pb-8 text-center sm:px-8 md:hidden">
         {/* Fluid, viewport-locked size + `whitespace-nowrap` so this never
             wraps to a second line, however narrow the phone. */}
-        <h2 className="font-serif text-[clamp(1.75rem,8.8vw,3.2rem)] leading-[1.1] font-bold tracking-[-0.02em] whitespace-nowrap">
+        <h2 className="font-serif text-[clamp(1.75rem,8.8vw,3.2rem)] leading-[1.1] tracking-[-0.02em] whitespace-nowrap">
           <TextSweepReveal text="Which path is yours?" underline />
         </h2>
       </div>
@@ -331,7 +331,7 @@ export function LandingPaths() {
             aria-hidden
             className="absolute inset-0 scale-x-[1.7] scale-y-[2.6] bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.66)_0%,rgba(0,0,0,0.36)_45%,transparent_74%)] blur-2xl"
           />
-          <h2 className="relative font-serif text-[3rem] leading-[1.03] font-bold tracking-[-0.02em] text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.55)] lg:text-[4.5rem]">
+          <h2 className="relative font-serif text-[3rem] leading-[1.03] tracking-[-0.02em] text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.55)] lg:text-[4.5rem]">
             <TextSweepReveal
               text="Which path is yours?"
               textColor="#ffffff"

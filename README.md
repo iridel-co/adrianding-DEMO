@@ -9,14 +9,12 @@ decisions behind it.
 This README is the handoff document for both audiences: the PM (scope, status, open
 decisions) and the dev team (architecture, gotchas, setup) building Phase 2.
 
-> **Font notice — in effect until Chan says otherwise (2026-09-28).** We are not allowed to
-> use **The Seasons** or **Abramo** yet. The share cards already use Prata instead. The
-> website itself still defaults to The Seasons and loads Abramo from demo-only copies in
-> `src/app/fonts/`; that is deliberate for the client review, and it stays until Chan
-> decides. Do not deploy this site anywhere public, and do not use either font in new work,
-> until they are licensed or the site is switched to Prata. See
-> [Decisions pending](#decisions-pending-client--chan) and
-> [Hero font switch](#hero-font-switch).
+> **Fonts — resolved (2026-09-29).** The site uses free, open-licensed fonts only: **Prata**
+> (SIL OFL) for the serif, **Red Hat Display** (SIL OFL) for body, **Geist Mono** (SIL OFL)
+> for mono/code contexts. The Seasons and Abramo (paid commercial faces) are dropped — no
+> license to carry, no swap needed before handoff. The earlier paid-font copies still exist
+> in git history; the repo is private, so that's not a distribution concern. See
+> [Decisions pending](#decisions-pending-client--chan).
 
 ## Table of contents
 
@@ -91,32 +89,28 @@ each one's shape as the data contract a CMS schema should match.
 
 Pulled from `MEETING-NOTES.md` (2026-09-20 meeting) — items not yet marked resolved:
 
-1. **Fonts.** License The Seasons + Abramo from the foundries (Iridel's recommendation), or
-   substitute for free: Prata (already wired as the [font comparison toggle](#temporary-review-tools))
-   for The Seasons, Italiana or Parisienne for Abramo. Legal exposure is Adrian's — decision
-   has to be his. **Open** — added 2026-09-28, no decision recorded yet.
-2. **Pricing.** Every course price shown (₱6,500 / ₱18,500) is invented, asterisked as
+1. **Pricing.** Every course price shown (₱6,500 / ₱18,500) is invented, asterisked as
    "indicative." Need his real numbers; if he wants early-bird/group pricing that's a
    structure change to flag now, not a number swap later.
-3. **Copy sign-off.** The "equip further top producers" line (kept verbatim from his own
+2. **Copy sign-off.** The "equip further top producers" line (kept verbatim from his own
    wording, reads like a typo), the shortened Train-the-Trainers title, the per-course
    "problem" opening lines (written by us, first thing cold ad traffic reads), and the
    headline stats (20+ years, 20,000+ trained, Top 500 companies, sourced from the PRD not a
    verified source).
-4. **Assets.** 47/91 company logos still missing (priority: Finance, Real Estate, Hotels,
+3. **Assets.** 47/91 company logos still missing (priority: Finance, Real Estate, Hotels,
    Food & Retail, SMEs); Genos/trainer-cert accreditation marks silhouette as unusable white
    blobs and need real vector logos (noted as a paid follow-on, not a blocker); primer/teaser
    videos are placeholder slots on every course page — worth asking Adrian directly if he has
    any event footage.
-5. **Ad → course-page flow.** Confirm each ad links to its own course URL (not the homepage)
+4. **Ad → course-page flow.** Confirm each ad links to its own course URL (not the homepage)
    — each course now has its own social preview card, so this is now safe to do.
-6. **Corporate off-ramp placement.** "Train your team" sits after the register CTA on each
+5. **Corporate off-ramp placement.** "Train your team" sits after the register CTA on each
    course page (deliberate, so it doesn't cannibalize the seat). Confirm he's happy with the
    order.
-7. **Registration/payment policy details.** The 48-hour seat hold window, the transfer
+6. **Registration/payment policy details.** The 48-hour seat hold window, the transfer
    window, and whether an official receipt is issued by default (`src/lib/workshop-faq.ts`,
    `registered/_sections/payment.tsx`) are proposed policy, not confirmed.
-8. **Content confirmations.** Timeline founding year/milestones, AET/CPD accrediting-body
+7. **Content confirmations.** Timeline founding year/milestones, AET/CPD accrediting-body
    names and years, industry-count stat, testimonials (pending
    `Coach_Adrian_Ding_Website_2025.pdf`), and the 4 placeholder corporate programmes added
    2026-09-24 (Sales Leadership & Coaching, Customer Service Excellence, Change Management &
@@ -210,40 +204,12 @@ specific to this codebase — not a generic backend checklist.
 
 ## Temporary review tools
 
-Two things currently in the UI exist only for client review. Both must be removed before
+One thing currently in the UI exists only for client review, and must be removed before
 go-live.
 
 | Tool                      | Decision owner                                                     | Status                                                            |
 | ------------------------- | ------------------------------------------------------------------ | ----------------------------------------------------------------- |
-| Hero font switch          | Adrian (legal exposure is his)                                     | **Open** — added 2026-09-28, no decision recorded yet             |
 | "Fill sample data" button | Iridel (not a client-facing decision — just remove before go-live) | Still present, correctly labelled as demo-only in its own comment |
-
-### Hero font switch
-
-`src/app/_components/font-switch.tsx` — a toggle in the hero letting Adrian compare the
-paid **The Seasons** against free **Prata**. Persists the choice in `localStorage` under
-`adrianding-fonts` (`"current"` | `"alt"`); switching calls `window.location.reload()`
-rather than flipping a live attribute, because dozens of `SplitText`-split headings below
-the fold are sized against whichever font is active at mount (see [Gotchas](#gotchas)). The
-saved choice is applied pre-paint by an inline `<Script id="font-init" strategy="beforeInteractive">`
-in `layout.tsx`, so a stored "alt" choice never flashes the default font on reload.
-
-To remove:
-
-1. Delete `src/app/_components/font-switch.tsx`.
-2. Remove its import and render in `src/app/_sections/hero-editorial.tsx`.
-3. In `src/app/layout.tsx`: remove the `prata` font load, its `.variable` class in the
-   `<body className>` string, and the `<Script id="font-init">` block.
-4. In `src/app/globals.css`: remove the `html[data-fonts="alt"] body` override block.
-
-**Font licensing:** **The Seasons** and **Abramo** in `src/app/fonts/` are web-sourced demo
-copies of commercial fonts — swap for licensed files (same filenames) before any real
-handoff. **The social cards no longer use The Seasons** (see
-[Share images](#share-images-open-graph-cards)) — they render in Prata, so there's no TTF
-swap needed there unless Chan later licenses The Seasons and moves the cards back to it.
-**Abramo is loaded but currently unused** in visible copy
-(reserved for future callouts) — confirm with Adrian whether to keep licensing it (see also
-[Known issues / tech debt](#known-issues--tech-debt)).
 
 ### "Fill sample data" button
 
@@ -265,28 +231,19 @@ To remove:
 
 ## Known issues / tech debt
 
-- **Dead CSS.** `.pull-quote`, `.pull-quote--dark`, and `.font-accent` are defined in
+- **Dead CSS.** `.pull-quote` and `.pull-quote--dark` are defined in
   `src/app/globals.css` (lines ~226–240) but have zero usages anywhere in `src/app` or
-  `src/components` — confirmed by grep. Either wire them into the Abramo accent-font use case
-  they were built for, or remove them.
+  `src/components` — confirmed by grep. Either wire them into a real use case or remove them.
 - **Two motion libraries.** GSAP drives scroll and interaction motion; framer-motion is also
   used in about a dozen components (e.g. `quote-reveal.tsx`, `paths.tsx`,
   `spec-reveal-cards.tsx`, `timeline.tsx`, `site-navbar.tsx`). Not a problem by itself, but
   worth a deliberate decision before Phase 2 if the team wants to standardise on one.
-- **Abramo is loaded but unused.** `Abramo-Regular.woff2` is loaded in `src/app/layout.tsx`
-  as `--font-abramo`, but its only consumer, `.font-accent`, has no call sites, so no rendered
-  text uses it. It doesn't need a license unless a callout starts using it; otherwise remove
-  the load along with the dead CSS above.
 - **37 `TODO` comments** across `src/`, all content/copy pending client sign-off — every one
   maps to a row in the PRD's asset/approval table. Run `grep -rn "TODO" src/` to enumerate.
 - **`placeholderImg()`** is used in 6 files (`src/lib/images.ts`'s helper, its consumers
   `src/components/common/{image-card,testimonial-section,hero-section,feature-row}.tsx`, and
   `src/lib/specializations.ts` where the actual Unsplash stand-ins are). Must be empty before
   delivery per the [Quality gates](#quality-gates) checklist.
-- **Two unlicensed commercial fonts** still installed as demo-only web copies: The Seasons
-  (`src/app/fonts/TheSeasons-{Regular,Bold}.woff2`, website only — the social cards were
-  switched to Prata on 2026-09-28, see [Share images](#share-images-open-graph-cards)) and
-  Abramo (`Abramo-Regular.woff2` — see note above on it being unused).
 - **No `NEXT_PUBLIC_SITE_URL` set** — falls back to Vercel env vars or `localhost:3000`,
   which is correct for preview deploys but must be set explicitly at handoff, then verified
   with `curl -s <host>/ | grep 'og:image'`.
@@ -360,11 +317,11 @@ in 16.
 src/
   app/
     page.tsx                  composition only, no copy
-    layout.tsx                 metadata, fonts, <ScrollRefresh />, font-toggle init script
+    layout.tsx                 metadata, fonts, <ScrollRefresh />
     opengraph-image.tsx        site-wide 1200x630 social card (next/og)
     og-assets/                 TTF/PNG copies Satori can read (see Gotchas)
     globals.css                design tokens + custom utilities
-    fonts/                     The Seasons, Abramo, Prata (.woff2) — see Temporary review tools
+    fonts/                     Prata (.woff2)
     _sections/*.tsx             homepage sections
     _components/*.tsx           site-wide shared components (navbar, footer, GSAP primitives)
     _lib/                       gsap.ts, handoff.ts, hooks (see below)
@@ -433,19 +390,20 @@ inert on purpose.
 
 #### Typography
 
-Three type families, loaded via `next/font` and exposed as CSS vars in
-`src/app/layout.tsx`:
+Two type families, both free/open-licensed, loaded via `next/font` and exposed as CSS vars
+in `src/app/layout.tsx`:
 
-- `--font-red-hat` (`--font-sans`) — Red Hat Display, Google font, body/UI text.
-- `--font-the-seasons` (`--font-serif`) — display serif for the logo, headings, pull
-  quotes. Self-hosted from `src/app/fonts/`.
-- `--font-abramo` (`--font-accent`) — all-caps serif, special callouts only.
-- `--font-prata` — free stand-in for The Seasons, used only by the review-only
-  [font toggle](#hero-font-switch).
+- `--font-red-hat` (`--font-sans`) — Red Hat Display (SIL OFL), Google font, body/UI text.
+- `--font-prata` (`--font-serif`) — Prata (SIL OFL), display serif for the logo, headings,
+  pull quotes. Self-hosted via `next/font/local` from `src/app/fonts/`, with a `size-adjust:
+93%` declaration — at equal font-size Prata's cap height runs 14% taller and x-height 3.5%
+  taller than the design's original reference face, so 93% was tuned to land headline sizes
+  where they were designed. Prata ships **one weight only (400/regular)** — serif text is
+  never bold; don't reach for `font-serif font-bold`, it has nothing to render.
+- `--font-geist-mono` — Geist Mono (SIL OFL), Google font, mono/code contexts.
 
-`globals.css` maps `font-sans` / `font-serif` / `font-accent` Tailwind utilities to these
-vars — use those utilities rather than `var(--font-the-seasons)` directly except in the
-handful of places already noted in `globals.css` (`html[data-fonts="alt"]` override).
+`globals.css` maps `font-sans` / `font-serif` Tailwind utilities to these vars — use those
+utilities rather than `var(--font-prata)` directly.
 
 #### Buttons
 
@@ -520,9 +478,9 @@ scrollY 5300 instead of 4298 — a full viewport late.
 ### Gotchas
 
 - **`SplitText` splits are fixed at mount.** A component that splits a heading into
-  line/word spans measures against whichever font is active when it mounts. If the font
-  changes after that (see the [font toggle](#hero-font-switch)), the split is stale — this is why the
-  font toggle reloads the page instead of flipping a live attribute.
+  line/word spans measures against whichever font is active when it mounts. If the webfont
+  swaps in after that (e.g. `display: "swap"` resolving late), the split can go stale until
+  a re-measure — this is exactly what `<ScrollRefresh />` below exists to correct.
 - **ScrollTrigger positions need a refresh after fonts load** — see `<ScrollRefresh />`
   above. Don't reintroduce a scroll reveal that skips it.
 - **`next/og` (Satori) can't read `.woff2` fonts, and never sees the source photo
@@ -676,18 +634,11 @@ look changes only through Chan, not a unilateral dev tweak.
 
 Satori needs TTF/OTF — it throws on `.woff2`. Cards use `Prata-Regular.ttf` +
 `RedHatDisplay-600.ttf` from `src/app/og-assets/`, loaded once by `loadOgFonts()` and
-shared by both routes. **Cards render in Prata, not The Seasons, as of 2026-09-28** — The
-Seasons is a paid commercial face and Chan doesn't have a license for it (including the
-separate server-side-rendering rights Satori would need, on top of any webfont license —
-see the license note below). `OG_SERIF` in `src/lib/og-fonts.ts` is the single switch
-point: reverting to The Seasons once it's licensed is a one-line filename/weight change
-there (Prata is one weight only, 400; The Seasons Bold is 700 — update both the file and
-the `weight`), **plus re-measuring the wordmark geometry in `og-card.tsx`'s `SPINE`
-constant and `OG_SCALE`'s title sizes** — Prata's metrics don't match The Seasons' 1:1
-(caps run taller and wider), so the two fonts' fitted geometry isn't interchangeable.
-**License note:** Satori renders server-side at build time, which may fall under a
-different license tier than the client-side webfont use elsewhere on the site — confirm
-with whichever foundry licenses the chosen serif before shipping real cards.
+shared by both routes. Both fonts are SIL OFL (free, open-licensed) — no license tier to
+confirm, on the site or in Satori's server-side render. `OG_SERIF` in `src/lib/og-fonts.ts`
+is the single switch point if the serif ever changes again; `og-card.tsx`'s `SPINE` constant
+and `OG_SCALE`'s title sizes are fitted to Prata's specific metrics, so swapping the serif
+would mean re-measuring that geometry, not just the filename.
 
 **Known limits**
 
@@ -743,16 +694,14 @@ platform-specific config exists in the repo.
 
 ## Next steps
 
-1. Get Adrian's font decision (license vs. Prata) — the About-prompt decision is already
-   resolved, one less thing to chase.
-2. Collect real testimonials from `Coach_Adrian_Ding_Website_2025.pdf`, real prices, and the
+1. Collect real testimonials from `Coach_Adrian_Ding_Website_2025.pdf`, real prices, and the
    outstanding company logos — these block the most visible placeholder content.
-3. Team picks the CMS and CRM destination (see [Open questions](#open-questions-for-the-team))
+2. Team picks the CMS and CRM destination (see [Open questions](#open-questions-for-the-team))
    — everything else in Phase 2 sequences off these two choices.
-4. Resolve the Resend/email-domain ownership question so the lead-capture contract in the
+3. Resolve the Resend/email-domain ownership question so the lead-capture contract in the
    [Phase 2 map](#phase-2-map) can actually be implemented end to end.
-5. Decide the Data Privacy Act consent/policy requirement before any real form write goes
+4. Decide the Data Privacy Act consent/policy requirement before any real form write goes
    live — this affects the form UI itself, not just the backend.
-6. Remove the two [temporary review tools](#temporary-review-tools) once their decisions land.
-7. Run mobile QA on real hardware (currently headless-only) before final delivery.
+5. Remove the [temporary review tool](#temporary-review-tools) once its decision lands.
+6. Run mobile QA on real hardware (currently headless-only) before final delivery.
    </content>

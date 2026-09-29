@@ -62,7 +62,7 @@ function MobileJourneyRail({ entries }: { entries: TimelineEntry[] }) {
             key={`${entry.year}-${i}-m`}
             className="w-[78vw] shrink-0 snap-start"
           >
-            <h3 className="text-brand font-serif text-3xl font-bold tracking-[-0.02em]">
+            <h3 className="text-brand font-serif text-3xl tracking-[-0.02em]">
               {entry.year}
             </h3>
             {entry.logoSrc && (
@@ -324,7 +324,7 @@ function TimelineRow({
             approach) reads as a drop shadow behind the digits at every
             partial-opacity frame; one element never has that problem. */}
         <motion.h3
-          className="hidden pl-20 font-serif text-4xl font-bold tracking-[-0.02em] md:block lg:text-5xl"
+          className="hidden pl-20 font-serif text-4xl tracking-[-0.02em] md:block lg:text-5xl"
           style={{ color: yearColor }}
         >
           {entry.year}
@@ -332,7 +332,7 @@ function TimelineRow({
       </div>
 
       <div className="relative w-full pr-4 pl-20 md:min-h-[26rem] md:pl-4">
-        <h3 className="text-muted-foreground mb-4 block font-serif text-3xl font-bold tracking-[-0.02em] md:hidden">
+        <h3 className="text-muted-foreground mb-4 block font-serif text-3xl tracking-[-0.02em] md:hidden">
           {entry.year}
         </h3>
         {entry.logoSrc && (
