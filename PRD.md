@@ -388,8 +388,8 @@ Every submission from any form — workshop registration and corporate inquiry t
 anything added later — must (1) create a CRM record with status **`NEW`** and (2) email
 the owners that someone filled out the form. Record first, email second; a failed email
 never loses a lead, and a failed record write never shows the visitor a confirmation.
-Full contract (fields, `source` values, failure handling): README →
-"Backend / CRM / CMS — not yet built".
+Full flow (screens, primer videos, emails, CRM statuses and triggers): README →
+[Form flows, emails & CRM triggers](README.md#form-flows-emails--crm-triggers).
 
 ---
 
