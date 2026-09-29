@@ -225,10 +225,11 @@ export function HeroEditorial() {
                 </span>
               </h1>
             </div>
-            {/* Roles — a slow, quiet marquee under the wordmark. Given an
-                explicit viewport-relative width (a touch under the wordmark's
-                own) so the "g" descender of "Ding" keeps a clear lane on its
-                right, and so the clipped track can never blow out the cluster.
+            {/* Roles — a slow, quiet marquee under the wordmark. Its width is
+                4.5× the wordmark's font size (same clamps as `WORD`), about 88%
+                of the rendered "Adrian Ding", so it stops just short of the "g"
+                descender at every size and the clipped track can never blow
+                out the cluster.
                 `he-line` fades it in with the rest of the cluster; the Marquee's
                 own tween drives the cycle. The top margin is pulled up by a
                 fraction of the wordmark's own font size (same clamps as `WORD`),
@@ -240,7 +241,7 @@ export function HeroEditorial() {
               <Marquee
                 speed={22}
                 gap="2.75rem"
-                className="w-[min(68vw,40rem)] [mask-image:linear-gradient(to_right,transparent,#000_7%,#000_97.5%,transparent)] text-[0.7rem] font-semibold tracking-[0.16em] text-white/80 uppercase [-webkit-mask-image:linear-gradient(to_right,transparent,#000_7%,#000_97.5%,transparent)] [text-shadow:0_1px_8px_rgba(0,0,0,0.55)] sm:w-[min(44vw,40rem)] sm:text-[0.72rem] sm:tracking-[0.2em]"
+                className="w-[calc(4.5*clamp(3.85rem,14vw,9.5rem))] [mask-image:linear-gradient(to_right,transparent,#000_7%,#000_97.5%,transparent)] text-[0.7rem] font-semibold tracking-[0.16em] text-white/80 uppercase [-webkit-mask-image:linear-gradient(to_right,transparent,#000_7%,#000_97.5%,transparent)] [text-shadow:0_1px_8px_rgba(0,0,0,0.55)] sm:w-[calc(4.5*clamp(2.75rem,10vw,9.5rem))] sm:text-[0.72rem] sm:tracking-[0.2em]"
               >
                 {ROLES.map((role) => (
                   <span
