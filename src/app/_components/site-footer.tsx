@@ -153,22 +153,42 @@ export function SiteFooter() {
         </div>
       </div>
 
-      {/* Big wordmark — one line on desktop; splits into "Adrian" / "Ding" on
-          mobile, sized large enough to run past the screen edges and crop
-          against the wrapper's `overflow-hidden`, default letter-spacing
-          (no per-letter stretch — that's been dropped). */}
+      {/* Big wordmark — one line on desktop, fitted to ~96% of the width;
+          splits into "Adrian" / "Ding" on mobile, sized large enough to run
+          past the screen edges and crop against the wrapper's
+          `overflow-hidden`. Line-heights are measured from Prata's ink box
+          (per em: ascent 0.76, descent 0.24, font box 0.92/0.34): below
+          ~0.95 the overflow clip slices the tops off "A", "d" and "D". The
+          bottom is cropped on purpose: `-mb-[0.30em]` on a 1.08 line puts the
+          wrapper's bottom edge 0.05em above the baseline, so the clip just shaves
+          the feet and serifs off every letter and the wordmark bleeds off the
+          bottom. Raise the margin to crop more, lower it to crop less. */}
       <div aria-hidden className="w-full overflow-hidden select-none">
         <p
-          className="hidden w-full text-center font-serif leading-[0.78] whitespace-nowrap text-white sm:block"
-          style={{ fontSize: "clamp(90px, 19vw, 320px)" }}
+          className="-mb-[0.30em] hidden w-full text-center font-serif leading-[1.08] whitespace-nowrap text-white sm:block"
+          style={{ fontSize: "clamp(90px, 17.5vw, 320px)" }}
         >
           Adrian Ding
         </p>
-        <div className="flex w-full flex-col items-center text-center font-serif leading-[0.78] whitespace-nowrap text-white sm:hidden">
-          <p style={{ fontSize: "clamp(100px, 34vw, 220px)" }}>Adrian</p>
+        <div className="flex w-full flex-col items-center text-center font-serif whitespace-nowrap text-white sm:hidden">
+          <p
+            className="leading-[0.95]"
+            style={{ fontSize: "clamp(100px, 34vw, 220px)" }}
+          >
+            Adrian
+          </p>
           {/* "Ding" is 4 letters vs "Adrian"'s 6, so it needs a noticeably
-              bigger size (~1.5×) to reach the same left/right edges. */}
-          <p style={{ fontSize: "clamp(150px, 51vw, 330px)" }}>Ding</p>
+              bigger size (~1.5×) to reach the same left/right edges. The
+              negative margin tucks it up under "Adrian" (which has no
+              descenders) so the two lines read as one block. Its bottom crop
+              is lighter than desktop's (0.27em → 0.02em above the baseline),
+              just shaving the serifs. */}
+          <p
+            className="-mt-[0.12em] -mb-[0.27em] leading-[1.08]"
+            style={{ fontSize: "clamp(150px, 51vw, 330px)" }}
+          >
+            Ding
+          </p>
         </div>
       </div>
     </footer>

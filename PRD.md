@@ -2,6 +2,8 @@
 
 > Frontend-only demo. Represents the full quote scope (QUO-2026-0002-v5) visually — CMS, CRM, auth, and payment tracking are shown as UI/forms, not wired to a real backend. Full build happens after demo approval. Organized by page, section-by-section, in build order: Landing → About → Gallery → Workshops → Corporate Training → global (Navbar/Footer) → Email Templates.
 
+> **Functional spec for Phase 2 handoff — only acted on at handoff:** [`FSD.md`](FSD.md) (flows, data model, state machines, emails, open decisions).
+
 ---
 
 ## Client
@@ -388,8 +390,7 @@ Every submission from any form — workshop registration and corporate inquiry t
 anything added later — must (1) create a CRM record with status **`NEW`** and (2) email
 the owners that someone filled out the form. Record first, email second; a failed email
 never loses a lead, and a failed record write never shows the visitor a confirmation.
-Full flow (screens, primer videos, emails, CRM statuses and triggers): README →
-[Form flows, emails & CRM triggers](README.md#form-flows-emails--crm-triggers).
+Full flow (screens, primer videos, emails, CRM statuses and triggers): [`FSD.md`](FSD.md).
 
 ---
 
