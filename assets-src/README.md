@@ -12,4 +12,3 @@ logo or photo can be re-exported later without asking the client again.
 
 Adding a new file: drop it in the right folder with a lowercase-hyphen name,
 export an optimized copy to `public/images/`, and wire it in `src/lib/`.
-Not on the roster (kept for reference only): `finance/aplic.png`, `finance/luap.png`.

@@ -136,6 +136,15 @@ export const COMPANY_GROUPS: CompanyGroup[] = [
       { name: "Insular Life", src: "/images/logos/co-insular-life.webp" },
       { name: "Pacific Prime", src: "/images/logos/co-pacific-prime.webp" },
       { name: "IMG", src: "/images/logos/co-img.svg" },
+      {
+        name: "Asia Pacific Life Insurance Congress (APLIC)",
+        src: "/images/logos/co-aplic.webp",
+      },
+      {
+        name: "Life Underwriters Association of the Philippines (LUAP)",
+        src: "/images/logos/co-luap.webp",
+        shape: "square",
+      },
     ],
   },
   {
