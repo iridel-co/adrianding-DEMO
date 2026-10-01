@@ -153,10 +153,9 @@ export const COMPANY_GROUPS: CompanyGroup[] = [
       { name: "Apple One", src: "/images/logos/co-apple-one.webp" },
       { name: "Ayala Land", src: "/images/logos/co-ayala-land.svg" },
       { name: "Quirante Construction Corp." },
-      { name: "Primary Structures Corporation" },
       { name: "Primary Homes", src: "/images/logos/co-primary-homes.webp" },
       {
-        name: "Primary Group of Builders",
+        name: "Primary Structures Corporation · Primary Group of Builders",
         src: "/images/logos/co-primary-group-of-builders.webp",
       },
       {
