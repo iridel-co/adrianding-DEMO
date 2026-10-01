@@ -1,7 +1,7 @@
 /**
  * Testimonials for the landing carousel and the corporate-training page.
  * Quotes are the client's own wording, verbatim. Orgs without logo artwork
- * (Knowles, Rotary International) render as a name chip.
+ * (PETDA, Rotary International) render as a name chip.
  */
 
 export type Testimonial = {
@@ -57,6 +57,7 @@ export const TESTIMONIALS: Testimonial[] = [
     name: "Joseph Liwag",
     role: "Vice President & Managing Director",
     org: "Knowles Philippines",
+    logo: "/images/logos/co-knowles.webp",
     corporate: true,
     photo: "/images/testimonials/joseph-liwag.webp",
   },
@@ -88,8 +89,6 @@ export const TESTIMONIALS: Testimonial[] = [
     org: "Petron Dealers Association (PETDA)",
     corporate: true,
     photo: "/images/testimonials/sonia-madrid.webp",
-    logo: "/images/logos/co-petron.svg",
-    logoShape: "square",
   },
   {
     quote:
