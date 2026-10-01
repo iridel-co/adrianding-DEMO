@@ -166,13 +166,13 @@ export function SiteFooter() {
           `overflow-hidden`. Line-heights are measured from Prata's ink box
           (per em: ascent 0.76, descent 0.24, font box 0.92/0.34): below
           ~0.95 the overflow clip slices the tops off "A", "d" and "D". The
-          bottom is cropped on purpose: `-mb-[0.30em]` on a 1.08 line puts the
-          wrapper's bottom edge 0.05em above the baseline, so the clip just shaves
-          the feet and serifs off every letter and the wordmark bleeds off the
-          bottom. Raise the margin to crop more, lower it to crop less. */}
+          bottom is cropped on purpose: `-mb-[0.25em]` on a 1.08 line puts the
+          wrapper's bottom edge right at the baseline, so the letters sit fully
+          in view and only the descender of "g" bleeds off the bottom. Raise the
+          margin to crop more, lower it to crop less. */}
       <div aria-hidden className="w-full overflow-hidden select-none">
         <p
-          className="-mb-[0.30em] hidden w-full text-center font-serif leading-[1.08] whitespace-nowrap text-white sm:block"
+          className="-mb-[0.25em] hidden w-full text-center font-serif leading-[1.08] whitespace-nowrap text-white sm:block"
           style={{ fontSize: "clamp(90px, 17.5vw, 320px)" }}
         >
           Adrian Ding
@@ -187,11 +187,11 @@ export function SiteFooter() {
           {/* "Ding" is 4 letters vs "Adrian"'s 6, so it needs a noticeably
               bigger size (~1.5×) to reach the same left/right edges. The
               negative margin tucks it up under "Adrian" (which has no
-              descenders) so the two lines read as one block. Its bottom crop
-              is lighter than desktop's (0.27em → 0.02em above the baseline),
-              just shaving the serifs. */}
+              descenders) so the two lines read as one block. Its bottom edge
+              sits at the baseline (0.22em) to match desktop, so only the "g"
+              descender is cropped. */}
           <p
-            className="-mt-[0.12em] -mb-[0.27em] leading-[1.08]"
+            className="-mt-[0.12em] -mb-[0.22em] leading-[1.08]"
             style={{ fontSize: "clamp(150px, 51vw, 330px)" }}
           >
             Ding
