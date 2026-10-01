@@ -5,7 +5,7 @@
  * Categories and the client roster below are the client's own list. Logos are
  * the cleaned set in `public/images/logos/` (prefix `co-`); an entry with no
  * `src` is a confirmed client whose logo artwork has not been sourced yet — the
- * marquee renders those as a name chip and footnotes the count.
+ * marquee renders those as a name chip.
  */
 
 export type CompanyLogo = {
@@ -109,6 +109,9 @@ export const COMPANY_GROUPS: CompanyGroup[] = [
         src: "/images/logos/co-t1-project-services.webp",
         shape: "square",
       },
+      // PENDING: AD to confirm which company "Run Time" is — no logo until then,
+      // so it renders as a name chip. Swap in `src` once confirmed (see PRD.md
+      // "Companies Served — Roster").
       { name: "Run Time" },
       { name: "Athena", src: "/images/logos/co-athena.svg" },
       {

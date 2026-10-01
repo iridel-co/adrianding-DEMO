@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils"
  * Companies-served marquee — category pills that filter the wall, over one to
  * three full-colour logo rows that drift in alternating directions. Select any
  * pills to reveal only those industries; "All industries" clears the filter.
- * Clients without logo artwork yet render as a name chip and are footnoted.
+ * Clients without logo artwork yet render as a name chip.
  *
  * Each logo is a plain <Image> with the company name as its `alt` — no tooltip,
  * so the moving wall adds no focus stops to the tab order. Rows drift
@@ -154,7 +154,6 @@ export function CompaniesMarquee() {
   const rows = Array.from({ length: rowCount }, (_, r) =>
     visible.filter((_, i) => i % rowCount === r)
   )
-  const missing = visible.filter((c) => !c.src).length
 
   return (
     <>
@@ -196,14 +195,6 @@ export function CompaniesMarquee() {
           ))}
         </div>
       </div>
-
-      {missing > 0 && (
-        <p className="text-muted-foreground mx-auto mt-8 max-w-7xl px-5 text-xs leading-relaxed sm:px-8">
-          <span aria-hidden>* </span>
-          {missing} of the {visible.length} organisations shown are listed by
-          name while their logo artwork is being sourced.
-        </p>
-      )}
     </>
   )
 }
