@@ -1,4 +1,4 @@
-# Coach Adrian Ding — Demo Site
+# Coach Adrian Ding Demo Site
 
 A multi-page Next.js site built to pitch Coach Adrian Ding on a rebuild of
 adrianding.com. **Frontend-only** — every form, login, and content list is UI without a
