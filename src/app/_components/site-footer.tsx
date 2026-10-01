@@ -27,10 +27,26 @@ const NAV = [
 // Kept in step with the hero's own SOCIALS (hero-editorial.tsx) — same five
 // platforms in both places.
 const SOCIALS = [
-  { href: "https://instagram.com", label: "Instagram", Icon: Instagram },
-  { href: "https://facebook.com", label: "Facebook", Icon: Facebook },
-  { href: "https://linkedin.com", label: "LinkedIn", Icon: Linkedin },
-  { href: "https://youtube.com", label: "YouTube", Icon: Youtube },
+  {
+    href: "https://www.instagram.com/coachadrianding/?hl=en",
+    label: "Instagram",
+    Icon: Instagram,
+  },
+  {
+    href: "https://www.facebook.com/adrianding.mi/",
+    label: "Facebook",
+    Icon: Facebook,
+  },
+  {
+    href: "https://ph.linkedin.com/in/coachadrianding",
+    label: "LinkedIn",
+    Icon: Linkedin,
+  },
+  {
+    href: "https://www.youtube.com/channel/UCugWqssJknpyGE0k-jexhfA",
+    label: "YouTube",
+    Icon: Youtube,
+  },
 ]
 
 function TikTokIcon({ className }: { className?: string }) {
@@ -74,7 +90,7 @@ export function SiteFooter() {
                 </a>
               ))}
               <a
-                href="https://tiktok.com"
+                href="https://www.tiktok.com/@coachadrianding"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="TikTok"

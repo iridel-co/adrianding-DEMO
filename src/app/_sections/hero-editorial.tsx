@@ -46,11 +46,31 @@ const SOCIALS: {
   href: string
   Icon: React.ComponentType<{ className?: string }>
 }[] = [
-  { label: "Instagram", href: "https://instagram.com", Icon: Instagram },
-  { label: "Facebook", href: "https://facebook.com", Icon: Facebook },
-  { label: "LinkedIn", href: "https://linkedin.com", Icon: Linkedin },
-  { label: "YouTube", href: "https://youtube.com", Icon: Youtube },
-  { label: "TikTok", href: "https://tiktok.com", Icon: TikTokIcon },
+  {
+    label: "Instagram",
+    href: "https://www.instagram.com/coachadrianding/?hl=en",
+    Icon: Instagram,
+  },
+  {
+    label: "Facebook",
+    href: "https://www.facebook.com/adrianding.mi/",
+    Icon: Facebook,
+  },
+  {
+    label: "LinkedIn",
+    href: "https://ph.linkedin.com/in/coachadrianding",
+    Icon: Linkedin,
+  },
+  {
+    label: "YouTube",
+    href: "https://www.youtube.com/channel/UCugWqssJknpyGE0k-jexhfA",
+    Icon: Youtube,
+  },
+  {
+    label: "TikTok",
+    href: "https://www.tiktok.com/@coachadrianding",
+    Icon: TikTokIcon,
+  },
 ]
 
 function TikTokIcon({ className }: { className?: string }) {
