@@ -65,7 +65,7 @@ export const COMPANY_GROUPS: CompanyGroup[] = [
       },
       { name: "Tsuneishi", src: "/images/logos/co-tsuneishi.svg" },
       { name: "NKC", src: "/images/logos/co-nkc.svg" },
-      { name: "SDNI" },
+      { name: "SDNI", src: "/images/logos/co-thinking-tools.webp" },
       { name: "5ELK", src: "/images/logos/co-5elk.svg" },
       { name: "BSA Solutions" },
       { name: "Autoliv", src: "/images/logos/co-autoliv.svg" },
@@ -153,9 +153,14 @@ export const COMPANY_GROUPS: CompanyGroup[] = [
       { name: "Apple One", src: "/images/logos/co-apple-one.webp" },
       { name: "Ayala Land", src: "/images/logos/co-ayala-land.svg" },
       { name: "Quirante Construction Corp." },
+      {
+        name: "Primary Structures Corporation",
+        src: "/images/logos/co-primary-structures.webp",
+        shape: "square",
+      },
       { name: "Primary Homes", src: "/images/logos/co-primary-homes.webp" },
       {
-        name: "Primary Structures Corporation · Primary Group of Builders",
+        name: "Primary Group of Builders",
         src: "/images/logos/co-primary-group-of-builders.webp",
       },
       {
