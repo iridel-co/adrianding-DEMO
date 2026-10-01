@@ -1,3 +1,5 @@
+import sharp from "sharp"
+
 /**
  * Re-encodes a generated social card from PNG to JPEG.
  *
@@ -13,13 +15,9 @@
  * headroom matters more than pixel purity when the ceiling is hard.
  *
  * Both cards are prerendered by `generateStaticParams`, so this runs at build
- * time, not per request. sharp is loaded inside the function, not at the top
- * of the file: Cloudflare Workers can't load sharp, and Next still loads this
- * file on every page view (for the og:image metadata). A top-level import
- * crashes every page there.
+ * time, not per request.
  */
 export async function ogJpeg(image: Response): Promise<Response> {
-  const { default: sharp } = await import("sharp")
   const png = Buffer.from(await image.arrayBuffer())
   const jpeg = await sharp(png)
     .jpeg({
