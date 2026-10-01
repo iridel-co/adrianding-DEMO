@@ -43,7 +43,7 @@ export const COMPANY_GROUPS: CompanyGroup[] = [
       },
       { name: "The Linde Group", src: "/images/logos/co-linde.webp" },
       { name: "Nestlé", src: "/images/logos/co-nestle.svg" },
-      { name: "Knowles Electronics", src: "/images/logos/co-knowles.webp" },
+      { name: "Knowles Electronics", src: "/images/logos/co-knowles.svg" },
       { name: "Teradyne", src: "/images/logos/co-teradyne.svg" },
       { name: "GlaxoSmithKline", src: "/images/logos/co-gsk.png" },
       {
@@ -77,7 +77,10 @@ export const COMPANY_GROUPS: CompanyGroup[] = [
     logos: [
       { name: "Petron", src: "/images/logos/co-petron.svg", shape: "square" },
       { name: "PLDT", src: "/images/logos/co-pldt.svg" },
-      { name: "Petron Dealers Association (PETDA)" },
+      {
+        name: "Petron Dealers Association (PETDA)",
+        src: "/images/logos/co-petda.webp",
+      },
       { name: "Aboitiz Power", src: "/images/logos/co-aboitizpower.svg" },
       { name: "Vivant", src: "/images/logos/co-vivant.svg" },
       {
@@ -92,25 +95,25 @@ export const COMPANY_GROUPS: CompanyGroup[] = [
       { name: "Unilab", src: "/images/logos/co-unilab.svg" },
       { name: "Rose Pharmacy", src: "/images/logos/co-rose-pharmacy.png" },
       { name: "IPI", src: "/images/logos/co-ipi.png" },
-      { name: "South Star Drug", src: "/images/logos/co-southstar-drug.png" },
+      { name: "South Star Drug", src: "/images/logos/co-southstar-drug.webp" },
       { name: "Global Pacific", src: "/images/logos/co-global-pacific.png" },
       { name: "Toyota", src: "/images/logos/co-toyota.svg" },
       { name: "The Generics Pharmacy", src: "/images/logos/co-tgp.png" },
-      { name: "Chong Hua Hospital", src: "/images/logos/co-chong-hua.jpg" },
+      { name: "Chong Hua Hospital", src: "/images/logos/co-chong-hua.webp" },
       {
         name: "Cebu Orthopedic Institute",
         src: "/images/logos/co-cebu-orthopedic.png",
       },
       { name: "T1 Project Services" },
       { name: "Run Time" },
-      { name: "Athena" },
+      { name: "Athena", src: "/images/logos/co-athena.svg" },
       {
         name: "Metro Retail Group",
         src: "/images/logos/co-metro-retail.svg",
         shape: "square",
       },
       { name: "Hi-Precision Diagnostics" },
-      { name: "Apptech" },
+      { name: "Apptech", src: "/images/logos/co-apptech.webp" },
     ],
   },
   {
@@ -145,8 +148,7 @@ export const COMPANY_GROUPS: CompanyGroup[] = [
       },
       {
         name: "Cebu Landmasters Inc",
-        src: "/images/logos/co-cebu-landmasters.svg",
-        shape: "square",
+        src: "/images/logos/co-cebu-landmasters.webp",
       },
       { name: "Apple One", src: "/images/logos/co-apple-one.webp" },
       { name: "Ayala Land", src: "/images/logos/co-ayala-land.svg" },
@@ -160,7 +162,6 @@ export const COMPANY_GROUPS: CompanyGroup[] = [
       {
         name: "Concrete Solutions Inc.",
         src: "/images/logos/co-concrete-solutions.webp",
-        shape: "square",
       },
       {
         name: "Sky Rise Realty",
@@ -174,7 +175,7 @@ export const COMPANY_GROUPS: CompanyGroup[] = [
     logos: [
       {
         name: "Shangri-La's Mactan Island Resort & Spa",
-        src: "/images/logos/co-shangri-la-mactan.webp",
+        src: "/images/logos/co-shangri-la-mactan.svg",
       },
       {
         name: "Sheraton",
