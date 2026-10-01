@@ -94,7 +94,7 @@ export const COMPANY_GROUPS: CompanyGroup[] = [
       },
       { name: "Unilab", src: "/images/logos/co-unilab.svg" },
       { name: "Rose Pharmacy", src: "/images/logos/co-rose-pharmacy.png" },
-      { name: "IPI", src: "/images/logos/co-ipi.png" },
+      { name: "IPI", src: "/images/logos/co-ipi.webp" },
       { name: "South Star Drug", src: "/images/logos/co-southstar-drug.webp" },
       { name: "Global Pacific", src: "/images/logos/co-global-pacific.png" },
       { name: "Toyota", src: "/images/logos/co-toyota.svg" },
