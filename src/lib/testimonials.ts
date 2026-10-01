@@ -1,7 +1,6 @@
 /**
  * Testimonials for the landing carousel and the corporate-training page.
- * Quotes are the client's own wording, verbatim. Orgs without logo artwork
- * (Rotary International) render as a name chip.
+ * Quotes are the client's own wording, verbatim. Every org has its logo.
  */
 
 export type Testimonial = {
@@ -100,6 +99,8 @@ export const TESTIMONIALS: Testimonial[] = [
     org: "Rotary International",
     corporate: true,
     photo: "/images/testimonials/richard-centino.webp",
+    logo: "/images/logos/co-rotary-international.webp",
+    logoShape: "square",
   },
 ]
 

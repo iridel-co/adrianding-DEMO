@@ -70,6 +70,11 @@ export const COMPANY_GROUPS: CompanyGroup[] = [
       { name: "BSA Solutions", src: "/images/logos/co-bsa-solutions.webp" },
       { name: "Autoliv", src: "/images/logos/co-autoliv.svg" },
       { name: "Rise", src: "/images/logos/co-rise.svg" },
+      {
+        name: "Rotary International",
+        src: "/images/logos/co-rotary-international.webp",
+        shape: "square",
+      },
     ],
   },
   {
