@@ -109,10 +109,6 @@ export const COMPANY_GROUPS: CompanyGroup[] = [
         src: "/images/logos/co-t1-project-services.webp",
         shape: "square",
       },
-      // PENDING: AD to confirm which company "Run Time" is — no logo until then,
-      // so it renders as a name chip. Swap in `src` once confirmed (see PRD.md
-      // "Companies Served — Roster").
-      { name: "Run Time" },
       { name: "Athena", src: "/images/logos/co-athena.svg" },
       {
         name: "Metro Retail Group",
