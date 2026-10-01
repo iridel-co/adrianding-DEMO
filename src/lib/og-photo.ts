@@ -1,4 +1,3 @@
-import sharp from "sharp"
 import { readFile } from "node:fs/promises"
 import { join } from "node:path"
 
@@ -26,6 +25,9 @@ import { join } from "node:path"
  * format sharp can read (jpg/png/webp/avif) works as a source — no
  * pre-generated JPEG copies need to be committed, and Phase 2's CMS can feed
  * its own image buffer through `treatOgPhoto` unchanged.
+ *
+ * sharp is loaded inside each function, not at the top of the file — see
+ * `og-jpeg.ts` for why (Cloudflare Workers can't load it).
  */
 
 const DUOTONE_DARK: [number, number, number] = [10, 8, 8]
@@ -36,6 +38,7 @@ async function duotone(
   dark: [number, number, number] = DUOTONE_DARK,
   light: [number, number, number] = DUOTONE_LIGHT
 ): Promise<Buffer> {
+  const { default: sharp } = await import("sharp")
   const { data, info } = await sharp(buf)
     .grayscale()
     .linear(1.35, -30) // contrast boost before the recolor
@@ -61,6 +64,7 @@ async function duotone(
 /** Treats a raw image buffer (any format sharp reads) into a duotoned,
  *  1200x630 JPEG data URI ready to inline as a Satori `<img src>`. */
 export async function treatOgPhoto(buf: Buffer): Promise<string> {
+  const { default: sharp } = await import("sharp")
   const resized = await sharp(buf)
     .resize(1200, 630, { fit: "cover", position: sharp.strategy.attention })
     .normalise()
