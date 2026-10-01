@@ -67,7 +67,7 @@ export const COMPANY_GROUPS: CompanyGroup[] = [
       { name: "NKC", src: "/images/logos/co-nkc.svg" },
       { name: "SDNI", src: "/images/logos/co-thinking-tools.webp" },
       { name: "5ELK", src: "/images/logos/co-5elk.svg" },
-      { name: "BSA Solutions" },
+      { name: "BSA Solutions", src: "/images/logos/co-bsa-solutions.webp" },
       { name: "Autoliv", src: "/images/logos/co-autoliv.svg" },
       { name: "Rise", src: "/images/logos/co-rise.svg" },
     ],
@@ -104,7 +104,11 @@ export const COMPANY_GROUPS: CompanyGroup[] = [
         name: "Cebu Orthopedic Institute",
         src: "/images/logos/co-cebu-orthopedic.png",
       },
-      { name: "T1 Project Services" },
+      {
+        name: "T1 Project Services",
+        src: "/images/logos/co-t1-project-services.webp",
+        shape: "square",
+      },
       { name: "Run Time" },
       { name: "Athena", src: "/images/logos/co-athena.svg" },
       {
@@ -112,7 +116,12 @@ export const COMPANY_GROUPS: CompanyGroup[] = [
         src: "/images/logos/co-metro-retail.svg",
         shape: "square",
       },
-      { name: "Hi-Precision Diagnostics" },
+      {
+        name: "Hi-Precision Diagnostics",
+        src: "/images/logos/co-hi-precision.webp",
+        // Very wide lockup: the shorter cap keeps it from dominating the row.
+        shape: "square",
+      },
       { name: "Apptech", src: "/images/logos/co-apptech.webp" },
     ],
   },
@@ -161,7 +170,10 @@ export const COMPANY_GROUPS: CompanyGroup[] = [
       },
       { name: "Apple One", src: "/images/logos/co-apple-one.webp" },
       { name: "Ayala Land", src: "/images/logos/co-ayala-land.svg" },
-      { name: "Quirante Construction Corp." },
+      {
+        name: "Quirante Construction Corp.",
+        src: "/images/logos/co-quirante.svg",
+      },
       {
         name: "Primary Structures Corporation",
         src: "/images/logos/co-primary-structures.webp",
@@ -207,7 +219,7 @@ export const COMPANY_GROUPS: CompanyGroup[] = [
   {
     category: "Food & Retail",
     logos: [
-      { name: "Pages Holdings" },
+      { name: "Pages Holdings", src: "/images/logos/co-pages-holdings.webp" },
       {
         name: "House of Lechon",
         src: "/images/logos/co-house-of-lechon.webp",
