@@ -179,8 +179,7 @@ function ColumnCard({ testimonial: t }: { testimonial: Testimonial }) {
       <div className="flex min-h-9 items-center justify-between gap-4">
         <Quote className="text-brand/25 size-7 shrink-0" aria-hidden />
         {/* Client mark, sitting inside the card. Orgs without artwork
-            (Knowles, PETDA, Rotary International) fall back to a name chip —
-            same set as testimonial-carousel.tsx and the companies marquee. */}
+            (Knowles, Rotary International) fall back to a name chip. */}
         {t.logo ? (
           <Image
             src={t.logo}
@@ -203,19 +202,32 @@ function ColumnCard({ testimonial: t }: { testimonial: Testimonial }) {
           </span>
         )}
       </div>
-      <blockquote className="mt-4 text-[1.3rem] leading-normal tracking-[-0.005em] text-balance lg:text-[1.45rem]">
+      <blockquote
+        className={cn(
+          "mt-4 leading-normal tracking-[-0.005em]",
+          // Long testimonials step down a size so a 600-character quote
+          // stays a card, not a wall.
+          t.quote.length > 320
+            ? "text-[1.05rem] lg:text-[1.15rem]"
+            : "text-[1.3rem] text-balance lg:text-[1.45rem]"
+        )}
+      >
         {t.quote}
       </blockquote>
       <figcaption className="mt-7 flex items-center gap-3.5">
-        {/* Headshot placeholder — swaps to a real <Image> once `photo` is set
-            on the testimonial (same fallback as testimonial-carousel.tsx). */}
-        <span className="border-border text-muted-foreground/70 flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-dashed">
+        {/* Round headshot; falls back to a dashed User icon if `photo` is unset. */}
+        <span
+          className={cn(
+            "text-muted-foreground/70 flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full",
+            t.photo ? "bg-muted" : "border-border border border-dashed"
+          )}
+        >
           {t.photo ? (
             <Image
               src={t.photo}
               alt={t.name}
-              width={48}
-              height={48}
+              width={96}
+              height={96}
               className="size-full object-cover"
             />
           ) : (

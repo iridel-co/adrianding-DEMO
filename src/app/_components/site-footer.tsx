@@ -108,7 +108,7 @@ export function SiteFooter() {
             </p>
             <a
               href="mailto:coachadrianding@maximumimpact.online"
-              className="flex items-center gap-2.5 text-base text-white/60 transition-colors hover:text-white sm:text-lg"
+              className="flex items-center gap-2.5 text-sm text-white/60 transition-colors hover:text-white sm:text-[0.9375rem]"
             >
               <Mail className="size-5 shrink-0" />
               {/* Clean, natural breaks on mobile instead of `break-all`
@@ -124,6 +124,13 @@ export function SiteFooter() {
               <span className="hidden break-all sm:inline">
                 coachadrianding@maximumimpact.online
               </span>
+            </a>
+            <a
+              href="mailto:maximumimpactphilippines@yahoo.com"
+              className="flex items-center gap-2.5 text-sm break-all text-white/60 transition-colors hover:text-white sm:text-[0.9375rem]"
+            >
+              <Mail className="size-5 shrink-0" />
+              maximumimpactphilippines@yahoo.com
             </a>
             <a
               href="tel:+639209007709"

@@ -45,7 +45,9 @@ export function CorporateTrainer() {
               He designs and delivers every engagement himself. What your team
               gets is not a franchised curriculum read off a licensed deck — it
               is built around your industry, your numbers and the problem you
-              actually called about.
+              actually called about. He also specializes in customized keynotes
+              for sales kick off rallies, conference and conventions.
+              Mentally-stimulating, high-energy, and high impact!
             </p>
           </Reveal>
 

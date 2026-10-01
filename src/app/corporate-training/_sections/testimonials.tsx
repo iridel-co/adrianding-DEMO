@@ -4,8 +4,7 @@ import { CORPORATE_TESTIMONIALS } from "@/lib/testimonials"
 
 /**
  * Corporate Training — reuses the landing page's testimonial layout
- * (TestimonialColumns) with corporate-specific header text and quotes.
- * TODO: quotes are placeholders until the source PDF is supplied.
+ * (TestimonialColumns) with corporate-specific header text.
  */
 export function CorporateTestimonials() {
   return (

@@ -12,6 +12,7 @@ import { Mail, MessageSquare, Phone } from "lucide-react"
 const PHONE_DISPLAY = "0920 900 7709"
 const PHONE_HREF = "tel:+639209007709"
 const EMAIL = "coachadrianding@maximumimpact.online"
+const EMAIL_ALT = "maximumimpactphilippines@yahoo.com"
 
 export function SupportBand({
   heading = "Questions before you register?",
@@ -53,6 +54,14 @@ export function SupportBand({
               icon={Mail}
               label="Email"
               value={EMAIL}
+            />
+          </li>
+          <li>
+            <ContactLink
+              href={`mailto:${EMAIL_ALT}`}
+              icon={Mail}
+              label="Email"
+              value={EMAIL_ALT}
             />
           </li>
         </ul>

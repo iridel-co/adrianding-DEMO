@@ -4,8 +4,9 @@
  * inline in the About section because ad traffic lands straight on a course page
  * and needs the same proof without a detour.
  *
- * TODO: confirm the exact accrediting-body names and years (AET / CPD) with the
- * client; the rest are from the PRD.
+ * AET and CPD are Adrian's own organisations, not accrediting bodies: positions
+ * confirmed by the client 2026-10-01. TODO: confirm the full expansions of
+ * "AET" and "CPD" with the client; the rest are from the PRD.
  */
 
 export type Certification = {
@@ -43,14 +44,14 @@ export const CERTIFICATIONS: Certification[] = [
   },
   {
     name: "AET",
-    line: "Accredited trainer",
-    short: "Accredited trainer",
+    line: "Founder and Lead Coach",
+    short: "Founder & Lead Coach",
     src: "/images/logos/aet-logo.png",
   },
   {
-    name: "CPD Council",
-    line: "Accredited professional-development provider",
-    short: "Accredited provider",
+    name: "CPD",
+    line: "Founder and Chief Empowering Officer (CEO)",
+    short: "Founder & CEO",
     src: "/images/logos/cpd-logo.webp",
   },
 ]

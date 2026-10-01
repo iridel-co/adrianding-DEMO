@@ -32,7 +32,7 @@ const FIGURES = [
   // TODO: confirm industry count with the client (PRD marks this a placeholder).
   { value: 9, suffix: "+", label: "Industries served" },
   { value: SPECIALIZATIONS.length, label: "Core program tracks" },
-  { value: CERTIFICATIONS.length, label: "International accreditations" },
+  { value: CERTIFICATIONS.length, label: "International credentials" },
 ]
 
 export function AboutNumbers() {

@@ -6,11 +6,9 @@ import { TESTIMONIALS } from "@/lib/testimonials"
  * Landing — what clients say. Heading holds the left rail; the right side runs
  * two columns of quote cards cycling upward (one column on mobile). Hovering a
  * column stops that column only.
- * TODO: quotes are placeholders until the source PDF is supplied.
  */
 // Header note: earlier copy ("booked him twice") implied repeat bookings we
-// can't substantiate. This leans on what the placeholder quotes actually say —
-// that the language from the room outlasts the session.
+// can't substantiate; the headline leans on what the quotes say instead.
 
 export function LandingTestimonials() {
   return (

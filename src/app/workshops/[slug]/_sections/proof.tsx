@@ -87,7 +87,7 @@ export function WorkshopProof() {
               accrediting body is recognised by its mark first, and a visitor
               from an ad has no other reason to trust the names. */}
           <Reveal className="mt-12">
-            <p className="text-sm font-medium">Certified and accredited</p>
+            <p className="text-sm font-medium">Certified and credentialed</p>
             <ul className="mt-6 grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-3 lg:grid-cols-5">
               {CERTIFICATIONS.map((c, i) => (
                 <li

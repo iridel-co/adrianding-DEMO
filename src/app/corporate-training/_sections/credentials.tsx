@@ -4,9 +4,9 @@ import { SplitReveal } from "@/app/_components/split-reveal"
 import { CERTIFICATIONS } from "@/lib/certifications"
 
 /**
- * Corporate training — accreditation band. An L&D head signing off on a
+ * Corporate training — credentials band. An L&D head signing off on a
  * training spend has to justify the choice internally, and "he is a good
- * speaker" does not survive that conversation. The accrediting bodies do, so
+ * speaker" does not survive that conversation. The credentials do, so
  * they sit on the page rather than only on /about.
  *
  * Data is shared with the About page — see `src/lib/certifications.ts`.
@@ -16,12 +16,13 @@ export function CorporateCredentials() {
     <section className="bg-background py-16 lg:py-24">
       <div className="mx-auto max-w-7xl px-6 sm:px-8">
         <SplitReveal className="max-w-3xl font-serif text-[2rem] leading-[1.1] tracking-[-0.02em] lg:text-[2.75rem]">
-          Accredited, not self-declared
+          Certified and credentialed
         </SplitReveal>
         <p className="text-muted-foreground mt-5 max-w-2xl leading-relaxed">
-          Every programme is delivered by a trainer certified and accredited by
-          the bodies below — the paperwork your procurement and L&amp;D teams
-          will ask for, before they ask for it.
+          Every programme is delivered by a trainer certified through Peak
+          Potentials, Genos and INSEAD, and the founder of AET and CPD — the
+          credentials your procurement and L&amp;D teams will ask for, before
+          they ask for it.
         </p>
 
         <Reveal

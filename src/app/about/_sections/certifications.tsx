@@ -4,7 +4,7 @@ import { SplitReveal } from "@/app/_components/split-reveal"
 import { CERTIFICATIONS, type Certification } from "@/lib/certifications"
 
 /**
- * About — certifications & accreditations as a single logo row, matching the
+ * About — certifications & positions as a single logo row, matching the
  * "in great company" treatment: bare marks, no card chrome.
  * Data is shared with the workshop detail pages — see `src/lib/certifications.ts`.
  */
@@ -15,7 +15,7 @@ export function AboutCertifications() {
   return (
     <section className="border-border/60 mx-auto max-w-7xl border-t px-6 py-24 sm:px-8 lg:py-36">
       <SplitReveal className="font-serif text-[2.75rem] leading-[1.05] tracking-[-0.02em] lg:text-[3.75rem]">
-        Certifications &amp; accreditations
+        Credentials &amp; positions
       </SplitReveal>
 
       <div className="mt-16 flex flex-col gap-8 lg:gap-14">
