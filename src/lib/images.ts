@@ -4,7 +4,7 @@
  * IMPORTANT: Replace "assets.nanobanana.io" with the actual CDN hostname once
  * confirmed, then update the `hostname` entry in `next.config.ts` to match.
  *
- * @see docs/image-handling.md
+ * @see README.md#images (repository-root image guidance)
  * @see next.config.ts — remotePatterns
  */
 

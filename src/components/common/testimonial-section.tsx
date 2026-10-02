@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * TestimonialCard Component
- * @see DESIGN_SYSTEM.md#Layout & Structure — Section Patterns
+ * @see README.md#design-system (repository-root overview)
  *
  * Pull-quote / testimonial with semantic HTML (figure/blockquote/figcaption).
  * Use 3 cards minimum for the grid layout to look intentional.

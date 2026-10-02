@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * Card Component
- * @see DESIGN_SYSTEM.md#Cards
+ * @see README.md#design-system (repository-root overview)
  *
  * UDS specs:
  * - Base: rounded-xl border bg-card p-6 shadow-sm

@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * Popover Component
- * @see DESIGN_SYSTEM.md#Dialogs/Sheets/Popover
+ * @see README.md#design-system (repository-root overview)
  *
  * UDS specs:
  * - Content: rounded-xl border bg-popover shadow-lg p-4

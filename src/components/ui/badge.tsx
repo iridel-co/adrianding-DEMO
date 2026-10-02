@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * Badge/Chip Component
- * @see DESIGN_SYSTEM.md#Badges/Chips
+ * @see README.md#design-system (repository-root overview)
  *
  * UDS specs:
  * - Base: rounded-full px-3 h-7 text-xs font-medium

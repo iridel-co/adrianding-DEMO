@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * ImageCard Component
- * @see DESIGN_SYSTEM.md#Cards
+ * @see README.md#design-system (repository-root overview)
  *
  * Card with a top image area followed by text content below.
  * Distinct from the bare Card primitive — use when visual imagery is central.

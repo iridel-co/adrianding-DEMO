@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * FeatureRow Component
- * @see DESIGN_SYSTEM.md#Layout & Structure — Section Patterns
+ * @see README.md#design-system (repository-root overview)
  *
  * Image + text side-by-side layout. Alternate `reverse` on consecutive rows
  * for visual balance — never use two non-reversed FeatureRows back to back.

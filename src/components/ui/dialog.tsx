@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * Dialog Component
- * @see DESIGN_SYSTEM.md#Dialogs/Sheets/Popover
+ * @see README.md#design-system (repository-root overview)
  *
  * UDS specs:
  * - Overlay: bg-black/80

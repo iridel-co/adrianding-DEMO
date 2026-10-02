@@ -1,6 +1,6 @@
 /**
  * UI Component Barrel Export
- * @see docs/ui-kit.md for usage documentation
+ * @see README.md#project-structure (repository-root component overview)
  */
 
 export * from "./alert"

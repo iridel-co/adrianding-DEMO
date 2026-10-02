@@ -18,7 +18,7 @@ import { Label } from "@/components/ui/label"
 
 /**
  * Form Components
- * @see DESIGN_SYSTEM.md#Forms
+ * @see README.md#design-system (repository-root overview)
  *
  * UDS specs:
  * - Label: text-sm font-medium

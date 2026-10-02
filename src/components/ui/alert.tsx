@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * Alert Component
- * @see DESIGN_SYSTEM.md#Toasts & Alerts
+ * @see README.md#design-system (repository-root overview)
  *
  * UDS specs:
  * - Base: rounded-lg border-l-4 p-4 flex gap-3

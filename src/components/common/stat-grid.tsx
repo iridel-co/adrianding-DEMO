@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * StatGrid + StatItem Components
- * @see DESIGN_SYSTEM.md#Layout & Structure — Section Patterns
+ * @see README.md#design-system (repository-root overview)
  *
  * Raw typographic metric display — intentionally NO card container.
  * Numbers breathe directly on the page to avoid card overuse.

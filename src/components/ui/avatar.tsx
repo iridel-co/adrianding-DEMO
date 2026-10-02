@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * Avatar Component
- * @see DESIGN_SYSTEM.md#Avatars/Icon Buttons
+ * @see README.md#design-system (repository-root overview)
  *
  * UDS specs:
  * - Sizes: sm (24px), md (32px), lg (40px)
