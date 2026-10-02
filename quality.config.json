@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "id": "format",
+      "script": "format:check",
+      "stage": "edit",
+      "patterns": ["."]
+    },
+    {
+      "id": "lint",
+      "script": "lint",
+      "stage": "edit",
+      "patterns": ["^src/.*\\.[jt]sx?$", "^eslint\\."]
+    },
+    {
+      "id": "css",
+      "script": "lint:css",
+      "stage": "edit",
+      "patterns": ["\\.css$", "^\\.stylelintrc"]
+    },
+    {
+      "id": "types",
+      "script": "typecheck",
+      "stage": "checkpoint",
+      "patterns": [
+        "^src/.*\\.[jt]sx?$",
+        "(^|/)tsconfig[^/]*\\.json$",
+        "^next\\.config\\."
+      ]
+    },
+    {
+      "id": "harness",
+      "script": "test:quality",
+      "stage": "checkpoint",
+      "patterns": [
+        "^scripts/quality/",
+        "^quality\\.config\\.json$",
+        "^\\.github/workflows/"
+      ]
+    },
+    {
+      "id": "build-and-og",
+      "script": "check:build",
+      "stage": "handoff",
+      "patterns": [
+        "^(src|public)/",
+        "^next\\.config\\.",
+        "^postcss\\.config\\.",
+        "^scripts/check-og\\.mjs$"
+      ]
+    }
+  ]
+}
