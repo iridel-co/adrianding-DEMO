@@ -67,10 +67,10 @@ necessary and record its dependency here.
 
 ## PR01 Quality harness and repository cleanup
 
-Branch: `chore/quality-harness-and-repo-cleanup`  
-PR title: `chore: quality harness and repo cleanup`  
-Dependencies: none. Owner: main executor, including shared configuration and CI.  
-PR: not published. Evidence: local full handoff passed on Node 25.7.0; clean-checkout Node 22 verification pending. Merge status: not merged.
+Branch: `chore/quality-harness-and-repo-cleanup`
+PR title: `chore: quality harness and repo cleanup`
+Dependencies: none. Owner: main executor, including shared configuration and CI.
+PR: not published. Evidence: full handoff passed locally on Node 25.7.0 and in a clean clone on Node 22.23.3. Merge status: not merged.
 
 - [x] Inventory root files, documentation, local/generated artifacts, existing
       tooling, and references before moving or removing anything.
@@ -118,18 +118,31 @@ Acceptance:
 
 - [x] Review moves with rename detection and verify moved document contents.
 - [x] Check local Markdown links/anchors and search for obsolete path references.
-- [ ] Verify install and checks from a clean checkout, not only a warm build cache.
+- [x] Verify install and checks from a clean checkout, not only a warm build cache.
 - [x] Pass harness self-tests and exercise cumulative stage selection, explicit
       files, staged/base scopes, missing scripts, and deliberate failure propagation.
 - [x] Verify Windows execution and the complete handoff gate; record CI evidence
       once publication is authorized (remote CI remains unverified). Harness tests are tooling coverage only.
 - [x] Keep baseline failures visible; do not suppress them solely to get a green gate.
 
+PR01 validation on 2026-10-02: locked clean installation succeeded; all six
+handoff checks passed, including eight harness tests and nine OG cards. Inspector
+exit 2 records the known application-test gap for PR02. Three ESLint warnings in
+OG routes, one CSS named-color warning, and an outdated Browserslist data notice
+remain visible. CSS notation changes were checked against the original parsed
+rules, declarations, values, and breakpoints and found equivalent. Remote CI and
+browser/device evidence remain unverified. The source ZIP remains uncommitted.
+
+The first package includes the saved 331-line milestone checklist and imported
+runner/tests, so its combined diff exceeds the usual size guideline. Review the
+atomic documentation, harness, and CI/baseline commits separately; subsequent
+feature packages retain the smaller scope targets.
+
 ## PR02 Public site regression coverage
 
-Branch: `test/public-site-regressions`  
-PR title: `test: public site regressions`  
-Dependencies: PR01. Owner: main executor or a scoped test implementer.  
+Branch: `test/public-site-regressions`
+PR title: `test: public site regressions`
+Dependencies: PR01. Owner: main executor or a scoped test implementer.
 PR: pending. Evidence: pending. Merge status: not started.
 
 - [ ] Add a small browser-test setup and register its real checks with the harness.
@@ -143,9 +156,9 @@ PR: pending. Evidence: pending. Merge status: not started.
 
 ## PR03 Core page responsiveness
 
-Branch: `fix/core-page-responsiveness`  
-PR title: `fix: core page responsiveness`  
-Dependencies: PR02. Owner: main executor for shared UI and Home/About consumers.  
+Branch: `fix/core-page-responsiveness`
+PR title: `fix: core page responsiveness`
+Dependencies: PR02. Owner: main executor for shared UI and Home/About consumers.
 PR: pending. Evidence: pending. Merge status: not started.
 
 - [ ] Reproduce current defects before editing, including the previously reported
@@ -159,9 +172,9 @@ PR: pending. Evidence: pending. Merge status: not started.
 
 ## PR04 Workshop responsiveness
 
-Branch: `fix/workshop-responsiveness`  
-PR title: `fix: workshop responsiveness`  
-Dependencies: PR03 shared layout changes. Owner: scoped workshop implementer.  
+Branch: `fix/workshop-responsiveness`
+PR title: `fix: workshop responsiveness`
+Dependencies: PR03 shared layout changes. Owner: scoped workshop implementer.
 PR: pending. Evidence: pending. Merge status: not started.
 
 - [ ] Audit and correct the listing's filters/calendar and workshop detail layouts.
@@ -172,9 +185,9 @@ PR: pending. Evidence: pending. Merge status: not started.
 
 ## PR05 Corporate page responsiveness
 
-Branch: `fix/corporate-page-responsiveness`  
-PR title: `fix: corporate page responsiveness`  
-Dependencies: PR03 shared layout changes. Owner: scoped corporate-page implementer.  
+Branch: `fix/corporate-page-responsiveness`
+PR title: `fix: corporate page responsiveness`
+Dependencies: PR03 shared layout changes. Owner: scoped corporate-page implementer.
 PR: pending. Evidence: pending. Merge status: not started.
 
 - [ ] Audit and correct programme carousel, inquiry form, and confirmation layouts.
@@ -185,10 +198,10 @@ PR: pending. Evidence: pending. Merge status: not started.
 
 ## PR06 Marquee accessibility
 
-Branch: `fix/marquee-accessibility`  
-PR title: `fix: marquee accessibility`  
-Dependencies: PR02 and any shared UI changes touching these components.  
-Owner: main executor for testimonial/company shared components.  
+Branch: `fix/marquee-accessibility`
+PR title: `fix: marquee accessibility`
+Dependencies: PR02 and any shared UI changes touching these components.
+Owner: main executor for testimonial/company shared components.
 PR: pending. Evidence: pending. Merge status: not started.
 
 - [ ] Remove hidden duplicate testimonial cards from keyboard navigation.
@@ -200,10 +213,10 @@ PR: pending. Evidence: pending. Merge status: not started.
 
 ## PR07 Company logo presentation
 
-Branch: `fix/company-logo-presentation`  
-PR title: `fix: company logo presentation`  
-Dependencies: team-approved logo mapping/files and relevant shared UI fixes.  
-Owner: scoped asset implementer; shared component edits coordinated centrally.  
+Branch: `fix/company-logo-presentation`
+PR title: `fix: company logo presentation`
+Dependencies: team-approved logo mapping/files and relevant shared UI fixes.
+Owner: scoped asset implementer; shared component edits coordinated centrally.
 PR: pending. Evidence: pending. Merge status: not started.
 
 - [ ] Audit existing artwork against the supplied mapping; replace only identified
@@ -214,10 +227,10 @@ PR: pending. Evidence: pending. Merge status: not started.
 
 ## PR08 Testimonial portraits
 
-Branch: `fix/testimonial-portraits`  
-PR title: `fix: testimonial portraits`  
-Dependencies: client-approved portraits/consent and relevant shared UI fixes.  
-Owner: scoped asset implementer; shared component edits coordinated centrally.  
+Branch: `fix/testimonial-portraits`
+PR title: `fix: testimonial portraits`
+Dependencies: client-approved portraits/consent and relevant shared UI fixes.
+Owner: scoped asset implementer; shared component edits coordinated centrally.
 PR: pending. Evidence: pending. Merge status: not started.
 
 - [ ] Map approved portraits to the eight testimonials and apply consistent crops
@@ -228,10 +241,10 @@ PR: pending. Evidence: pending. Merge status: not started.
 
 ## PR09 Frontend integration contracts
 
-Branch: `docs/frontend-integration-contracts`  
-PR title: `docs: frontend integration contracts`  
-Dependencies: PR01 document organization; counterpart input for agreed contracts.  
-Owner: main executor coordinates frontend and receiving-project boundaries.  
+Branch: `docs/frontend-integration-contracts`
+PR title: `docs: frontend integration contracts`
+Dependencies: PR01 document organization; counterpart input for agreed contracts.
+Owner: main executor coordinates frontend and receiving-project boundaries.
 PR: pending. Evidence: pending. Merge status: not started.
 
 - [ ] Inventory content and form fields, stable workshop/programme identifiers,
@@ -247,10 +260,10 @@ PR: pending. Evidence: pending. Merge status: not started.
 
 ## PR10 Demo submission boundaries
 
-Branch: `refactor/demo-submission-boundaries`  
-PR title: `refactor: demo submission boundaries`  
-Dependencies: PR02, PR09's necessary data decisions, and relevant form layout work.  
-Owner: main executor owns shared types/adapters; forms follow settled interfaces.  
+Branch: `refactor/demo-submission-boundaries`
+PR title: `refactor: demo submission boundaries`
+Dependencies: PR02, PR09's necessary data decisions, and relevant form layout work.
+Owner: main executor owns shared types/adapters; forms follow settled interfaces.
 PR: pending. Evidence: pending. Merge status: not started.
 
 - [ ] Separate complete validated form payloads from confirmation-display data.
@@ -266,10 +279,10 @@ PR: pending. Evidence: pending. Merge status: not started.
 
 ## PR11 Public page loading optional
 
-Branch: `perf/public-page-loading`  
-PR title: `perf: public page loading`  
-Dependencies: stable UI/assets and completed relevant integration preparation.  
-Owner: main executor or scoped performance implementer.  
+Branch: `perf/public-page-loading`
+PR title: `perf: public page loading`
+Dependencies: stable UI/assets and completed relevant integration preparation.
+Owner: main executor or scoped performance implementer.
 PR: pending. Evidence: pending. Merge status: not started. Decision: pending.
 
 - [ ] Record whether to perform or skip this optional package.
@@ -281,10 +294,10 @@ PR: pending. Evidence: pending. Merge status: not started. Decision: pending.
 
 ## PR12 Final design polish
 
-Branch: `fix/final-design-polish`  
-PR title: `fix: final design polish`  
+Branch: `fix/final-design-polish`
+PR title: `fix: final design polish`
 Dependencies: required preceding packages accepted, PR11 completed or explicitly
-skipped, and the user's final references supplied. Owner: main executor.  
+skipped, and the user's final references supplied. Owner: main executor.
 PR: pending. Evidence: pending. Merge status: not started.
 
 - [ ] Capture the supplied nitpicks as concrete checklist items before editing.
