@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   validate:
-    name: Quality handoff
+    name: Lint, Format, Typecheck
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -28,5 +28,5 @@ jobs:
           cache: npm
       - name: Install locked dependencies
         run: npm ci
-      - name: Run all handoff checks
+      - name: Run formatting, lint, CSS, types, harness tests, build and OG checks
         run: npm run quality:ci
