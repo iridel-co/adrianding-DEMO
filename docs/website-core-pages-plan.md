@@ -78,7 +78,7 @@ PR: not published. Evidence: full handoff passed locally on Node 25.7.0 and in a
       configuration and any root `AGENTS.md` where their tools expect them.
 - [x] Move `PRD.md` and `FSD.md` into `docs/product/`, preserving their filenames.
 - [x] Move `MEETING-NOTES.md` into `docs/meetings/`, preserving its contents and
-      filename. Preserve any concurrent author edits.
+      filename. Preserve its original contents exactly and any concurrent author edits.
 - [x] Add a concise `docs/index.md` linking this plan, current specifications,
       meeting records, and historical feedback passes. Keep scoped asset guidance
       such as `assets-src/README.md` beside the assets it explains.
@@ -89,8 +89,8 @@ PR: not published. Evidence: full handoff passed locally on Node 25.7.0 and in a
       by moves, including links back to the root README. Check dangling references
       to documents that do not exist; correct or explain them without inventing evidence.
 - [x] Reconcile verified stale status claims, such as missing-asset counts, in
-      current documentation. Preserve dated meeting records as history; add an
-      explicit current-status pointer instead of silently rewriting past decisions.
+      current documentation. Preserve dated meeting records unchanged; put current-status pointers in the documentation
+      index instead of adding to those records.
 - [x] Classify other apparently unused files before changing them. Remove only
       confirmed obsolete files; do not turn cleanup into a source-tree refactor.
 - [x] Adapt the ZIP's runner, configuration, and self-tests under `scripts/quality/`.
@@ -131,7 +131,9 @@ exit 2 records the known application-test gap for PR02. Three ESLint warnings in
 OG routes, one CSS named-color warning, and an outdated Browserslist data notice
 remain visible. CSS notation changes were checked against the original parsed
 rules, declarations, values, and breakpoints and found equivalent. Remote CI and
-browser/device evidence remain unverified. The source ZIP remains uncommitted.
+browser/device evidence remain unverified. The source ZIP remains uncommitted. Meeting notes are byte-identical to the original
+record after their file move. CI retains the prior job display name for existing
+required-check settings. Logo file presence is not artwork approval.
 
 The first package includes the saved 331-line milestone checklist and imported
 runner/tests, so its combined diff exceeds the usual size guideline. Review the

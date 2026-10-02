@@ -5,7 +5,7 @@ Start with the [repository overview](../README.md) for current demo behavior and
 - [Website Design and Core Pages delivery plan](website-core-pages-plan.md): current milestone scope, package dependencies, acceptance, and evidence.
 - [Product requirements](product/PRD.md): scope, copy, frontend behavior, and Phase 2 handoff context.
 - [Phase 2 functional specification](product/FSD.md): draft backend flows and [open decisions](product/FSD.md#112-open-decisions); implementation remains with Phase 2 owners.
-- [Client meeting record](meetings/MEETING-NOTES.md): dated decisions and requests, preserved as history with a current-status pointer.
+- [Client meeting record](meetings/MEETING-NOTES.md): dated decisions and requests, preserved without content edits.
 - [Historical feedback passes](feedback-passes/index.md): earlier plans and test evidence, not current execution instructions.
 - [Quality workflow](development/quality.md): prerequisites, stage coverage, and known gaps.
 - [Asset source guidance](../assets-src/README.md): originals and derivative handling, kept beside those assets.
