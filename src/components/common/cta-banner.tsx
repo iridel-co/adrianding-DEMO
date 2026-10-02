@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * CtaBanner Component
- * @see DESIGN_SYSTEM.md#Layout & Structure — Section Patterns
+ * @see README.md#design-system (repository-root overview)
  *
  * High-visual-weight call-to-action section. Use once per page as the final
  * section before the footer.

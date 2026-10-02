@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * Button Component
- * @see DESIGN_SYSTEM.md#Buttons
+ * @see README.md#design-system (repository-root overview)
  *
  * UDS specs:
  * - Base: rounded-full (pill), text-sm, font-medium, transition-all

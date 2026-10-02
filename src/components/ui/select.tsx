@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * Select Component
- * @see DESIGN_SYSTEM.md#Inputs
+ * @see README.md#design-system (repository-root overview)
  *
  * UDS specs:
  * - Trigger: h-9 rounded-md border border-input bg-background

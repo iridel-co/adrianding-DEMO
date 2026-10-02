@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * FeatureGrid + FeatureItem Components
- * @see DESIGN_SYSTEM.md#Layout & Structure — Section Patterns
+ * @see README.md#design-system (repository-root overview)
  *
  * Icon + heading + description grid. Intentionally NO card containers —
  * the icon badge and typography carry the visual weight.

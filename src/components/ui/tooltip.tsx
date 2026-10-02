@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * Tooltip Component
- * @see DESIGN_SYSTEM.md
+ * @see README.md#design-system (repository-root overview)
  *
  * UDS specs:
  * - Content: rounded-md bg-primary text-primary-foreground px-3 py-1.5 text-xs

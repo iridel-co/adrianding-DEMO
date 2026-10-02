@@ -209,7 +209,7 @@ Client-supplied roster, used by the filterable marquee on the Landing page and r
 > (Presenting with Impact, Negotiation Essentials, Coaching for Managers, Customer
 > Experience Excellence) are representative copy written for the demo — replace or
 > drop before handoff. Every price is an arbitrary demo figure pending his real
-> numbers; see `MEETING-NOTES.md`.
+> numbers; see `docs/meetings/MEETING-NOTES.md`.
 
 - **Focus tags (added 2026-09-19, client feedback):** every workshop carries 1–3 tags from a fixed taxonomy (Leadership, Sales, Communication, Coaching, Customer Experience, Culture, Train-the-Trainer) shown as pills on every card (landing + list) and on the course hero. Filter chips above the /workshops grid — "All" by default, multi-select, **OR** semantics (a course shows if it has any selected tag). Chips only list tags an open course actually carries.
 - **Filter bar (2026-09-24, pass 4):** "Filter by focus" and "Showing X of Y workshops" share one line (space-between). The chips below are smaller (32px pill, 44px touch target) and always sit on a single row, which scrolls sideways with an edge fade wherever it doesn't fit (below 1024px). On the desktop grid, the "More events coming soon" card fills the shorter column: right when the filtered count is odd, left when it's even.
@@ -280,7 +280,7 @@ becomes CMS-managed the cards follow for free** — publishing a new workshop
 mints its own preview card with no design step and no upload. Full
 implementation guide, with file pointers and the testing workflow:
 `README.md` → [Share images (Open Graph
-cards)](README.md#share-images-open-graph-cards).
+cards)](../../README.md#share-images-open-graph-cards).
 
 What the build team needs to carry over:
 

@@ -21,7 +21,7 @@ const nextConfig: NextConfig = {
        * Nano Banana CDN
        * Replace "assets.nanobanana.io" with the actual domain once confirmed.
        * Update NANO_BANANA_BASE in src/lib/images.ts to match.
-       * @see docs/image-handling.md
+       * @see README.md#images (repository-root image guidance)
        */
       {
         protocol: "https",

@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * Table Component
- * @see DESIGN_SYSTEM.md#Tables/Data Lists
+ * @see README.md#design-system (repository-root overview)
  *
  * UDS specs:
  * - Header cells: text-xs uppercase tracking-[0.06em] text-muted-foreground

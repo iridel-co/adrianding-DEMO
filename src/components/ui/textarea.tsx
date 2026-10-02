@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * Textarea Component
- * @see DESIGN_SYSTEM.md#Inputs
+ * @see README.md#design-system (repository-root overview)
  *
  * UDS specs:
  * - Base: rounded-md border border-input bg-background px-3 text-sm shadow-sm

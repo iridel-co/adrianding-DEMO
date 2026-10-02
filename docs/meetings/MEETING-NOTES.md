@@ -133,3 +133,10 @@ Sept 19 Meeting Notes:
 - marine corp, 2go, opascor
 - every inquiry filled should notify email and pop as new in CRM
 - how low can we go for a PARTNERSHIP
+
+> **Current-status pointer (2026-10-02).** The dated record above is preserved.
+> See the [delivery plan](../website-core-pages-plan.md),
+> [current open decisions](../product/FSD.md#112-open-decisions), and
+> [repository overview](../../README.md#decisions-pending-client--chan).
+> All 93 company artwork references and all eight testimonial portrait references
+> now resolve locally; approval, identity mapping, and photo consent remain pending.

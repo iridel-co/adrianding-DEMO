@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * HeroSection Component
- * @see DESIGN_SYSTEM.md#Layout & Structure — Section Patterns
+ * @see README.md#design-system (repository-root overview)
  *
  * Full-width hero with optional background image, eyebrow label, display
  * heading, subtext, and a CTA actions slot.
