@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * PageContainer Component
- * @see DESIGN_SYSTEM.md#Layout & Structure
+ * @see README.md#design-system (repository-root overview)
  *
  * UDS specs:
  * - Container: max-w-7xl mx-auto
@@ -26,7 +26,7 @@ PageContainer.displayName = "PageContainer"
 
 /**
  * PageHeader Component
- * @see DESIGN_SYSTEM.md#Layout & Structure
+ * @see README.md#design-system (repository-root overview)
  *
  * UDS specs:
  * - Eyebrow: text-xs uppercase tracking-[0.08em] text-muted-foreground
@@ -67,7 +67,7 @@ PageHeader.displayName = "PageHeader"
 
 /**
  * PageSection Component
- * @see DESIGN_SYSTEM.md#Layout & Structure
+ * @see README.md#design-system (repository-root overview)
  *
  * UDS specs:
  * - Spacing: space-y-4

@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * Toast Component
- * @see DESIGN_SYSTEM.md#Toasts & Alerts
+ * @see README.md#design-system (repository-root overview)
  *
  * UDS specs:
  * - Base: rounded-lg border bg-card shadow-lg p-4 flex gap-3

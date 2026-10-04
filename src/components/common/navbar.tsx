@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * Navbar Component
- * @see DESIGN_SYSTEM.md#Navigation
+ * @see README.md#design-system (repository-root overview)
  *
  * UDS specs:
  * - Height: 64px (h-16)

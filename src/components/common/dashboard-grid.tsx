@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * DashboardGrid Component
- * @see DESIGN_SYSTEM.md#Layout & Structure
+ * @see README.md#design-system (repository-root overview)
  *
  * UDS specs:
  * - Grid: grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6

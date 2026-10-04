@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * EmptyState Component
- * @see DESIGN_SYSTEM.md#Tables/Data Lists
+ * @see README.md#design-system (repository-root overview)
  *
  * UDS specs:
  * - Container: rounded-xl bg-muted/40 p-8 (no border — bg-muted/40 provides visual containment)

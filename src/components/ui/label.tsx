@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * Label Component
- * @see DESIGN_SYSTEM.md#Forms
+ * @see README.md#design-system (repository-root overview)
  *
  * UDS specs:
  * - Base: text-sm font-medium

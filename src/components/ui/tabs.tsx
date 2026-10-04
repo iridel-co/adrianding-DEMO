@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * Tabs Component
- * @see DESIGN_SYSTEM.md#Tabs/Segmentation
+ * @see README.md#design-system (repository-root overview)
  *
  * UDS specs:
  * - List: inline-flex gap-2 p-1 rounded-full bg-muted (pill style)
