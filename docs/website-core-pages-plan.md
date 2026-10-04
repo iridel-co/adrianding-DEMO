@@ -193,6 +193,19 @@ execution, not evidence of a Firefox site regression. No macOS/iOS proof is clai
 Structurally invalid stored payload validation remains PR10. The source ZIP remains
 uncommitted. PR03 is the next package after PR02 acceptance.
 
+Review follow-up on 2026-10-04: hotspot-origin development JavaScript requests
+returned HTTP 403, preventing client hydration. Added an explicit, environment-fed
+`allowedDevOrigins` list and documented LAN startup. The same asset request then
+returned HTTP 200. In-app desktop browser checks over the hotspot address confirmed
+FAQ hover expansion, Sales filtering (2 of 7), calendar month advancement,
+inquiry sample filling and step advancement, workshop scroll controls, and seven
+spread gallery cards. Real iPhone navigation still needs retesting after refresh.
+The Building Winning Cultures event contains one reflection followed by photos;
+additional event copy is not present in its current demo data. The public domain
+currently uses coming-soon/interest links, while the Vercel demo uses workshop and
+inquiry journeys. This development fix is included in PR02's review follow-up;
+formatting and type checks passed. Real-device acceptance remains pending.
+
 ## PR03 Core page responsiveness
 
 Branch: `fix/core-page-responsiveness`

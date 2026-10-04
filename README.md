@@ -307,6 +307,18 @@ npm run validate # typecheck + lint + format check — run before any handoff
 
 No backend, no database, no `.env` file required to run it.
 
+For phone testing over LAN or Windows Mobile Hotspot, allow the desktop's IPv4
+address explicitly before starting the development server (PowerShell):
+
+```powershell
+$env:NEXT_DEV_ALLOWED_ORIGINS = "<desktop-ip>"
+npm run dev -- --hostname 0.0.0.0
+```
+
+Replace `<desktop-ip>` with the desktop address on the phone's network, then open
+`http://<desktop-ip>:3000` on the phone. Multiple hosts can be comma-separated;
+restart the development server after changing them.
+
 ### Environment variables
 
 | Variable               | Required | Purpose                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
