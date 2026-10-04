@@ -33,7 +33,12 @@ test("repository mapping covers CSS, source, tooling, and fresh build plus OG", 
     "tests/browser/public-site.spec.ts",
     "playwright.config.ts",
   ]) {
-    assert.deepEqual(ids([file], "handoff"), ["format", "types", "browser"])
+    assert.deepEqual(ids([file], "handoff"), [
+      "format",
+      "lint",
+      "types",
+      "browser",
+    ])
   }
   for (const file of [
     "package-lock.json",

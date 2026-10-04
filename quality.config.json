@@ -11,7 +11,12 @@
       "id": "lint",
       "script": "lint",
       "stage": "edit",
-      "patterns": ["^src/.*\\.[jt]sx?$", "^eslint\\."]
+      "patterns": [
+        "^src/.*\\.[jt]sx?$",
+        "^eslint\\.",
+        "^tests/browser/",
+        "^playwright\\.config\\."
+      ]
     },
     {
       "id": "css",

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test"
+import { expect, test, type Page } from "@playwright/test"
 
 const workshop = "/workshops/exceptional-salesmanship"
 
@@ -9,19 +9,41 @@ test.beforeEach(async ({ page }) => {
 test("main navigation works with keyboard activation", async ({
   page,
 }, testInfo) => {
+  const webkit = testInfo.project.name.startsWith("webkit")
   await page.goto("/")
-  if (testInfo.project.name === "mobile") {
+  if (testInfo.project.name.includes("mobile")) {
     const menu = page.getByRole("button", { name: "Open menu" })
-    await menu.focus()
+    const home = page.getByRole("link", { name: "Coach Adrian Ding — home" })
+    await expect(home).toBeVisible()
+    await home.focus()
+    if (webkit) await menu.focus()
+    else {
+      await page.keyboard.press("Tab")
+      await page.keyboard.press("Tab")
+    }
+    await expect(menu).toBeFocused()
     await page.keyboard.press("Enter")
     await expect(page.getByRole("dialog")).toBeVisible()
   }
-  const navigation =
-    testInfo.project.name === "mobile"
-      ? page.getByRole("dialog")
-      : page.getByRole("navigation", { name: "Main" })
+  const navigation = testInfo.project.name.includes("mobile")
+    ? page.getByRole("dialog")
+    : page.getByRole("navigation", { name: "Main" })
   const about = navigation.getByRole("link", { name: "About", exact: true })
-  await about.focus()
+  if (testInfo.project.name.includes("mobile")) {
+    const home = navigation.getByRole("link", { name: /Adrian Ding/ })
+    await expect(home).toBeVisible()
+    await home.focus()
+  } else {
+    const home = navigation.getByRole("link", {
+      name: "Coach Adrian Ding — home",
+    })
+    await expect(home).toBeVisible()
+    await home.focus()
+  }
+  // Windows WebKit excludes links from sequential Tab navigation by default.
+  // Verify keyboard activation there; Chromium/Firefox also verify Tab order.
+  if (webkit) await about.focus()
+  else await page.keyboard.press("Tab")
   await expect(about).toBeFocused()
   await page.keyboard.press("Enter")
   await expect(page).toHaveURL(/\/about$/)
@@ -62,67 +84,77 @@ test("calendar changes months and opens a workshop by keyboard", async ({
   await expect(page).toHaveURL(workshop)
 })
 
-test("workshop registration validates, preserves steps and personalizes confirmation", async ({
-  page,
-}) => {
-  await page.goto(workshop)
-  await page
-    .getByRole("button", { name: "Register now", exact: true })
-    .first()
-    .click()
-  const dialog = page.getByRole("dialog", { name: "Reserve your seat" })
-  await dialog.getByRole("button", { name: "Continue", exact: true }).click()
-  await expect(dialog.getByText("Please enter your full name.")).toBeVisible()
-  await dialog
-    .getByRole("button", {
-      name: "Demo shortcut: fill this form with sample data",
-    })
-    .click()
-  await dialog.getByRole("button", { name: "Continue", exact: true }).click()
-  await expect(dialog.getByText(/Step 2 of 3/)).toBeVisible()
-  await dialog.getByRole("button", { name: "Back", exact: true }).click()
-  await expect(dialog.getByPlaceholder("Juan Dela Cruz")).toHaveValue(
-    "Juan Dela Cruz"
-  )
-  await dialog.getByRole("button", { name: "Continue", exact: true }).click()
-  await dialog.getByRole("button", { name: "Continue", exact: true }).click()
-  await expect(dialog.getByText(/Step 3 of 3/)).toBeVisible()
-  await expect(page).toHaveURL(workshop)
-  await dialog.getByRole("button", { name: "Complete registration" }).click()
-  await expect(page).toHaveURL(`${workshop}/registered`)
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "You're on the list, Juan."
-  )
-})
+for (const blocked of [false, true]) {
+  test(`workshop registration validates, preserves steps and confirms (storage blocked: ${blocked})`, async ({
+    page,
+  }) => {
+    if (blocked) await blockStorage(page)
+    await page.goto(workshop)
+    await page
+      .getByRole("button", { name: "Register now", exact: true })
+      .first()
+      .click()
+    const dialog = page.getByRole("dialog", { name: "Reserve your seat" })
+    await dialog.getByRole("button", { name: "Continue", exact: true }).click()
+    await expect(dialog.getByText("Please enter your full name.")).toBeVisible()
+    await dialog
+      .getByRole("button", {
+        name: "Demo shortcut: fill this form with sample data",
+      })
+      .click()
+    await dialog.getByRole("button", { name: "Continue", exact: true }).click()
+    await expect(dialog.getByText(/Step 2 of 3/)).toBeVisible()
+    await dialog.getByRole("button", { name: "Back", exact: true }).click()
+    await expect(dialog.getByPlaceholder("Juan Dela Cruz")).toHaveValue(
+      "Juan Dela Cruz"
+    )
+    await dialog.getByRole("button", { name: "Continue", exact: true }).click()
+    await dialog.getByRole("button", { name: "Continue", exact: true }).click()
+    await expect(dialog.getByText(/Step 3 of 3/)).toBeVisible()
+    await expect(page).toHaveURL(workshop)
+    await dialog.getByRole("button", { name: "Complete registration" }).click()
+    await expect(page).toHaveURL(`${workshop}/registered`)
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      blocked ? "You're on the list." : "You're on the list, Juan."
+    )
+  })
 
-test("corporate inquiry validates and submits all four steps", async ({
-  page,
-}) => {
-  await page.goto("/corporate-training?program=leadership#inquiry")
-  const form = page.locator("form")
-  await form.getByRole("button", { name: "Continue", exact: true }).click()
-  await expect(form.getByText("Please enter your full name.")).toBeVisible()
-  await form
-    .getByRole("button", {
-      name: "Demo shortcut: fill this form with sample data",
-    })
-    .click()
-  for (const step of [2, 3, 4]) {
+  test(`corporate inquiry validates and confirms (storage blocked: ${blocked})`, async ({
+    page,
+  }) => {
+    if (blocked) await blockStorage(page)
+    await page.goto("/corporate-training?program=leadership#inquiry")
+    const form = page.locator("form")
     await form.getByRole("button", { name: "Continue", exact: true }).click()
-    await expect(form.getByText(new RegExp(`Step ${step} of 4`))).toBeVisible()
-  }
-  await expect(page).toHaveURL(
-    /\/corporate-training\?program=leadership#inquiry$/
-  )
-  await form.getByRole("button", { name: "Send inquiry" }).click()
-  await expect(page).toHaveURL(/\/corporate-training\/inquiry-received$/)
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "Thanks, Maria. We've got your inquiry."
-  )
-  await expect(
-    page.getByText("Acme Manufacturing", { exact: true }).first()
-  ).toBeVisible()
-})
+    await expect(form.getByText("Please enter your full name.")).toBeVisible()
+    await form
+      .getByRole("button", {
+        name: "Demo shortcut: fill this form with sample data",
+      })
+      .click()
+    for (const step of [2, 3, 4]) {
+      await form.getByRole("button", { name: "Continue", exact: true }).click()
+      await expect(
+        form.getByText(new RegExp(`Step ${step} of 4`))
+      ).toBeVisible()
+    }
+    await expect(page).toHaveURL(
+      /\/corporate-training\?program=leadership#inquiry$/
+    )
+    await form.getByRole("button", { name: "Send inquiry" }).click()
+    await expect(page).toHaveURL(/\/corporate-training\/inquiry-received$/)
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      blocked
+        ? "Thanks — we've got your inquiry."
+        : "Thanks, Maria. We've got your inquiry."
+    )
+    const company = page
+      .getByText("Acme Manufacturing", { exact: true })
+      .first()
+    if (blocked) await expect(company).toHaveCount(0)
+    else await expect(company).toBeVisible()
+  })
+}
 
 for (const storage of ["missing", "malformed", "unavailable"] as const) {
   for (const route of [
@@ -170,4 +202,14 @@ for (const storage of ["missing", "malformed", "unavailable"] as const) {
       expect(errors).toEqual([])
     })
   }
+}
+
+async function blockStorage(page: Page) {
+  await page.addInitScript(() => {
+    Object.defineProperty(window, "sessionStorage", {
+      get() {
+        throw new Error("Storage blocked")
+      },
+    })
+  })
 }

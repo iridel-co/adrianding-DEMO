@@ -714,8 +714,8 @@ npm run validate       # legacy lightweight types/lint/format subset
 npm run check:build    # fresh production build plus all OG artifact checks
 ```
 
-Public-site Chromium regressions run at handoff; `npm run test:browser` builds
-and runs them independently. Install Chromium with `npx playwright install chromium`
+Public-site browser regressions run at handoff; `npm run test:browser` builds
+and runs them independently. Install browsers with `npx playwright install chromium firefox webkit`
 after `npm ci`. See [browser prerequisites and evidence](docs/development/quality.md#evidence-and-known-gaps).
 Harness tests cover tooling only; local checks do not establish real-device, hosted, or provider
 readiness. Existing lint warnings remain visible. `.gitattributes` aligns text

@@ -5,7 +5,8 @@ milestone across reviewable PRs. Start with the portable quality harness and
 repository documentation cleanup. Finish with the user's design and nitpick pass.
 
 Created: 2026-10-02. Planning baseline: `main` at `f1408f4`.
-PR01 and PR02 are accepted locally. An unchecked item is pending, not a failed check.
+PR01 is merged. PR02's expanded verification is blocked on local Firefox launch.
+An unchecked item is pending unless its evidence explicitly records a failed check.
 
 ## Scope and decisions
 
@@ -70,7 +71,10 @@ necessary and record its dependency here.
 Branch: `chore/quality-harness-and-repo-cleanup`
 PR title: `chore: quality harness and repo cleanup`
 Dependencies: none. Owner: main executor, including shared configuration and CI.
-PR: not published. Evidence: full handoff passed locally on Node 25.7.0 and in a clean clone on Node 22.23.3. Merge status: not merged.
+PR: [#1](https://github.com/iridel-co/adrianding-DEMO/pull/1). Evidence: full handoff
+passed locally on Node 25.7.0 and in a clean clone on Node 22.23.3; GitHub's
+`Lint, Format, Typecheck` check succeeded. Merge status: merged into `main` on
+2026-10-04 at `5c86906`, verified through GitHub and fetched history.
 
 - [x] Inventory root files, documentation, local/generated artifacts, existing
       tooling, and references before moving or removing anything.
@@ -145,9 +149,10 @@ feature packages retain the smaller scope targets.
 Branch: `test/public-site-regressions`
 PR title: `test: public site regressions`
 Dependencies: PR01. Owner: main executor or a scoped test implementer.
-PR: not published; stacked locally on `chore/quality-harness-and-repo-cleanup` at
-`fc96cac`. Evidence: full local handoff passed on 2026-10-04, Node 25.7.0,
-including 22 Chromium tests (1440px desktop and 390px mobile). Merge status: not merged.
+PR: not published; rebased onto integrated `origin/main` at `5c86906`, target `main`.
+Evidence: original 22-test Chromium handoff passed locally on 2026-10-04,
+Node 25.7.0; expanded Chromium/WebKit selection passed 52 tests. Firefox launch
+is blocked on Windows; full handoff is not passing. Merge status: not merged.
 
 - [x] Add a small browser-test setup and register its real checks with the harness.
 - [x] Cover navigation, representative workshop interactions, both demo forms, and
@@ -155,7 +160,7 @@ including 22 Chromium tests (1440px desktop and 390px mobile). Merge status: not
 - [x] Exercise keyboard navigation and a narrow viewport with deterministic data.
 - [x] Keep setup and behavior coverage in coherent commits. Add regression cases
       alongside subsequent bug fixes rather than committing a failing baseline.
-- [x] Acceptance: tests demonstrate observable behavior, run without watch mode,
+- [ ] Acceptance: tests demonstrate observable behavior, run without watch mode,
       and produce useful failure evidence. Record browser/install prerequisites.
 
 PR02 uses a fresh production build and its own server on port 3100. Tests cover
@@ -165,12 +170,27 @@ fallbacks after client storage reads with missing, invalid-JSON, or blocked stor
 Fixed browser time is 2026-10-04; reduced motion avoids animation-dependent waits.
 Failure screenshots/traces and HTML reports are ignored locally and uploaded by CI.
 Browser prerequisites and report commands are in `docs/development/quality.md`.
-All seven handoff checks passed, including eight harness tests and nine OG cards.
+Original seven-check handoff passed, including eight harness tests and nine OG cards.
 The existing three ESLint warnings, CSS named-color warning, and Browserslist notice
-remain visible. Remote CI, cross-browser, real-device, and visual design acceptance
-remain unverified; Chromium viewport emulation does not complete later UI packages.
+remain visible. PR02 remote CI, real-device, and visual design acceptance
+remain unverified; viewport emulation does not complete later UI packages.
+Re-review on 2026-10-04 expanded the matrix to desktop Chromium/Firefox/WebKit
+and mobile Chromium/WebKit, added lint ownership, fixed the browser timezone to
+Asia/Manila, and tested both form submissions with blocked storage. Chromium/Firefox
+assert Tab traversal; Windows WebKit tests focus and Enter activation because its
+default mode excludes links from sequential Tab traversal. Failure screenshots and
+traces were confirmed during the review's selector failures.
+Checkpoint checks passed (including eight harness tests). Build and nine OG checks
+passed. The complete 65-case run failed: Firefox's 13 cases could not launch the
+downloaded binary (`spawn UNKNOWN`); Windows Application/SideBySide logs identify
+an unresolved `mozglue` assembly despite the bundled DLL being present. After fixing
+WebKit's test assumptions, all 52 Chromium/WebKit cases passed against a fresh build.
+Firefox remains configured in CI and the full local handoff; it is not silently
+skipped. Resolve its binary prerequisite or obtain successful CI evidence before
+checking expanded acceptance. This is an environment failure before application
+execution, not evidence of a Firefox site regression. No macOS/iOS proof is claimed.
 Structurally invalid stored payload validation remains PR10. The source ZIP remains
-uncommitted. PR03 is the next package.
+uncommitted. PR03 is the next package after PR02 acceptance.
 
 ## PR03 Core page responsiveness
 

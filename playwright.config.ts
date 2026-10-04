@@ -10,6 +10,7 @@ export default defineConfig({
   use: {
     baseURL: "http://127.0.0.1:3100",
     reducedMotion: "reduce",
+    timezoneId: "Asia/Manila",
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },
@@ -22,6 +23,23 @@ export default defineConfig({
       name: "mobile",
       use: {
         browserName: "chromium",
+        viewport: { width: 390, height: 844 },
+        isMobile: true,
+        hasTouch: true,
+      },
+    },
+    {
+      name: "firefox-desktop",
+      use: { browserName: "firefox", viewport: { width: 1440, height: 900 } },
+    },
+    {
+      name: "webkit-desktop",
+      use: { browserName: "webkit", viewport: { width: 1440, height: 900 } },
+    },
+    {
+      name: "webkit-mobile",
+      use: {
+        browserName: "webkit",
         viewport: { width: 390, height: 844 },
         isMobile: true,
         hasTouch: true,

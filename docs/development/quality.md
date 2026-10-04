@@ -7,11 +7,11 @@ the first failure. It does not fix files or perform Git or external writes.
 
 ## Stages and coverage
 
-| Stage      | Eligible checks                                                            |
-| ---------- | -------------------------------------------------------------------------- |
-| edit       | Prettier, source ESLint, CSS Stylelint                                     |
-| checkpoint | edit checks, generated Next types and TypeScript, harness tests            |
-| handoff    | checkpoint checks, fresh Next build, built OG checks, Chromium regressions |
+| Stage      | Eligible checks                                                           |
+| ---------- | ------------------------------------------------------------------------- |
+| edit       | Prettier, source ESLint, CSS Stylelint                                    |
+| checkpoint | edit checks, generated Next types and TypeScript, harness tests           |
+| handoff    | checkpoint checks, fresh Next build, built OG checks, browser regressions |
 
 Scopes select which checks run, not which files those npm commands inspect.
 Package, lockfile, harness, and CI changes select every eligible check. Docs
@@ -40,16 +40,28 @@ it does not certify partially staged contents. No selected checks exits 2.
 ## Evidence and known gaps
 
 Application browser coverage lives in `tests/browser/` with Playwright. Install
-Chromium after `npm ci` using `npx playwright install chromium`; on Linux CI use
-`npx playwright install --with-deps chromium` for system dependencies too.
+the browsers after `npm ci` using `npx playwright install chromium firefox webkit`;
+on Linux CI add `--with-deps` for system dependencies too.
 Run `npm run test:browser` to build and test a fresh production server on port 3100. The port must be free; the runner never reuses another server. The handoff
 gate includes this command for application, browser setup, and dependency changes.
-Both 1440px desktop and 390px mobile Chromium projects run with reduced motion,
-one worker, isolated browser contexts, and fixed demo data. These are browser
-emulations, not real-device evidence or cross-browser coverage.
-Tests cover keyboard navigation, listing filters, both multistep demo forms,
+1440px desktop projects cover Chromium, Firefox, and WebKit; 390px mobile projects
+cover Chromium and WebKit. They use reduced motion, an explicit Asia/Manila
+timezone, one worker, isolated contexts, and fixed demo data. These are engine
+tests and viewport emulations, not real-device or every-operating-system evidence.
+WebKit is Playwright's patched engine, not installed Safari. Windows local and
+Linux CI runs do not establish macOS/iOS behavior; native Safari/device QA remains
+part of milestone acceptance. Browser tests and configuration are linted and typed.
+Tests cover Tab traversal in Chromium/Firefox and focus/Enter activation in WebKit
+(its Windows default excludes links from sequential Tab traversal), listing filters, both multistep demo forms,
 personalized confirmations, and missing, invalid-JSON, or blocked storage.
+Both form submissions also run with storage blocked and reach generic confirmations.
 Runtime validation of structurally invalid stored payloads remains PR10 work.
+On the 2026-10-04 Windows review, Firefox's downloaded binary failed before launch
+with a `mozglue` side-by-side assembly error. All 52 Chromium/WebKit cases passed;
+Firefox remains a required project and blocks a full local handoff claim until its
+browser prerequisite is repaired. To diagnose the available engines separately,
+run `npm run test:browser -- --project=desktop --project=mobile --project=webkit-desktop --project=webkit-mobile`.
+That selection does not replace the full quality gate.
 Failures retain screenshots and traces under `test-results/` and an HTML report
 under `playwright-report/`; CI uploads them for seven days. Inspect locally with
 `npx playwright show-report` or `npx playwright show-trace <trace.zip>`.
