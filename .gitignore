@@ -44,3 +44,7 @@ next-env.d.ts
 .claude/
 CLAUDE.md
 .impeccable/
+
+# Playwright browser evidence
+/playwright-report/
+/test-results/

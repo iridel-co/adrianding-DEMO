@@ -714,8 +714,10 @@ npm run validate       # legacy lightweight types/lint/format subset
 npm run check:build    # fresh production build plus all OG artifact checks
 ```
 
-Application/browser tests are pending PR02 of the delivery plan. Harness tests
-cover tooling only; local checks do not establish device, hosted, or provider
+Public-site Chromium regressions run at handoff; `npm run test:browser` builds
+and runs them independently. Install Chromium with `npx playwright install chromium`
+after `npm ci`. See [browser prerequisites and evidence](docs/development/quality.md#evidence-and-known-gaps).
+Harness tests cover tooling only; local checks do not establish real-device, hosted, or provider
 readiness. Existing lint warnings remain visible. `.gitattributes` aligns text
 checkouts with Prettier's LF requirement; original SVG/font-license files retain
 their source bytes.

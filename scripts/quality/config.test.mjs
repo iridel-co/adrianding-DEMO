@@ -19,6 +19,7 @@ test("repository mapping covers CSS, source, tooling, and fresh build plus OG", 
     "format",
     "css",
     "build-and-og",
+    "browser",
   ])
   assert.deepEqual(ids(["src/app/page.tsx"], "checkpoint"), [
     "format",
@@ -27,6 +28,13 @@ test("repository mapping covers CSS, source, tooling, and fresh build plus OG", 
   ])
   assert.ok(ids(["scripts/check-og.mjs"], "handoff").includes("build-and-og"))
   assert.equal(pkg.scripts["check:build"], "npm run build && npm run check:og")
+  assert.equal(pkg.scripts["test:browser"], "npm run build && playwright test")
+  for (const file of [
+    "tests/browser/public-site.spec.ts",
+    "playwright.config.ts",
+  ]) {
+    assert.deepEqual(ids([file], "handoff"), ["format", "types", "browser"])
+  }
   for (const file of [
     "package-lock.json",
     ".nvmrc",

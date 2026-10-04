@@ -5,7 +5,7 @@ milestone across reviewable PRs. Start with the portable quality harness and
 repository documentation cleanup. Finish with the user's design and nitpick pass.
 
 Created: 2026-10-02. Planning baseline: `main` at `f1408f4`.
-PR01 implementation is in progress. An unchecked item is pending, not a failed check.
+PR01 and PR02 are accepted locally. An unchecked item is pending, not a failed check.
 
 ## Scope and decisions
 
@@ -145,16 +145,32 @@ feature packages retain the smaller scope targets.
 Branch: `test/public-site-regressions`
 PR title: `test: public site regressions`
 Dependencies: PR01. Owner: main executor or a scoped test implementer.
-PR: pending. Evidence: pending. Merge status: not started.
+PR: not published; stacked locally on `chore/quality-harness-and-repo-cleanup` at
+`fc96cac`. Evidence: full local handoff passed on 2026-10-04, Node 25.7.0,
+including 22 Chromium tests (1440px desktop and 390px mobile). Merge status: not merged.
 
-- [ ] Add a small browser-test setup and register its real checks with the harness.
-- [ ] Cover navigation, representative workshop interactions, both demo forms, and
+- [x] Add a small browser-test setup and register its real checks with the harness.
+- [x] Cover navigation, representative workshop interactions, both demo forms, and
       confirmation fallbacks, including malformed or unavailable session storage.
-- [ ] Exercise keyboard navigation and a narrow viewport with deterministic data.
-- [ ] Keep setup and behavior coverage in coherent commits. Add regression cases
+- [x] Exercise keyboard navigation and a narrow viewport with deterministic data.
+- [x] Keep setup and behavior coverage in coherent commits. Add regression cases
       alongside subsequent bug fixes rather than committing a failing baseline.
-- [ ] Acceptance: tests demonstrate observable behavior, run without watch mode,
+- [x] Acceptance: tests demonstrate observable behavior, run without watch mode,
       and produce useful failure evidence. Record browser/install prerequisites.
+
+PR02 uses a fresh production build and its own server on port 3100. Tests cover
+keyboard navigation, filter reset, calendar month/date navigation, required-field
+validation, step preservation, both personalized demo confirmations, and generic
+fallbacks after client storage reads with missing, invalid-JSON, or blocked storage.
+Fixed browser time is 2026-10-04; reduced motion avoids animation-dependent waits.
+Failure screenshots/traces and HTML reports are ignored locally and uploaded by CI.
+Browser prerequisites and report commands are in `docs/development/quality.md`.
+All seven handoff checks passed, including eight harness tests and nine OG cards.
+The existing three ESLint warnings, CSS named-color warning, and Browserslist notice
+remain visible. Remote CI, cross-browser, real-device, and visual design acceptance
+remain unverified; Chromium viewport emulation does not complete later UI packages.
+Structurally invalid stored payload validation remains PR10. The source ZIP remains
+uncommitted. PR03 is the next package.
 
 ## PR03 Core page responsiveness
 

@@ -26,7 +26,9 @@
       "patterns": [
         "^src/.*\\.[jt]sx?$",
         "(^|/)tsconfig[^/]*\\.json$",
-        "^next\\.config\\."
+        "^next\\.config\\.",
+        "^tests/browser/",
+        "^playwright\\.config\\."
       ]
     },
     {
@@ -48,6 +50,17 @@
         "^next\\.config\\.",
         "^postcss\\.config\\.",
         "^scripts/check-og\\.mjs$"
+      ]
+    },
+    {
+      "id": "browser",
+      "script": "test:browser",
+      "stage": "handoff",
+      "patterns": [
+        "^(src|public|tests/browser)/",
+        "^playwright\\.config\\.",
+        "^next\\.config\\.",
+        "^postcss\\.config\\."
       ]
     }
   ]

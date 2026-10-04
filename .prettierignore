@@ -9,6 +9,8 @@ graphify-out/
 out/
 build/
 dist/
+playwright-report/
+test-results/
 
 # Cache
 .cache/
@@ -21,4 +23,3 @@ next-env.d.ts
 package-lock.json
 pnpm-lock.yaml
 yarn.lock
-
