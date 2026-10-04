@@ -149,7 +149,8 @@ feature packages retain the smaller scope targets.
 Branch: `test/public-site-regressions`
 PR title: `test: public site regressions`
 Dependencies: PR01. Owner: main executor or a scoped test implementer.
-PR: not published; rebased onto integrated `origin/main` at `5c86906`, target `main`.
+PR: [#2](https://github.com/iridel-co/adrianding-DEMO/pull/2), opened for review;
+rebased onto integrated `origin/main` at `5c86906`, target `main`.
 Evidence: original 22-test Chromium handoff passed locally on 2026-10-04,
 Node 25.7.0; expanded Chromium/WebKit selection passed 52 tests. Firefox launch
 is blocked on Windows; full handoff is not passing. Merge status: not merged.
