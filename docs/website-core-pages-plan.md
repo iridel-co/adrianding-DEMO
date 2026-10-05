@@ -237,7 +237,7 @@ Dependencies: PR02. Owner: main executor for shared UI and Home/About consumers.
 PR: [#3](https://github.com/iridel-co/adrianding-DEMO/pull/3), target `main`.
 Branch based on integrated `origin/main` at `ee0f0a5`.
 Evidence: locally implemented on 2026-10-05; full `quality:ci` passed, including
-150 browser cases across all five Chromium/Firefox/WebKit projects. Merge status: not merged.
+165 browser cases across all five Chromium/Firefox/WebKit projects. Merge status: not merged.
 
 - [x] Reproduce current defects before editing, including the previously reported
       hero wordmark issue at widths of 402px and below.
@@ -298,6 +298,16 @@ the same shared control, including icons, hover, and disabled styling. The final
 follow-up full gate passed all 150 browser cases. Source changes are committed
 and PR03 is published; merge and remote CI status remain separate. Preserve the
 pre-existing annotation intake and temporary designer notes outside the PR.
+
+Mobile hero follow-up, 2026-10-05: normal-motion viewport resizing exposed a
+portrait offset that earlier reduced-motion checks did not catch. Responsive
+positioning now sits outside the GSAP transform target; mobile pointer movement
+keeps the portrait centered. The rotating role line is centered below the name
+below 640px, retaining the desktop cover alignment. Local Chromium rendering
+confirmed portrait and role-line centering at 360/390/402px. Added motion-enabled
+resize regressions at those widths; full `quality:ci` passed all checks and 165
+browser cases across all configured projects. Device and remote CI proof remain
+separate.
 
 ## PR04 Workshop responsiveness
 

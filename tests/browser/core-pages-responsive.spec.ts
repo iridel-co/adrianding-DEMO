@@ -77,3 +77,22 @@ test("About tablet milestones remain connected to their year", async ({
   expect(yearBox).not.toBeNull()
   expect(milestoneBox!.x - (yearBox!.x + yearBox!.width)).toBeLessThan(100)
 })
+
+for (const width of [360, 390, 402]) {
+  test(`Home portrait stays centered after resizing to ${width}px with motion enabled`, async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" })
+    await page.setViewportSize({ width: 1440, height: 824 })
+    await page.goto("/")
+    await expect(page.locator(".he-portrait")).toBeVisible()
+    await page.setViewportSize({ width, height: 824 })
+    await page.mouse.move(width - 1, 400)
+    await expect
+      .poll(async () => {
+        const box = await page.locator(".he-portrait").boundingBox()
+        return box ? Math.abs(box.x + box.width / 2 - width / 2) : Infinity
+      })
+      .toBeLessThan(2)
+  })
+}
