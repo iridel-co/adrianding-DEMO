@@ -25,7 +25,9 @@ export function ScrollRefresh() {
     let frame = 0
     const refresh = () => {
       cancelAnimationFrame(frame)
-      frame = requestAnimationFrame(() => ScrollTrigger.refresh())
+      // Wait for active scrolling to finish before rebuilding trigger positions.
+      // An immediate refresh can restore an old scroll offset mid-click.
+      frame = requestAnimationFrame(() => ScrollTrigger.refresh(true))
     }
 
     // Fonts are the big one — the serif swap moves everything below it.

@@ -3,7 +3,62 @@ import { expect, test, type Page } from "@playwright/test"
 const workshop = "/workshops/exceptional-salesmanship"
 
 test.beforeEach(async ({ page }) => {
-  await page.clock.setFixedTime(new Date("2026-10-04T04:00:00Z"))
+  // Keep demo dates deterministic while Date.now advances for GSAP's scroll timing.
+  await page.clock.install({ time: new Date("2026-10-04T04:00:00Z") })
+})
+
+test("document scrolling follows the visitor's motion preference", async ({
+  page,
+}) => {
+  await page.goto("/corporate-training")
+  const startedAt = await page.evaluate(() => Date.now())
+  await expect
+    .poll(() => page.evaluate(() => Date.now()))
+    .toBeGreaterThan(startedAt)
+  const scrollBehavior = () =>
+    page.evaluate(
+      () => getComputedStyle(document.documentElement).scrollBehavior
+    )
+  await expect.poll(scrollBehavior).toBe("auto")
+  await page.emulateMedia({ reducedMotion: "no-preference" })
+  await expect.poll(scrollBehavior).toBe("smooth")
+})
+
+test("inquiry landing stops controlling scroll after keyboard interaction", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" })
+  await page.addInitScript(() => {
+    const scrollTo = window.scrollTo.bind(window)
+    window.scrollTo = (options?: ScrollToOptions | number, y?: number) => {
+      if (typeof options === "number") scrollTo(options, y ?? 0)
+      else {
+        if (options?.behavior === "smooth") {
+          document.documentElement.setAttribute(
+            "data-smooth-scroll-started",
+            "true"
+          )
+        }
+        scrollTo(options)
+      }
+    }
+  })
+  await page.goto("/corporate-training?program=leadership#inquiry")
+  await expect(
+    page
+      .locator("form")
+      .getByText(/Enquiring about Leadership Training & Development/)
+  ).toBeVisible()
+  await page.evaluate(() => document.fonts.ready)
+  await expect(page.locator("html")).toHaveAttribute(
+    "data-smooth-scroll-started",
+    "true"
+  )
+  await page.keyboard.press("ArrowUp")
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }))
+  // Exercise the old corrective-scroll deadline without adding a wall-clock sleep.
+  await page.clock.fastForward(3000)
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
 })
 
 test("main navigation works with keyboard activation", async ({
@@ -125,6 +180,11 @@ for (const blocked of [false, true]) {
     if (blocked) await blockStorage(page)
     await page.goto("/corporate-training?program=leadership#inquiry")
     const form = page.locator("form")
+    // The URL prefill is applied after hydration; wait for its visible result
+    // before exercising controls rendered by the server.
+    await expect(
+      form.getByText(/Enquiring about Leadership Training & Development/)
+    ).toBeVisible()
     await form.getByRole("button", { name: "Continue", exact: true }).click()
     await expect(form.getByText("Please enter your full name.")).toBeVisible()
     await form
