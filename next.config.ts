@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
    * re-injection shows up as a dirty tree in every demo. Keep it off.
    */
   agentRules: false,
+  // Explicit hosts for phone/LAN development; unset for normal local use.
+  allowedDevOrigins: process.env.NEXT_DEV_ALLOWED_ORIGINS?.split(",")
+    .map((host) => host.trim())
+    .filter(Boolean),
   /**
    * gsap + @gsap/react are large barrel exports — keep tree-shaking tight so a
    * few named imports don't drag the whole package through the compiler.

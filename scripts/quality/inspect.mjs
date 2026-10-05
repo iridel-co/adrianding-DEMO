@@ -45,6 +45,7 @@ for (const script of [
   "format:check",
   "lint",
   "test:quality",
+  "test:browser",
   "build",
   ...(hasTs ? ["typecheck"] : []),
 ]) {
@@ -70,7 +71,7 @@ requireItem(
 )
 requireItem(
   hasTests,
-  "application behavioral tests (pending PR02; runner tests are tooling coverage only)"
+  "application behavioral tests (runner tests are tooling coverage only)"
 )
 if (hasTs) {
   requireItem(!!deps.typescript, "TypeScript dependency")

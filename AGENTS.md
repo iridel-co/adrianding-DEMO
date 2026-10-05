@@ -17,6 +17,6 @@
 - Checks inspect working-tree content; staged scope does not certify partial staging.
 - Never edit during validation or overlap heavy runs. Failures block a passing claim.
 - Maintain `quality.config.json` when adding checks or changing ownership boundaries.
-- Application/browser tests are pending PR02. Runner tests prove tooling behavior only.
+- Public-site browser regressions run at handoff. Runner tests prove tooling behavior only.
 - Automated checks do not replace code review, browser, device, CI, or provider proof.
 - See `docs/development/quality.md` for prerequisites and coverage limits.

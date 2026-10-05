@@ -307,6 +307,18 @@ npm run validate # typecheck + lint + format check — run before any handoff
 
 No backend, no database, no `.env` file required to run it.
 
+For phone testing over LAN or Windows Mobile Hotspot, allow the desktop's IPv4
+address explicitly before starting the development server (PowerShell):
+
+```powershell
+$env:NEXT_DEV_ALLOWED_ORIGINS = "<desktop-ip>"
+npm run dev -- --hostname 0.0.0.0
+```
+
+Replace `<desktop-ip>` with the desktop address on the phone's network, then open
+`http://<desktop-ip>:3000` on the phone. Multiple hosts can be comma-separated;
+restart the development server after changing them.
+
 ### Environment variables
 
 | Variable               | Required | Purpose                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
@@ -714,8 +726,10 @@ npm run validate       # legacy lightweight types/lint/format subset
 npm run check:build    # fresh production build plus all OG artifact checks
 ```
 
-Application/browser tests are pending PR02 of the delivery plan. Harness tests
-cover tooling only; local checks do not establish device, hosted, or provider
+Public-site browser regressions run at handoff; `npm run test:browser` builds
+and runs them independently. Install browsers with `npx playwright install chromium firefox webkit`
+after `npm ci`. See [browser prerequisites and evidence](docs/development/quality.md#evidence-and-known-gaps).
+Harness tests cover tooling only; local checks do not establish real-device, hosted, or provider
 readiness. Existing lint warnings remain visible. `.gitattributes` aligns text
 checkouts with Prettier's LF requirement; original SVG/font-license files retain
 their source bytes.
