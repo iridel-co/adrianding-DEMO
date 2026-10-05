@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ScrollArrows } from "@/app/_components/scroll-arrows"
 import { useReducedMotionSafe } from "@/app/_lib/use-reduced-motion-safe"
 import { SplitReveal } from "@/app/_components/split-reveal"
 import { Reveal } from "@/app/_components/reveal"
@@ -118,24 +118,13 @@ export function LandingSpecializations() {
               <span className="text-muted-foreground mr-auto text-sm">
                 More programs
               </span>
-              <button
-                type="button"
-                onClick={() => move(-1)}
-                disabled={ends.start}
-                aria-label="Previous programs"
-                className="border-border flex size-11 items-center justify-center rounded-full border disabled:opacity-30"
-              >
-                <ChevronLeft className="size-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => move(1)}
-                disabled={ends.end}
-                aria-label="Next programs"
-                className="border-border flex size-11 items-center justify-center rounded-full border disabled:opacity-30"
-              >
-                <ChevronRight className="size-4" />
-              </button>
+              <ScrollArrows
+                className="flex"
+                edges={{ left: !ends.start, right: !ends.end }}
+                onNudge={move}
+                previousLabel="Previous programs"
+                nextLabel="Next programs"
+              />
             </div>
           </div>
         </div>
