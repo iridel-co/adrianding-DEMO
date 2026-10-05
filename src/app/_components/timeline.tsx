@@ -293,7 +293,7 @@ function TimelineRow({
     // by the content box, so the dwell comes from the card column's `min-h`.
     <div
       ref={rowRef}
-      className="relative z-20 flex justify-start gap-6 pt-16 first:pt-0 md:gap-10 md:pt-40"
+      className="relative z-20 flex justify-start gap-6 pt-16 first:pt-0 md:pt-40 lg:gap-10"
     >
       {/* `self-start` is what makes the lock work: as a stretched flex item
           the column would be as tall as the card beside it and never unstick.
@@ -302,7 +302,7 @@ function TimelineRow({
           as the next year arrives. */}
       <div
         ref={columnRef}
-        className="relative flex max-w-xs flex-col items-center md:sticky md:top-40 md:h-16 md:w-full md:flex-row md:items-center md:self-start lg:max-w-sm"
+        className="relative flex max-w-xs flex-col items-center md:sticky md:top-40 md:h-16 md:w-full md:flex-row md:items-center md:self-start md:max-lg:w-48 md:max-lg:shrink-0 lg:max-w-sm"
       >
         <div className="absolute left-3 z-10 flex h-10 w-10 items-center justify-center md:top-1/2 md:-translate-y-1/2">
           {/* Halo blooms only while this entry is the one the beam rests on. */}
@@ -331,7 +331,7 @@ function TimelineRow({
         </motion.h3>
       </div>
 
-      <div className="relative w-full pr-4 pl-20 md:min-h-[26rem] md:pl-4">
+      <div className="relative w-full pr-4 pl-20 md:min-h-[26rem] md:pl-4 md:max-lg:min-w-0 md:max-lg:flex-1">
         <h3 className="text-muted-foreground mb-4 block font-serif text-3xl tracking-[-0.02em] md:hidden">
           {entry.year}
         </h3>

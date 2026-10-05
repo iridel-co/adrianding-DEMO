@@ -225,6 +225,10 @@ export function HeroEditorial() {
             it returns to the true centre-axis the cover composition is built
             on. */}
         <div className="pointer-events-none absolute top-[calc(var(--nav-h)+1.5rem)] left-1/2 z-30 flex w-full max-w-[min(90vw,44rem)] -translate-x-1/2 flex-col items-center text-center sm:top-1/2 sm:left-24 sm:w-auto sm:translate-x-0 sm:-translate-y-1/2 sm:items-start sm:text-left">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -inset-x-12 -inset-y-10 -z-10 hidden bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.72)_0%,rgba(0,0,0,0.4)_45%,transparent_72%)] sm:block lg:hidden"
+          />
           {/* Wordmark + marquee stay mutually left-aligned to each other at
               every breakpoint (`items-start`, never centered) — the marquee's
               width is tuned relative to the wordmark's own left edge so the

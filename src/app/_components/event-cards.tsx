@@ -269,7 +269,9 @@ export function EventCards({
     if (!el) return
     el.scrollBy({
       left: dir * Math.max(320, el.clientWidth * 0.8),
-      behavior: "smooth",
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "instant"
+        : "smooth",
     })
   }
 
@@ -455,7 +457,7 @@ export function EventCards({
       </Reveal>
 
       {!isGrid && hasOverflow && (
-        <div className="mx-auto mt-8 hidden max-w-7xl justify-end px-6 sm:px-8 lg:flex">
+        <div className="mx-auto mt-8 flex max-w-7xl justify-end px-6 sm:px-8">
           <ScrollArrows edges={edges} onNudge={nudge} className="flex" />
         </div>
       )}
