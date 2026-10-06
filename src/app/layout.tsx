@@ -81,7 +81,11 @@ export default function RootLayout({
     // mid-flight, which is why clicking a nav link from deep in a page used to
     // drop you halfway down the next one. This attribute tells Next to force an
     // instant jump for navigation scrolls while native hash anchors stay smooth.
-    <html lang="en" className="scroll-smooth" data-scroll-behavior="smooth">
+    <html
+      lang="en"
+      className="scroll-smooth motion-reduce:scroll-auto"
+      data-scroll-behavior="smooth"
+    >
       <body
         className={`${redHatDisplay.variable} ${geistMono.variable} ${prata.variable} antialiased`}
       >

@@ -1,9 +1,11 @@
 "use client"
 
+import { ScrollArrows } from "./scroll-arrows"
+
 import { useEffect, useRef, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowLeft, ArrowRight, MapPin, Ticket } from "lucide-react"
+import { ArrowRight, MapPin, Ticket } from "lucide-react"
 import { Reveal } from "@/app/_components/reveal"
 import { WorkshopTagPills } from "@/app/_components/workshop-tags"
 import { type Workshop } from "@/lib/workshops"
@@ -129,41 +131,6 @@ function shortDate(iso: string) {
   })
 }
 
-function ScrollArrows({
-  edges,
-  onNudge,
-  className = "",
-}: {
-  edges: { left: boolean; right: boolean }
-  onNudge: (dir: 1 | -1) => void
-  className?: string
-}) {
-  const btn =
-    "border-border/80 text-foreground flex size-11 items-center justify-center rounded-full border transition-colors hover:border-foreground hover:bg-foreground hover:text-background disabled:cursor-default disabled:opacity-25 disabled:hover:border-border/80 disabled:hover:bg-transparent disabled:hover:text-foreground"
-  return (
-    <div className={`${className} shrink-0 items-center gap-2.5`}>
-      <button
-        type="button"
-        aria-label="Scroll to previous workshops"
-        onClick={() => onNudge(-1)}
-        disabled={!edges.left}
-        className={btn}
-      >
-        <ArrowLeft className="size-5" />
-      </button>
-      <button
-        type="button"
-        aria-label="Scroll to more workshops"
-        onClick={() => onNudge(1)}
-        disabled={!edges.right}
-        className={btn}
-      >
-        <ArrowRight className="size-5" />
-      </button>
-    </div>
-  )
-}
-
 export function EventCards({
   workshops,
   className,
@@ -269,7 +236,9 @@ export function EventCards({
     if (!el) return
     el.scrollBy({
       left: dir * Math.max(320, el.clientWidth * 0.8),
-      behavior: "smooth",
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "instant"
+        : "smooth",
     })
   }
 
@@ -455,8 +424,14 @@ export function EventCards({
       </Reveal>
 
       {!isGrid && hasOverflow && (
-        <div className="mx-auto mt-8 hidden max-w-7xl justify-end px-6 sm:px-8 lg:flex">
-          <ScrollArrows edges={edges} onNudge={nudge} className="flex" />
+        <div className="mx-auto mt-8 flex max-w-7xl justify-end px-6 sm:px-8">
+          <ScrollArrows
+            edges={edges}
+            onNudge={nudge}
+            className="flex"
+            previousLabel="Scroll to previous workshops"
+            nextLabel="Scroll to more workshops"
+          />
         </div>
       )}
     </div>

@@ -17,6 +17,11 @@
  * turn "auto" into just another animation to abandon.
  */
 function driveScroll(getTargetY: () => number) {
+  // Effects can run before SSR-safe motion hooks resolve the visitor's preference.
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    window.scrollTo({ top: getTargetY(), behavior: "instant" })
+    return () => {}
+  }
   window.scrollTo({ top: getTargetY(), behavior: "smooth" })
 
   let lastY = window.scrollY
@@ -42,6 +47,12 @@ function driveScroll(getTargetY: () => number) {
     lastY = y
   }, 120)
   const ceiling = window.setTimeout(finish, 2400)
+
+  return () => {
+    window.clearInterval(interval)
+    window.clearTimeout(ceiling)
+    window.scrollTo({ top: window.scrollY, behavior: "instant" })
+  }
 }
 
 /** Scrolls `target` into view, honoring its own `scroll-margin-top` (e.g.
@@ -50,12 +61,12 @@ function driveScroll(getTargetY: () => number) {
  * declares for the fixed navbar. */
 export function smoothScrollToElement(target: HTMLElement) {
   const marginTop = parseFloat(getComputedStyle(target).scrollMarginTop) || 0
-  driveScroll(
+  return driveScroll(
     () => target.getBoundingClientRect().top + window.scrollY - marginTop
   )
 }
 
 /** Scrolls the page back to the very top. */
 export function smoothScrollToTop() {
-  driveScroll(() => 0)
+  return driveScroll(() => 0)
 }

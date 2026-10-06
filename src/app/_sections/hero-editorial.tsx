@@ -158,7 +158,7 @@ export function HeroEditorial() {
           const y = e.clientY / window.innerHeight - 0.5
           bgX(x * -2)
           bgY(y * -1.5)
-          portraitX(x * 2)
+          portraitX(window.innerWidth < 640 ? 0 : x * 2)
         }
         window.addEventListener("mousemove", onMove, { passive: true })
         return () => window.removeEventListener("mousemove", onMove)
@@ -205,15 +205,19 @@ export function HeroEditorial() {
             portrait's top edge clears the sticky navbar at every breakpoint —
             without it, the tighter top clearance at `lg` (~2svh, well under
             the 4rem bar) lets the subject's head sit behind/under the nav. */}
-        <div className="he-portrait pointer-events-none absolute bottom-[calc(-4svh-var(--nav-h))] left-1/2 z-20 aspect-[1080/1720] h-[76svh] w-auto -translate-x-1/2 will-change-transform select-none sm:right-[2%] sm:bottom-[calc(-12svh-var(--nav-h))] sm:left-auto sm:h-[112svh] sm:translate-x-0 lg:right-[7%] lg:bottom-[calc(-18svh-var(--nav-h))] lg:h-[124svh]">
-          <Image
-            src="/images/mascot/ad-hero-portrait.webp"
-            alt="Coach Adrian Ding"
-            fill
-            priority
-            sizes="(max-width: 640px) 70vw, (max-width: 1024px) 50vw, 42vw"
-            className="object-contain object-bottom"
-          />
+        {/* Keep responsive positioning outside the GSAP transform target so
+            desktop-to-mobile resizing cannot retain a stale horizontal offset. */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-[calc(-4svh-var(--nav-h))] z-20 flex h-[76svh] justify-center sm:inset-x-auto sm:right-[2%] sm:bottom-[calc(-12svh-var(--nav-h))] sm:aspect-[1080/1720] sm:h-[112svh] lg:right-[7%] lg:bottom-[calc(-18svh-var(--nav-h))] lg:h-[124svh]">
+          <div className="he-portrait relative aspect-[1080/1720] h-full shrink-0 will-change-transform select-none">
+            <Image
+              src="/images/mascot/ad-hero-portrait.webp"
+              alt="Coach Adrian Ding"
+              fill
+              priority
+              sizes="(max-width: 640px) 70vw, (max-width: 1024px) 50vw, 42vw"
+              className="object-contain object-bottom"
+            />
+          </div>
         </div>
 
         {/* Cover cluster — left-aligned, parked on the page's y-axis (`top-1/2` +
@@ -225,17 +229,13 @@ export function HeroEditorial() {
             it returns to the true centre-axis the cover composition is built
             on. */}
         <div className="pointer-events-none absolute top-[calc(var(--nav-h)+1.5rem)] left-1/2 z-30 flex w-full max-w-[min(90vw,44rem)] -translate-x-1/2 flex-col items-center text-center sm:top-1/2 sm:left-24 sm:w-auto sm:translate-x-0 sm:-translate-y-1/2 sm:items-start sm:text-left">
-          {/* Wordmark + marquee stay mutually left-aligned to each other at
-              every breakpoint (`items-start`, never centered) — the marquee's
-              width is tuned relative to the wordmark's own left edge so the
-              "g" descender of "Ding" keeps its clear lane on the right (see
-              below). Centering them independently would split that clearance
-              evenly on both sides and starve the right side of it. Centering
-              on the page instead happens one level up: this whole two-line
-              block is a single flex item inside the outer `items-center`
-              wrapper, so it's centered as one unit while staying internally
-              left-aligned. */}
-          <div className="flex flex-col items-start">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -inset-x-12 -inset-y-10 -z-10 hidden bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.72)_0%,rgba(0,0,0,0.4)_45%,transparent_72%)] sm:block lg:hidden"
+          />
+          {/* Center the rotating role line independently on mobile; retain the
+              desktop cover's left-aligned name and role composition. */}
+          <div className="flex flex-col items-center sm:items-start">
             <div className="w-max">
               <h1 className={`he-word ${WORD}`}>
                 Adrian Ding

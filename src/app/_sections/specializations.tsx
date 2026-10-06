@@ -1,3 +1,8 @@
+"use client"
+
+import { useEffect, useRef, useState } from "react"
+import { ScrollArrows } from "@/app/_components/scroll-arrows"
+import { useReducedMotionSafe } from "@/app/_lib/use-reduced-motion-safe"
 import { SplitReveal } from "@/app/_components/split-reveal"
 import { Reveal } from "@/app/_components/reveal"
 import {
@@ -40,6 +45,40 @@ const CARDS: SpecCard[] = CORPORATE_PROGRAMMES.map((spec) => ({
 }))
 
 export function LandingSpecializations() {
+  const railContainer = useRef<HTMLDivElement>(null)
+  const reduced = useReducedMotionSafe()
+  const [ends, setEnds] = useState({ start: true, end: false })
+
+  useEffect(() => {
+    const rail = railContainer.current?.firstElementChild
+    if (!(rail instanceof HTMLElement)) return
+    const measure = () =>
+      setEnds({
+        start: rail.scrollLeft <= 1,
+        end: rail.scrollLeft + rail.clientWidth >= rail.scrollWidth - 1,
+      })
+    measure()
+    rail.addEventListener("scroll", measure, { passive: true })
+    const observer = new ResizeObserver(measure)
+    observer.observe(rail)
+    return () => {
+      rail.removeEventListener("scroll", measure)
+      observer.disconnect()
+    }
+  }, [])
+
+  const move = (direction: number) => {
+    const rail = railContainer.current?.firstElementChild
+    if (!(rail instanceof HTMLElement)) return
+    const card = rail.firstElementChild
+    if (!(card instanceof HTMLElement)) return
+    const gap = parseFloat(getComputedStyle(rail).columnGap) || 0
+    rail.scrollBy({
+      left: direction * (card.offsetWidth + gap),
+      behavior: reduced ? "instant" : "smooth",
+    })
+  }
+
   return (
     <section className="bg-muted/40 py-24 lg:py-36">
       <div className="mx-auto w-full max-w-7xl px-6 sm:px-8">
@@ -68,12 +107,26 @@ export function LandingSpecializations() {
               vertical expand-on-hover stack from `lg` up. `-mx-6`/`px-6`
               lets the rail bleed to the viewport edges while its first card
               still lines up with the section gutter. */}
-          <Reveal
-            stagger={0.08}
-            className="no-scrollbar -mx-6 mt-12 flex snap-x snap-mandatory scroll-px-6 gap-3 overflow-x-auto px-6 pb-1 sm:-mx-8 sm:scroll-px-8 sm:px-8 lg:mx-0 lg:mt-0 lg:snap-none lg:flex-col lg:overflow-visible lg:px-0 lg:pb-0"
-          >
-            <SpecRevealCards items={CARDS} />
-          </Reveal>
+          <div ref={railContainer} className="min-w-0">
+            <Reveal
+              stagger={0.08}
+              className="no-scrollbar -mx-6 mt-12 flex snap-x snap-mandatory scroll-px-6 gap-3 overflow-x-auto px-6 pb-1 sm:-mx-8 sm:scroll-px-8 sm:px-8 lg:mx-0 lg:mt-0 lg:snap-none lg:flex-col lg:overflow-visible lg:px-0 lg:pb-0"
+            >
+              <SpecRevealCards items={CARDS} />
+            </Reveal>
+            <div className="mt-5 flex items-center justify-end gap-3 lg:hidden">
+              <span className="text-muted-foreground mr-auto text-sm">
+                More programs
+              </span>
+              <ScrollArrows
+                className="flex"
+                edges={{ left: !ends.start, right: !ends.end }}
+                onNudge={move}
+                previousLabel="Previous programs"
+                nextLabel="Next programs"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </section>

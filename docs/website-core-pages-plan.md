@@ -5,7 +5,8 @@ milestone across reviewable PRs. Start with the portable quality harness and
 repository documentation cleanup. Finish with the user's design and nitpick pass.
 
 Created: 2026-10-02. Planning baseline: `main` at `f1408f4`.
-PR01 is merged. PR02's expanded verification is blocked on local Firefox launch.
+PR01 and PR02 are merged. The local Firefox launch blocker was resolved with a
+project-local browser installation during PR03 validation on 2026-10-05.
 An unchecked item is pending unless its evidence explicitly records a failed check.
 
 ## Scope and decisions
@@ -50,7 +51,7 @@ image quality, and current rendered behavior still need verification.
 
 ## Branches and review size
 
-Each package has its own branch and Conventional Commit PR title. Atomic commits
+Each delivery group below has its own branch and Conventional Commit PR title. Atomic commits
 use the same convention, with a scope where useful, such as `fix(workshops): ...`.
 Prefer one coherent behavior plus its tests per commit.
 
@@ -65,6 +66,27 @@ Avoid whole-repository formatting. The first PR can be larger for the cohesive
 harness import and mechanical documentation moves, but should not absorb unrelated
 rewrites. Split substantial discovered cleanup into a named follow-up package if
 necessary and record its dependency here.
+
+## Consolidated delivery groups — 2026-10-05
+
+The user requested fewer PRs to reduce review and workflow friction. Keep the old
+package IDs as work-item references; they no longer each require a separate PR.
+PR01/PR02 stay merged and PR03 stays on its existing separate branch.
+
+| Delivery PR | Includes                                                                           | Branch and title                                                                                            |
+| ----------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| PR03        | Current core/shared responsiveness and browser repairs                             | Existing branch/title below                                                                                 |
+| PR04        | PR04 + PR05: Workshop and Corporate layouts and registration availability          | `fix/public-form-layouts`; `fix: public form layouts and workshop availability`                             |
+| PR06        | PR06 + PR07 + PR08 + approved gallery removal: shared motion, presentation, assets | `fix/shared-public-presentation`; `fix: shared public presentation`                                         |
+| PR09        | PR09 + PR10: typed content adapters, contracts, demo submission boundaries         | `refactor/frontend-integration-preparation`; `refactor: prepare frontend content and submission boundaries` |
+| PR12        | Final polish; PR11 performance work only if measurements justify it                | Existing PR12 branch/title below                                                                            |
+
+Use coherent commits within these groups. Pending portrait/logo approvals do not
+block ready accessibility or gallery work: defer those asset commits if approval
+is still missing. Split only when the actual diff or dependencies justify it;
+avoid opening a separate PR solely for documentation or a small asset correction.
+Physical-phone QA and agreed receiving API contracts remain separate acceptance
+requirements. No new PR, push, or merge is authorized by this grouping.
 
 ## PR01 Quality harness and repository cleanup
 
@@ -149,11 +171,12 @@ feature packages retain the smaller scope targets.
 Branch: `test/public-site-regressions`
 PR title: `test: public site regressions`
 Dependencies: PR01. Owner: main executor or a scoped test implementer.
-PR: [#2](https://github.com/iridel-co/adrianding-DEMO/pull/2), opened for review;
-rebased onto integrated `origin/main` at `5c86906`, target `main`.
+PR: [#2](https://github.com/iridel-co/adrianding-DEMO/pull/2), approved and merged
+into `main` on 2026-10-05 at `ee0f0a5`, verified through GitHub and fetched history.
 Evidence: original 22-test Chromium handoff passed locally on 2026-10-04,
 Node 25.7.0; expanded Chromium/WebKit selection passed 52 tests. Firefox launch
-is blocked on Windows; full handoff is not passing. Merge status: not merged.
+was blocked at the original review; successful local handoff is recorded under
+PR03. Merge status: merged.
 
 - [x] Add a small browser-test setup and register its real checks with the harness.
 - [x] Cover navigation, representative workshop interactions, both demo forms, and
@@ -191,7 +214,7 @@ skipped. Resolve its binary prerequisite or obtain successful CI evidence before
 checking expanded acceptance. This is an environment failure before application
 execution, not evidence of a Firefox site regression. No macOS/iOS proof is claimed.
 Structurally invalid stored payload validation remains PR10. The source ZIP remains
-uncommitted. PR03 is the next package after PR02 acceptance.
+uncommitted. PR03 proceeds from merged PR02; its local Firefox/device evidence gaps remain recorded.
 
 Review follow-up on 2026-10-04: hotspot-origin development JavaScript requests
 returned HTTP 403, preventing client hydration. Added an explicit, environment-fed
@@ -211,34 +234,112 @@ formatting and type checks passed. Real-device acceptance remains pending.
 Branch: `fix/core-page-responsiveness`
 PR title: `fix: core page responsiveness`
 Dependencies: PR02. Owner: main executor for shared UI and Home/About consumers.
-PR: pending. Evidence: pending. Merge status: not started.
+PR: [#3](https://github.com/iridel-co/adrianding-DEMO/pull/3), target `main`.
+Branch based on integrated `origin/main` at `ee0f0a5`.
+Evidence: locally implemented on 2026-10-05; full `quality:ci` passed, including
+165 browser cases across all five Chromium/Firefox/WebKit projects. Merge status: not merged.
 
-- [ ] Reproduce current defects before editing, including the previously reported
+- [x] Reproduce current defects before editing, including the previously reported
       hero wordmark issue at widths of 402px and below.
-- [ ] Correct shared navigation/layout, then Home and About wrapping, spacing,
+- [x] Correct shared navigation/layout, then Home and About wrapping, spacing,
       imagery, and CTA visibility using existing `src/app/_components` patterns.
-- [ ] Separate shared fixes and page corrections into coherent commits; split the
+- [x] Separate shared fixes and page corrections into coherent commits; split the
       PR if both groups become substantial.
 - [ ] Acceptance: no unintended horizontal overflow or clipped actions; mobile menu,
       focus handling, touch interactions, and reduced motion remain usable.
 
+PR03 local evidence, 2026-10-05: reproduced footer wordmark overflow at 360px
+(Adrian width 371.5px; Ding width 394.9px with its descender below the wrapper),
+tablet path CTA wrapping and excessive timeline date-column width. Home's existing
+hero wordmark and centered portrait already fit at 360/390/402px and were preserved.
+Implemented small-mobile-only footer sizing (the intentional g crop was restored
+per the latest user direction), removal of the public
+staff-login footer link, menu focus restoration without scrolling, hidden marquee
+scrollbars with scrolling retained, Home workshop/programme arrows, tablet hero
+contrast, path spacing/alignment, and tablet-only timeline columns. Desktop footer
+wordmark styles remain unchanged. Open About wordmark/carousel design decisions
+remain deferred; gallery removal remains its separate package.
+
+Formatting, source/CSS lint, types, eight harness tests, production build, and nine
+OG checks passed (existing lint/CSS/Browserslist warnings remain). The initial full gate
+failed: 107 browser cases passed, 27 Firefox cases failed before launch with
+spawn UNKNOWN, and one WebKit desktop inquiry case failed to reach step 4.
+Three focused inquiry repetitions yielded five passes and one recurrence across
+six blocked/unblocked-storage cases, confirming an intermittent issue.
+After restricting timeline rules to tablet, focused checkpoint/build/OG passed
+again and all 56 PR03 responsive cases passed. These initial attempts did not
+establish a passing full handoff.
+
+Follow-up resolution: the same official Firefox build launches from Playwright's
+supported project-local cache (`PLAYWRIGHT_BROWSERS_PATH=0`); the AppData launch
+failure's precise Windows loader cause remains unverified. Setup and per-shell
+environment requirements are documented in `docs/development/quality.md`.
+WebKit traces exposed competing landing scrolls and early form interaction:
+landing now reads the live motion preference, cancels its pending correction on
+interaction/cleanup, and keeps the form inert until hydration. Reduced motion
+overrides the root smooth-scroll utility; ScrollTrigger refresh waits for scrolling
+to settle. Tests use an advancing demo clock and wait for client-side prefill.
+A 40-case WebKit stress run passed before the final hydration guard; the final
+source passed 18 repeated Firefox/WebKit inquiry and keyboard-interruption cases.
+The subsequent full `quality:ci` passed all checks, including 145 browser cases
+with every configured engine enabled. The final footer refinement adds 319px
+coverage, tighter fluid mobile sizing and optical centering while retaining the
+g tail crop. Final PR03 `quality:ci` passed all checks, including 150 browser
+cases across every configured engine. Existing warnings remain. Real-phone and
+remote CI acceptance remain pending.
+
+Rendered Chromium checks also exercised normal-motion programme arrows, desktop
+path hover, About at 768/1024/1440px without page overflow, and shared footers on
+About/Workshops/Corporate at 360px. Screenshots and the first failed handoff report
+are retained locally under ignored test-results/pr03/. Automated footer coverage
+includes 319/360/390/402/639/640/768/1024/1440px, keyboard menu closing/focus, and mobile
+and tablet carousel advancement/reversal. Workshop and programme arrows now use
+the same shared control, including icons, hover, and disabled styling. The final
+follow-up full gate passed all 150 browser cases. Source changes are committed
+and PR03 is published; merge and remote CI status remain separate. Preserve the
+pre-existing annotation intake and temporary designer notes outside the PR.
+
+Mobile hero follow-up, 2026-10-05: normal-motion viewport resizing exposed a
+portrait offset that earlier reduced-motion checks did not catch. Responsive
+positioning now sits outside the GSAP transform target; mobile pointer movement
+keeps the portrait centered. The rotating role line is centered below the name
+below 640px, retaining the desktop cover alignment. Local Chromium rendering
+confirmed portrait and role-line centering at 360/390/402px. Added motion-enabled
+resize regressions at those widths; full `quality:ci` passed all checks and 165
+browser cases across all configured projects. Device and remote CI proof remain
+separate.
+
 ## PR04 Workshop responsiveness
 
-Branch: `fix/workshop-responsiveness`
-PR title: `fix: workshop responsiveness`
+Branch: `fix/public-form-layouts`
+PR title: `fix: public form layouts and workshop availability`
 Dependencies: PR03 shared layout changes. Owner: scoped workshop implementer.
 PR: pending. Evidence: pending. Merge status: not started.
 
 - [ ] Audit and correct the listing's filters/calendar and workshop detail layouts.
+- [ ] Cover no registrations yet (all seats available), partially filled, last seat,
+      fully booked (zero seats), closed/past, and unknown/unavailable capacity.
+      Also cover an empty catalogue, no filter matches, and a month without events;
+      distinguish these from loading and fetch failure once an API is connected.
+- [ ] Use consistent availability in cards, calendar, hero, overview, closing CTA,
+      sticky bar, and direct registration entry. Fully booked must not open normal
+      registration; past/closed must not advertise remaining seats. Keep useful
+      workshop details and an accessible state message visible.
+- [ ] Resolve the current zero-seat mismatch: closing CTA says Fully booked but
+      still opens registration. Recheck confirmation/payment capacity messaging.
+      Do not invent waitlist behaviour before the receiving-project contract agrees it.
+- [ ] Test transitions from available to full, full to reopened, and availability
+      changing during a form: preserve entered fields, explain rejection, and do
+      not show a successful booking when the receiving service rejects capacity.
+      Server enforcement and seat-holding transitions remain backend-owned.
 - [ ] Check registration dialogs, form validation, sticky CTAs, and confirmation
       layout; group commits by interaction and preserve demo behavior.
 - [ ] Acceptance: keyboard/touch journeys and representative open/past workshop
       states work at the agreed widths; sticky controls do not obscure content.
 
-## PR05 Corporate page responsiveness
+## PR05 Corporate page responsiveness (included in PR04)
 
-Branch: `fix/corporate-page-responsiveness`
-PR title: `fix: corporate page responsiveness`
+Delivery: PR04 branch/title; keep these tasks as a separate commit group.
 Dependencies: PR03 shared layout changes. Owner: scoped corporate-page implementer.
 PR: pending. Evidence: pending. Merge status: not started.
 
@@ -250,8 +351,8 @@ PR: pending. Evidence: pending. Merge status: not started.
 
 ## PR06 Marquee accessibility
 
-Branch: `fix/marquee-accessibility`
-PR title: `fix: marquee accessibility`
+Branch: `fix/shared-public-presentation`
+PR title: `fix: shared public presentation`
 Dependencies: PR02 and any shared UI changes touching these components.
 Owner: main executor for testimonial/company shared components.
 PR: pending. Evidence: pending. Merge status: not started.
@@ -263,10 +364,9 @@ PR: pending. Evidence: pending. Merge status: not started.
 - [ ] Acceptance: focus cannot enter hidden duplicates; controls expose their names
       and state; user-requested pause is not undone by hover/focus transitions.
 
-## PR07 Company logo presentation
+## PR07 Company logo presentation (included in PR06)
 
-Branch: `fix/company-logo-presentation`
-PR title: `fix: company logo presentation`
+Delivery: PR06 branch/title; asset approval remains required.
 Dependencies: team-approved logo mapping/files and relevant shared UI fixes.
 Owner: scoped asset implementer; shared component edits coordinated centrally.
 PR: pending. Evidence: pending. Merge status: not started.
@@ -277,10 +377,9 @@ PR: pending. Evidence: pending. Merge status: not started.
 - [ ] Acceptance: correct identity, aspect ratio, legibility, contrast, and working
       references across relevant backgrounds and mobile/desktop consumers.
 
-## PR08 Testimonial portraits
+## PR08 Testimonial portraits (included in PR06)
 
-Branch: `fix/testimonial-portraits`
-PR title: `fix: testimonial portraits`
+Delivery: PR06 branch/title; identity and consent approval remain required.
 Dependencies: client-approved portraits/consent and relevant shared UI fixes.
 Owner: scoped asset implementer; shared component edits coordinated centrally.
 PR: pending. Evidence: pending. Merge status: not started.
@@ -293,12 +392,22 @@ PR: pending. Evidence: pending. Merge status: not started.
 
 ## PR09 Frontend integration contracts
 
-Branch: `docs/frontend-integration-contracts`
-PR title: `docs: frontend integration contracts`
+Branch: `refactor/frontend-integration-preparation`
+PR title: `refactor: prepare frontend content and submission boundaries`
 Dependencies: PR01 document organization; counterpart input for agreed contracts.
 Owner: main executor coordinates frontend and receiving-project boundaries.
 PR: pending. Evidence: pending. Merge status: not started.
 
+- [x] Retain the workshop catalogue in `src/lib/workshops.ts`. The user reversed
+      the JSON migration on 2026-10-05; JSON fixtures and migration-only tooling
+      changes were removed. Keep TypeScript authoring checks and provenance comments.
+- [ ] Inventory programme, FAQ, testimonial, and company data consumers. Prepare
+      typed data adapters and runtime API-response validation where the agreed
+      receiving contract requires them; JSON extraction is no longer planned.
+- [ ] Define proposed availability and empty/loading/error contracts separately
+      from lifecycle and reservation status. Agree count validity, unknown counts,
+      authoritative capacity refresh/rejection, and any waitlist with API owners.
+      No registrations yet means available capacity, not a fully booked workshop.
 - [ ] Inventory content and form fields, stable workshop/programme identifiers,
       media/OG requirements, frontend states, and receiving-project ownership.
 - [ ] Account for every collected submission field, including corporate phone,
@@ -310,10 +419,9 @@ PR: pending. Evidence: pending. Merge status: not started.
 - [ ] Acceptance: owners can identify inputs, outputs, validation/error needs, and
       responsibilities. Inventory can proceed now; agreement needs counterpart input.
 
-## PR10 Demo submission boundaries
+## PR10 Demo submission boundaries (included in PR09)
 
-Branch: `refactor/demo-submission-boundaries`
-PR title: `refactor: demo submission boundaries`
+Delivery: PR09 branch/title; shared adapters and each form get coherent commits.
 Dependencies: PR02, PR09's necessary data decisions, and relevant form layout work.
 Owner: main executor owns shared types/adapters; forms follow settled interfaces.
 PR: pending. Evidence: pending. Merge status: not started.
@@ -323,16 +431,15 @@ PR: pending. Evidence: pending. Merge status: not started.
       data at runtime, with explicit submitting/result/error states.
 - [ ] Preserve demo behavior without network writes or claims that real leads exist.
 - [ ] Add focused behavior tests for invalid payloads, failures, and fallback states.
-- [ ] Split workshop/corporate migration into separate branches and PRs if the diff
-      grows; shared contracts must land first. Record any split here.
+- [ ] Keep workshop/corporate migration in PR09 by default; split only if the
+      actual diff warrants it. Shared contracts precede form adapters within the PR.
 - [ ] Introduce CMS/content adapters only where an agreed boundary justifies them.
 - [ ] Acceptance: both form journeys still work; confirmation data is not reused as
       an incomplete API payload; real integrations remain with their owning projects.
 
-## PR11 Public page loading optional
+## PR11 Public page loading optional (included in PR12 if useful)
 
-Branch: `perf/public-page-loading`
-PR title: `perf: public page loading`
+Delivery: PR12; no standalone performance PR by default.
 Dependencies: stable UI/assets and completed relevant integration preparation.
 Owner: main executor or scoped performance implementer.
 PR: pending. Evidence: pending. Merge status: not started. Decision: pending.

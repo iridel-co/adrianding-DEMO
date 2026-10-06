@@ -466,7 +466,7 @@ function PathCard({
       <div className="absolute inset-0 z-20 bg-linear-to-t from-black/70 via-black/25 to-black/5" />
       <div className="absolute inset-0 z-20 bg-linear-to-r from-black/40 via-black/10 to-transparent" />
 
-      <div className="relative z-30 p-7 pb-10 text-white sm:p-16 sm:pb-24 lg:p-20 lg:pb-32">
+      <div className="relative z-30 p-7 pb-10 text-white sm:p-16 sm:pb-24 md:p-8 md:pb-16 lg:p-20 lg:pb-32">
         <p className="text-xs font-semibold tracking-[0.16em] text-white/70 uppercase">
           {p.eyebrow}
         </p>
@@ -477,7 +477,7 @@ function PathCard({
             *itself* (measured +92px). Same fix, same reason: pin it to a
             viewport-driven width so it can never change size mid-transition. */}
         <h3
-          className={`mt-4 text-[2rem] leading-[1.05] font-bold tracking-[-0.02em] lg:text-[2.75rem] ${LOCKED_WIDTH}`}
+          className={`mt-4 text-[2rem] leading-[1.05] font-bold tracking-[-0.02em] md:min-h-[2.1em] lg:min-h-0 lg:text-[2.75rem] ${LOCKED_WIDTH}`}
         >
           {p.title}
         </h3>
@@ -516,9 +516,9 @@ function PathCard({
             one line at `lg` for the same reason the blurb is width-locked:
             the take-over must never change this card's content height. */}
         <AttentionOnView className="mt-8 flex justify-end sm:justify-start">
-          <span className="group/cta hover:bg-brand hover:text-brand-foreground cta-beat-target -mr-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-semibold tracking-[0.08em] text-black uppercase transition-colors duration-300 sm:mr-0 sm:-ml-4 sm:text-sm sm:tracking-[0.12em] lg:whitespace-nowrap">
+          <span className="group/cta hover:bg-brand hover:text-brand-foreground cta-beat-target -mr-4 inline-flex max-w-full items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-semibold tracking-[0.08em] text-black uppercase transition-colors duration-300 sm:mr-0 sm:-ml-4 sm:text-sm sm:tracking-[0.12em] md:text-xs md:tracking-[0.08em] lg:max-w-none lg:text-sm lg:tracking-[0.12em] lg:whitespace-nowrap">
             {p.cta}
-            <ArrowRight className="size-4 transition-transform group-hover/cta:translate-x-1" />
+            <ArrowRight className="size-4 shrink-0 transition-transform group-hover/cta:translate-x-1" />
           </span>
         </AttentionOnView>
       </div>

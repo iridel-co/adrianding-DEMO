@@ -9,7 +9,6 @@ import { ArrowLeft, ArrowRight, Check, ChevronDown, Phone } from "lucide-react"
 import { gsap, useGSAP } from "@/app/_lib/gsap"
 import { saveHandoff } from "@/app/_lib/handoff"
 import { smoothScrollToElement } from "@/app/_lib/smooth-scroll-to"
-import { useReducedMotionSafe } from "@/app/_lib/use-reduced-motion-safe"
 import { DemoFillButton } from "@/app/_components/demo-fill"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -122,10 +121,12 @@ const STEPS: { title: string; fields: (keyof FormValues)[] }[] = [
 
 export function CorporateInquiryForm() {
   const router = useRouter()
-  const reduce = useReducedMotionSafe()
+  const [hydrated, setHydrated] = useState(false)
   const [step, setStep] = useState(0)
   const [submitting, setSubmitting] = useState(false)
   const paneRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => setHydrated(true), [])
 
   // Date capture has two modes. Most inquiries have a real date or a bracket in
   // mind, so the calendar is the default; "Not fixed yet" falls back to free
@@ -221,8 +222,11 @@ export function CorporateInquiryForm() {
     if (window.location.hash !== "#inquiry") return
 
     let interacted = false
+    let cancelLanding: (() => void) | undefined
     const markInteracted = () => {
       interacted = true
+      cancelLanding?.()
+      cancelLanding = undefined
     }
     const interactionEvents = [
       "wheel",
@@ -241,8 +245,7 @@ export function CorporateInquiryForm() {
       settled = true
       const target = document.getElementById("inquiry")
       if (!target) return
-      if (reduce) target.scrollIntoView({ block: "start", behavior: "instant" })
-      else smoothScrollToElement(target)
+      cancelLanding = smoothScrollToElement(target)
     }
     const queueLand = () => {
       cancelAnimationFrame(frame)
@@ -272,14 +275,16 @@ export function CorporateInquiryForm() {
     ro.observe(document.body)
 
     return () => {
+      interacted = true
       cancelAnimationFrame(frame)
+      cancelLanding?.()
       window.removeEventListener("load", onLoad)
       interactionEvents.forEach((type) =>
         window.removeEventListener(type, markInteracted)
       )
       ro.disconnect()
     }
-  }, [reduce])
+  }, [])
 
   // The primary programme can never also be an extra.
   useEffect(() => {
@@ -390,6 +395,8 @@ export function CorporateInquiryForm() {
 
   return (
     <form
+      inert={!hydrated}
+      aria-busy={!hydrated}
       ref={formRef}
       tabIndex={-1}
       onSubmit={handleSubmit(onSubmit)}

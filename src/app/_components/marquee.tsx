@@ -191,7 +191,7 @@ export function Marquee({
     <div
       ref={wrap}
       className={cn(
-        "relative overflow-hidden max-md:overflow-x-auto",
+        "no-scrollbar relative overflow-hidden motion-reduce:overflow-x-auto max-md:overflow-x-auto",
         "[mask-image:linear-gradient(to_right,transparent,#000_7%,#000_93%,transparent)]",
         "[-webkit-mask-image:linear-gradient(to_right,transparent,#000_7%,#000_93%,transparent)]",
         "motion-reduce:[mask-image:none] motion-reduce:[-webkit-mask-image:none]",

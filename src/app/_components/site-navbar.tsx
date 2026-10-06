@@ -259,13 +259,20 @@ export function SiteNavbar({
               // scrolling the document to bring it "into view", which reads
               // as the page jumping to the top after closing the drawer
               // (most visible on outside-click dismiss). Not a form, so
-              // skip the auto-focus entirely.
-              onCloseAutoFocus={(e) => e.preventDefault()}
+              // restore focus without scrolling the page.
+              onCloseAutoFocus={(e) => {
+                e.preventDefault()
+                headerRef.current
+                  ?.querySelector<HTMLButtonElement>(
+                    '[data-slot="sheet-trigger"]'
+                  )
+                  ?.focus({ preventScroll: true })
+              }}
               className={cn(
                 // z-70: above this header's z-60 (see the header className
                 // comment) — the drawer still needs to slide in front of the
                 // now-visible-through-the-scrim navbar, not behind it.
-                "z-70 w-72",
+                "z-70 w-72 max-w-full overflow-y-auto motion-reduce:transition-none",
                 dark &&
                   "border-white/10 bg-black text-white **:data-[slot=sheet-close]:text-white"
               )}
