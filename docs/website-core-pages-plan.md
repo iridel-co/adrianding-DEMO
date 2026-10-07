@@ -319,8 +319,8 @@ separate.
 Branch: `fix/public-form-layouts`
 PR title: `fix: public form layouts and workshop availability`
 Dependencies: PR03 shared layout changes. Owner: scoped workshop implementer.
-PR: pending. Evidence: implemented locally from verified integrated `main` at
-`dc00ab8`; full gate passed on 2026-10-07. Merge status: not started.
+PR: [#4](https://github.com/iridel-co/adrianding-DEMO/pull/4). Evidence: implemented locally from verified integrated `main` at
+`dc00ab8`; final full gate passed on 2026-10-07. Merge status: open; remote CI pending.
 
 ### PR04 execution contract — 2026-10-06
 
@@ -387,7 +387,7 @@ separate. Preserve historical meetings, local designer notes, and the harness ZI
 
 Delivery: PR04 branch/title; keep these tasks as a separate commit group.
 Dependencies: PR03 shared layout changes. Owner: scoped corporate-page implementer.
-PR: pending. Evidence: local implementation verified with PR04. Merge status: not started.
+PR: [#4](https://github.com/iridel-co/adrianding-DEMO/pull/4). Evidence: local implementation verified with PR04. Merge status: open; remote CI pending.
 
 - [x] Audit and correct programme carousel, inquiry form, and confirmation layouts.
 - [x] Preserve programme prefill, multi-select behavior, and validation; separate
