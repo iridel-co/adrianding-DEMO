@@ -125,6 +125,17 @@ export function CorporateInquiryForm() {
   const [step, setStep] = useState(0)
   const [submitting, setSubmitting] = useState(false)
   const paneRef = useRef<HTMLDivElement>(null)
+  const headingRef = useRef<HTMLHeadingElement>(null)
+  const previousStep = useRef(step)
+
+  useEffect(() => {
+    if (previousStep.current === step) return
+    previousStep.current = step
+    const heading = headingRef.current
+    if (!heading) return
+    heading.focus({ preventScroll: true })
+    return smoothScrollToElement(heading)
+  }, [step])
 
   useEffect(() => setHydrated(true), [])
 
@@ -155,6 +166,7 @@ export function CorporateInquiryForm() {
   })
 
   const primary = watch("program")
+  const consent = watch("consent")
   const also = watch("alsoInterested") ?? []
 
   const toggleAlso = (title: string) => {
@@ -414,9 +426,13 @@ export function CorporateInquiryForm() {
         ))}
       </div>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-muted-foreground text-xs tracking-[0.1em] uppercase">
+        <h3
+          ref={headingRef}
+          tabIndex={-1}
+          className="text-muted-foreground scroll-mt-28 text-xs tracking-[0.1em] uppercase outline-none"
+        >
           Step {step + 1} of {STEPS.length} · {current.title}
-        </p>
+        </h3>
         <DemoFillButton onFill={fillSample} />
       </div>
       {prefilled && step < 2 && (
@@ -427,6 +443,11 @@ export function CorporateInquiryForm() {
         </p>
       )}
 
+      {step < 3 && (
+        <p className="text-muted-foreground mt-4 text-xs">
+          Fields are required unless marked optional.
+        </p>
+      )}
       <div ref={paneRef} className="mt-6 space-y-5">
         {step === 0 && (
           <>
@@ -558,7 +579,7 @@ export function CorporateInquiryForm() {
                 onValueChange={(v) => switchDateMode(v as "pick" | "text")}
                 className="mb-3"
               >
-                <TabsList>
+                <TabsList className="grid w-full grid-cols-2 sm:inline-flex sm:w-auto">
                   <TabsTrigger value="pick">Pick dates</TabsTrigger>
                   <TabsTrigger value="text">Not fixed yet</TabsTrigger>
                 </TabsList>
@@ -655,7 +676,7 @@ export function CorporateInquiryForm() {
             <label className="flex items-start gap-3">
               <input
                 type="checkbox"
-                className="accent-brand mt-1 size-4"
+                className="accent-brand mt-1 size-4 shrink-0"
                 {...register("consent")}
               />
               <span className="text-muted-foreground text-sm leading-relaxed">
@@ -664,23 +685,14 @@ export function CorporateInquiryForm() {
                 Philippine Data Privacy Act.
               </span>
             </label>
-            {errors.consent?.message && (
-              <p className="text-destructive text-sm">
-                {errors.consent.message}
-              </p>
-            )}
+            <p aria-live="polite" className="text-destructive min-h-5 text-sm">
+              {errors.consent?.message}
+            </p>
           </>
         )}
       </div>
 
-      {/* The "call us instead" line shares the action row and sits opposite the
-          primary button, so the alternative to filling the form is offered at
-          the exact moment someone is deciding whether to continue with it.
-          Back and Continue group together on the right; the row wraps on narrow
-          widths, putting the phone line above the buttons rather than crushing
-          both. The sentence is one text node so the flex `gap` can't open a
-          space in front of the number. */}
-      <div className="mt-8 flex flex-wrap-reverse items-center justify-between gap-x-6 gap-y-4">
+      <div className="mt-8 flex flex-col-reverse items-stretch gap-4 sm:flex-row sm:flex-wrap-reverse sm:items-center sm:justify-between sm:gap-x-6">
         <p className="text-muted-foreground/70 flex items-center gap-2 text-xs">
           <Phone className="size-3.5 shrink-0" />
           <span>
@@ -694,9 +706,14 @@ export function CorporateInquiryForm() {
           </span>
         </p>
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="flex w-full items-center gap-2 sm:ml-auto sm:w-auto">
           {step > 0 && (
-            <Button type="button" variant="ghost" onClick={back}>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={back}
+              className="min-w-0 flex-1 sm:flex-none"
+            >
               <ArrowLeft className="size-4" />
               Back
             </Button>
@@ -705,7 +722,13 @@ export function CorporateInquiryForm() {
               across branches — see the identical comment in the workshop
               form's registration-form.tsx for the failure mode this avoids. */}
           {step < STEPS.length - 1 ? (
-            <Button key="continue" type="button" variant="brand" onClick={next}>
+            <Button
+              key="continue"
+              type="button"
+              variant="brand"
+              onClick={next}
+              className="min-w-0 flex-1 sm:flex-none"
+            >
               Continue
               <ArrowRight className="size-4" />
             </Button>
@@ -714,7 +737,8 @@ export function CorporateInquiryForm() {
               key="submit"
               type="submit"
               variant="brand"
-              disabled={submitting}
+              disabled={submitting || !consent}
+              className="min-w-0 flex-1 sm:flex-none"
             >
               {submitting ? "Sending…" : "Send inquiry"}
             </Button>
@@ -805,8 +829,10 @@ function Field({
 function Row({ k, v }: { k: string; v: string }) {
   return (
     <div className="flex justify-between gap-4">
-      <dt className="text-muted-foreground">{k}</dt>
-      <dd className="text-foreground text-right font-medium">{v}</dd>
+      <dt className="text-muted-foreground shrink-0">{k}</dt>
+      <dd className="text-foreground min-w-0 text-right font-medium [overflow-wrap:anywhere]">
+        {v}
+      </dd>
     </div>
   )
 }

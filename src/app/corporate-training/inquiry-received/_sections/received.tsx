@@ -54,12 +54,12 @@ export function InquiryReceived() {
       <div className="mx-auto max-w-5xl px-6 sm:px-8">
         {/* Centred to match the workshop confirmation header — the check and the
             headline read as one confirmation mark on a shared axis. */}
-        <Reveal className="mx-auto flex max-w-3xl flex-col items-center text-center">
+        <Reveal className="mx-auto flex max-w-3xl flex-col items-center text-center [overflow-wrap:anywhere]">
           <span className="bg-brand text-brand-foreground flex size-12 items-center justify-center rounded-full">
             <Check className="size-6" strokeWidth={2.5} />
           </span>
 
-          <h1 className="mt-7 font-serif text-[2.5rem] leading-[1.05] tracking-[-0.02em] sm:text-[3.25rem] lg:text-[4rem]">
+          <h1 className="mt-7 max-w-full font-serif text-[2.5rem] leading-[1.05] tracking-[-0.02em] sm:text-[3.25rem] lg:text-[4rem]">
             {firstName
               ? `Thanks, ${firstName}. We've got your inquiry.`
               : "Thanks — we've got your inquiry."}

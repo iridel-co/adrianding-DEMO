@@ -71,7 +71,10 @@ export function InquirySummary() {
             const value = handoff?.[field.key]?.trim()
             const Icon = field.icon
             return (
-              <div key={field.key} className="bg-muted/50 rounded-lg p-6">
+              <div
+                key={field.key}
+                className="bg-muted/50 min-w-0 rounded-lg p-6 [overflow-wrap:anywhere]"
+              >
                 <dl>
                   <dt className="text-muted-foreground flex items-center gap-1.5 text-xs tracking-[0.1em] uppercase">
                     <Icon className="size-3.5" />
@@ -94,7 +97,7 @@ export function InquirySummary() {
               — with no handoff or an empty list, the "four things we ask for"
               copy above stays true. */}
           {handoff?.alsoInterested?.length ? (
-            <div className="bg-muted/50 rounded-lg p-6 sm:col-span-2">
+            <div className="bg-muted/50 min-w-0 rounded-lg p-6 [overflow-wrap:anywhere] sm:col-span-2">
               <dl>
                 <dt className="text-muted-foreground flex items-center gap-1.5 text-xs tracking-[0.1em] uppercase">
                   <Layers className="size-3.5" /> Also interested in
