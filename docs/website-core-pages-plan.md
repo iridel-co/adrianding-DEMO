@@ -1027,3 +1027,18 @@ PR04-CLEANUP delivery steering, 2026-10-07: user authorized commit/push on the
 existing PR branch. The previously proposed separate cleanup PR is superseded by
 atomic commits on `fix/public-form-layouts` / PR #4. Local validation evidence
 above applies; post-publication remote CI and hosted proof remain separate.
+
+### PR04 remote CI scroll assertion follow-up — 2026-10-07
+
+GitHub run `37642829255` tested cleanup revision `8265452`: formatting,
+source-size, lint/CSS, types, tooling, build and OG checks passed; 364 browser
+cases passed and the desktop Chromium touch interruption case failed twice.
+Linux native cancellation retained 7–19 pixels, exceeding the test's two-pixel
+assumption. The regression now observes the anchor helper's options-object
+scroll commands after interruption, exercises its full correction deadline,
+and confirms the inquiry section remains outside the viewport. GSAP numeric
+position restoration is excluded. Application behavior is unchanged.
+
+Focused validation: all 40 anchor-navigation cases passed (two repetitions
+across five browser projects); formatting, lint and types passed. A fresh full
+remote gate remains pending after publication of this test correction.
