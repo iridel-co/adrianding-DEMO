@@ -49,7 +49,7 @@ export type Workshop = {
   price: string
   /** Card fill — path under `public/images/`. */
   image: string
-  status: "open" | "past"
+  status: "open" | "past" | "closed"
   /** One-line hook for cards. */
   summary: string
   /** Longer intro paragraph for the detail page. */
@@ -71,9 +71,9 @@ export type Workshop = {
   whatToExpect: string[]
   /** One line under the primer video player, per course. */
   primerBlurb: string
-  seatsTotal: number
+  seatsTotal: number | null
   /** Drives the scarcity pill. TODO: CMS-managed in the real build. */
-  seatsLeft: number
+  seatsLeft: number | null
 }
 
 export const WORKSHOPS: Workshop[] = [

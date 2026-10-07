@@ -62,6 +62,7 @@
       "script": "test:browser",
       "stage": "handoff",
       "patterns": [
+        "^scripts/quality/render-workshop-fixtures\\.cjs$",
         "^(src|public|tests/browser)/",
         "^playwright\\.config\\.",
         "^next\\.config\\.",

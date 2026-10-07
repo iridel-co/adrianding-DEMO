@@ -1,17 +1,26 @@
 "use client"
 
-import { useRef, useState } from "react"
+import {
+  cloneElement,
+  isValidElement,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type HTMLAttributes,
+} from "react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { ArrowLeft, ArrowRight, ChevronDown, Phone } from "lucide-react"
+import { ArrowLeft, ArrowRight, ChevronDown, Phone, Check } from "lucide-react"
 import { gsap, useGSAP } from "@/app/_lib/gsap"
 import { saveHandoff } from "@/app/_lib/handoff"
 import { DemoFillButton } from "@/app/_components/demo-fill"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import type { WorkshopAvailability } from "@/lib/workshop-availability"
 import { cn } from "@/lib/utils"
 
 /**
@@ -61,6 +70,7 @@ type Props = {
   workshopTitle: string
   schedule: string
   venue: string
+  availability: WorkshopAvailability
 }
 
 export function RegistrationForm({
@@ -68,23 +78,34 @@ export function RegistrationForm({
   workshopTitle,
   schedule,
   venue,
+  availability,
 }: Props) {
   const router = useRouter()
   const [step, setStep] = useState(0)
   const [submitting, setSubmitting] = useState(false)
   const paneRef = useRef<HTMLDivElement>(null)
+  const headingRef = useRef<HTMLHeadingElement>(null)
 
   const {
     register,
     handleSubmit,
     trigger,
     getValues,
+    watch,
     reset,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     mode: "onTouched",
   })
+
+  const consent = watch("consent") === true
+  useEffect(() => {
+    headingRef.current?.focus({ preventScroll: true })
+    headingRef.current
+      ?.closest("[role=dialog]")
+      ?.scrollTo({ top: 0, behavior: "instant" })
+  }, [step])
 
   /**
    * Demo shortcut — see `_components/demo-fill.tsx`. `reset()` writes every
@@ -129,6 +150,7 @@ export function RegistrationForm({
   const back = () => setStep((s) => Math.max(s - 1, 0))
 
   const onSubmit = (v: FormValues) => {
+    if (!availability.canRegister) return
     setSubmitting(true)
     saveHandoff({
       kind: "workshop",
@@ -143,7 +165,7 @@ export function RegistrationForm({
   const current = STEPS[step]
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form className="min-w-0" onSubmit={handleSubmit(onSubmit)}>
       {/* Progress */}
       <div className="flex items-center gap-2">
         {STEPS.map((s, i) => (
@@ -157,12 +179,21 @@ export function RegistrationForm({
         ))}
       </div>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-muted-foreground text-xs tracking-[0.1em] uppercase">
+        <h2
+          ref={headingRef}
+          tabIndex={-1}
+          className="text-muted-foreground text-xs tracking-[0.1em] uppercase outline-none"
+        >
           Step {step + 1} of {STEPS.length} · {current.title}
-        </p>
+        </h2>
         <DemoFillButton onFill={fillSample} />
       </div>
 
+      {step < 2 && (
+        <p className="text-muted-foreground mt-4 text-xs">
+          Fields are required unless marked optional.
+        </p>
+      )}
       <div ref={paneRef} className="mt-10 space-y-5">
         {step === 0 && (
           <>
@@ -207,6 +238,7 @@ export function RegistrationForm({
             <Field label="Salary range" error={errors.salaryRange?.message}>
               <div className="relative">
                 <select
+                  aria-label="Salary range (required)"
                   className="border-input bg-background focus-visible:ring-ring h-12 w-full appearance-none rounded-md border py-3 pr-10 pl-3 text-base shadow-sm transition-colors focus-visible:ring-1 focus-visible:outline-none"
                   defaultValue=""
                   {...register("salaryRange")}
@@ -236,7 +268,7 @@ export function RegistrationForm({
 
         {step === 2 && (
           <>
-            <dl className="bg-muted/40 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 rounded-sm p-4 text-sm">
+            <dl className="bg-muted/40 grid grid-cols-1 gap-x-4 gap-y-2 rounded-sm p-4 text-sm sm:grid-cols-[auto_1fr]">
               <Row k="Workshop" v={workshopTitle} />
               <Row k="Schedule" v={schedule} />
               <Row k="Venue" v={venue} />
@@ -246,7 +278,7 @@ export function RegistrationForm({
             <label className="flex items-start gap-3">
               <input
                 type="checkbox"
-                className="accent-brand mt-1 size-4"
+                className="accent-brand mt-1 size-4 shrink-0"
                 {...register("consent")}
               />
               <span className="text-muted-foreground text-sm leading-relaxed">
@@ -255,23 +287,25 @@ export function RegistrationForm({
                 with the Philippine Data Privacy Act.
               </span>
             </label>
-            {errors.consent?.message && (
-              <p className="text-destructive text-sm">
-                {errors.consent.message}
-              </p>
-            )}
+            {/* Reserve error space so checkbox blur cannot move Back during a click. */}
+            <p
+              aria-live="polite"
+              className="text-destructive -mt-3 min-h-5 text-sm"
+            >
+              {errors.consent?.message}
+            </p>
           </>
         )}
       </div>
 
-      {/* The "call us instead" line shares the action row and sits opposite the
-          primary button, so the alternative to filling the form is offered at
-          the exact moment someone is deciding whether to continue with it.
-          Back and Continue group together on the right; the row wraps on narrow
-          widths, putting the phone line above the buttons rather than crushing
-          both. The sentence is one text node so the flex `gap` can't open a
-          space in front of the number. */}
-      <div className="mt-8 flex flex-wrap-reverse items-center justify-between gap-x-6 gap-y-4">
+      {!availability.canRegister && (
+        <p role="alert" className="text-destructive mt-6 text-sm">
+          {availability.label}. Your entered details have been kept;
+          registration cannot be completed for this date.
+        </p>
+      )}
+      {/* Keep the contact alternative separate from full-width mobile actions. */}
+      <div className="mt-3 flex flex-col-reverse items-stretch gap-4 sm:flex-row sm:flex-wrap-reverse sm:items-center sm:justify-between sm:gap-x-6">
         <p className="text-muted-foreground/70 flex items-center gap-2 text-xs">
           <Phone className="size-3.5 shrink-0" />
           <span>
@@ -285,9 +319,14 @@ export function RegistrationForm({
           </span>
         </p>
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="flex w-full items-center gap-2 sm:ml-auto sm:w-auto">
           {step > 0 && (
-            <Button type="button" variant="ghost" onClick={back}>
+            <Button
+              className="min-w-0 flex-1 sm:flex-none"
+              type="button"
+              variant="ghost"
+              onClick={back}
+            >
               <ArrowLeft className="size-4" />
               Back
             </Button>
@@ -304,18 +343,26 @@ export function RegistrationForm({
               whose data is valid immediately) and is a real risk for a fast
               real click too, not just automation. */}
           {step < STEPS.length - 1 ? (
-            <Button key="continue" type="button" variant="brand" onClick={next}>
+            <Button
+              className="min-w-0 flex-1 sm:flex-none"
+              key="continue"
+              type="button"
+              variant="brand"
+              onClick={next}
+            >
               Continue
               <ArrowRight className="size-4" />
             </Button>
           ) : (
             <Button
+              className="min-w-0 flex-1 whitespace-nowrap sm:flex-none"
               key="submit"
               type="submit"
               variant="brand"
-              disabled={submitting}
+              disabled={submitting || !consent || !availability.canRegister}
             >
-              {submitting ? "Reserving your seat…" : "Complete registration"}
+              {submitting ? "Submitting…" : "Finish"}
+              <Check className="size-4 shrink-0" aria-hidden />
             </Button>
           )}
         </div>
@@ -333,10 +380,14 @@ function Field({
   error?: string
   children: React.ReactNode
 }) {
+  const id = useId()
+  const control = isValidElement<HTMLAttributes<HTMLElement>>(children)
+    ? cloneElement(children, { "aria-labelledby": id })
+    : children
   return (
-    <div className="space-y-1.5">
-      <Label>{label}</Label>
-      {children}
+    <div className="min-w-0 space-y-1.5">
+      <Label id={id}>{label}</Label>
+      {control}
       {error && <p className="text-destructive text-sm">{error}</p>}
     </div>
   )
@@ -345,8 +396,10 @@ function Field({
 function Row({ k, v }: { k: string; v: string }) {
   return (
     <>
-      <dt className="text-muted-foreground text-right">{k}</dt>
-      <dd className="text-foreground text-left font-medium">{v}</dd>
+      <dt className="text-muted-foreground sm:text-right">{k}</dt>
+      <dd className="text-foreground min-w-0 text-left font-medium [overflow-wrap:anywhere]">
+        {v}
+      </dd>
     </>
   )
 }

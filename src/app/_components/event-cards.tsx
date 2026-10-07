@@ -1,5 +1,7 @@
 "use client"
 
+import { WorkshopAvailabilityText } from "@/app/_components/workshop-availability-text"
+
 import { ScrollArrows } from "./scroll-arrows"
 
 import { useEffect, useRef, useState } from "react"
@@ -9,13 +11,14 @@ import { ArrowRight, MapPin, Ticket } from "lucide-react"
 import { Reveal } from "@/app/_components/reveal"
 import { WorkshopTagPills } from "@/app/_components/workshop-tags"
 import { type Workshop } from "@/lib/workshops"
+import { getWorkshopAvailability } from "@/lib/workshop-availability"
 
 /**
  * Shared event grid — one rounded, image-filled card per workshop, with a
  * permanent "more coming soon" card pinned last. Used on the landing
  * (<LandingWorkshopsOpen>) and the /workshops list.
  *
- * The component renders full-bleed: below `lg` the cards stack; from `lg` they
+ * The component renders full-bleed: below `lg` cards use a snap rail; from `lg` they
  * become one horizontally scrolling row that starts near the left viewport
  * gutter (`lg:pl-10`) and runs off the right edge of the viewport when there
  * are more cards than fit. Render it OUTSIDE the section's `max-w-*` wrapper.
@@ -28,9 +31,9 @@ import { type Workshop } from "@/lib/workshops"
  * bottom-right — via a `grid-template-rows: 0fr → 1fr` collapse. Animating the
  * basis too means the expansion still reads once the row has overflowed into a
  * scroll. It is a real layout change — no `transform: scale`, whose hitbox
- * would lag the paint. On mobile every card shows the full content, stacked.
+ * would lag the paint. On mobile every card shows the full content in a swipeable rail.
  *
- * The native scrollbar is hidden (`no-scrollbar`); on `lg` the row is driven by
+ * The native scrollbar is hidden (`no-scrollbar`); overflowing rails are driven by
  * a pair of prev/next arrow buttons pinned bottom-right under the cards (aligned
  * to the 80rem content column), each enabled only while there's more row to
  * scroll that way. Trackpad / shift-wheel scrolling still works. The section
@@ -181,6 +184,10 @@ export function EventCards({
     }
   }, [isGrid])
 
+  useEffect(() => {
+    if (!interactive) setActive(null)
+  }, [interactive])
+
   const cardStyle = (i: number): React.CSSProperties => {
     if (!interactive) return {}
     const isActive = active === i
@@ -192,23 +199,25 @@ export function EventCards({
     }
   }
 
-  // Scroll arrows (lg only). `edges` says whether there's more row to scroll in
+  // Controls follow actual overflow at every breakpoint. `edges` says whether there's more row to scroll in
   // each direction — drives the buttons' disabled state.
   const rowRef = useRef<HTMLDivElement>(null)
   const [edges, setEdges] = useState({ left: false, right: false })
 
+  const listKey = workshops.map((w) => w.slug).join("|")
   useEffect(() => {
-    if (isGrid) return
     const el = rowRef.current
     if (!el) return
+    el.scrollLeft = 0
     let raf = 0
     const sync = () => {
       raf = 0
       // Don't re-evaluate mid-hover: an expanded card balloons scrollWidth and
       // would flip an arrow's enabled state under the pointer.
-      if (activeRef.current !== null) return
+      if (activeRef.current !== null && interactive) return
       const { scrollWidth: sw, clientWidth: cw, scrollLeft } = el
-      const overflow = sw - cw > 1
+      const overflow =
+        getComputedStyle(el).overflowX !== "visible" && sw - cw > 1
       setEdges({
         left: overflow && scrollLeft > 1,
         right: overflow && scrollLeft < sw - cw - 1,
@@ -223,13 +232,14 @@ export function EventCards({
     el.addEventListener("transitionend", queue)
     const ro = new ResizeObserver(queue)
     ro.observe(el)
+    for (const card of el.querySelectorAll("a")) ro.observe(card)
     return () => {
       el.removeEventListener("scroll", queue)
       el.removeEventListener("transitionend", queue)
       ro.disconnect()
       if (raf) cancelAnimationFrame(raf)
     }
-  }, [isGrid, workshops.length])
+  }, [isGrid, listKey, interactive])
 
   const nudge = (dir: 1 | -1) => {
     const el = rowRef.current
@@ -246,6 +256,7 @@ export function EventCards({
 
   const renderCard = (w: Workshop, i: number) => {
     const isActive = interactive && active === i
+    const availability = getWorkshopAvailability(w)
     // A resting desktop card shows just its date eyebrow + title. The
     // summary, venue/price and Register button unfurl on the hovered
     // card, and show always on mobile (where every card is full-width).
@@ -256,7 +267,7 @@ export function EventCards({
         href={`/workshops/${w.slug}`}
         onMouseEnter={() => interactive && setActive(i)}
         onFocus={() => interactive && setActive(i)}
-        onBlur={() => interactive && setActive(null)}
+        onBlur={() => setActive(null)}
         style={cardStyle(i)}
         className={`${CARD} ${isGrid ? GRID_HOVER : ""} ${
           isGrid || interactive ? "" : "lg:min-w-80 lg:flex-1 lg:basis-0"
@@ -279,6 +290,7 @@ export function EventCards({
 
         <div className="relative flex h-full w-full flex-col justify-end gap-3 px-6 py-8 text-left text-white lg:px-8">
           <p className="text-xs font-semibold tracking-[0.22em] text-white/75 uppercase">
+            {w.status === "past" ? "Past workshop · " : ""}
             {shortDate(w.start)}
           </p>
           <h3 className="text-[1.75rem] leading-[1.08] font-extrabold tracking-[-0.01em] text-balance lg:text-[2.125rem]">
@@ -293,6 +305,9 @@ export function EventCards({
             }`}
           >
             <div className="flex min-h-0 flex-col gap-4 overflow-hidden pt-3">
+              <p className="text-sm font-semibold text-white">
+                <WorkshopAvailabilityText workshop={w} onDark />
+              </p>
               <p className="max-w-md text-base leading-relaxed text-white/85">
                 {w.summary}
               </p>
@@ -322,7 +337,7 @@ export function EventCards({
                     that edge. Translate is safe since it only needs
                     headroom above. */}
                 <span className="group/reg text-brand-foreground bg-brand before:bg-background hover:text-foreground relative isolate inline-flex shrink-0 items-center gap-2 overflow-hidden rounded-full px-5 py-2.5 text-sm font-semibold shadow-lg shadow-black/25 transition-[color,transform,box-shadow] duration-300 before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:transition-transform before:duration-300 before:content-[''] hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/40 hover:before:scale-x-100">
-                  Register
+                  {availability.canRegister ? "Register" : "View details"}
                   <ArrowRight className="size-4 transition-transform duration-300 group-hover/reg:translate-x-1" />
                 </span>
               </div>
@@ -404,7 +419,7 @@ export function EventCards({
             else left.push(soonDesktop)
 
             return (
-              <div className={GRID_ROW}>
+              <div ref={rowRef} className={GRID_ROW}>
                 <div className={GRID_COL}>{left}</div>
                 <div className={`${GRID_COL} lg:mt-20`}>{right}</div>
                 {renderSoonCard("soon-mobile", "flex lg:hidden")}
@@ -423,7 +438,7 @@ export function EventCards({
         )}
       </Reveal>
 
-      {!isGrid && hasOverflow && (
+      {hasOverflow && (
         <div className="mx-auto mt-8 flex max-w-7xl justify-end px-6 sm:px-8">
           <ScrollArrows
             edges={edges}

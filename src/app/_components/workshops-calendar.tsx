@@ -1,30 +1,19 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
-import { createPortal } from "react-dom"
-import { useRouter } from "next/navigation"
+import { WorkshopAvailabilityText } from "@/app/_components/workshop-availability-text"
+
+import { useMemo, useState } from "react"
+import Link from "next/link"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { useReducedMotionSafe } from "@/app/_lib/use-reduced-motion-safe"
 import { AnimatePresence, motion } from "framer-motion"
 import { ArrowLeft, ArrowRight, MapPin } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { Workshop } from "@/lib/workshops"
-
-const POPOVER_WIDTH = 384 // matches w-96
-const POPOVER_MARGIN = 12
-const POPOVER_EST_HEIGHT = 260
-
-/**
- * `offset` is a `top` px value when opening downward, or a `bottom` px value
- * (distance from the viewport's bottom edge) when opening upward — flipping
- * the anchored edge instead of the anchored value avoids needing to know the
- * popover's rendered height up front.
- */
-type PopoverPos = {
-  key: string
-  offset: number
-  left: number
-  width: number
-  openUp: boolean
-}
 
 /**
  * Wobbly marker-circle strokes. Each is an off-round loop that overshoots
@@ -121,9 +110,8 @@ function buildMonth(
 
 /**
  * Month-grid calendar marking every open workshop date. Click a marked date
- * to jump straight to that workshop's page; hover (desktop) or focus
- * (keyboard) surfaces a smooth popover preview first, since a bare dot on a
- * date is not enough context to commit to a click.
+ * to preview its events, then follow an explicit workshop link. The shared
+ * popover handles keyboard focus, dismissal and viewport collisions.
  *
  * Defaults to the soonest open workshop's month so the first thing a visitor
  * sees already has a marked date, not a search.
@@ -135,7 +123,7 @@ export function WorkshopsCalendar({
   workshops: Workshop[]
   className?: string
 }) {
-  const router = useRouter()
+  const reduce = useReducedMotionSafe()
 
   const byDay = useMemo(() => {
     const map = new Map<string, Workshop[]>()
@@ -151,49 +139,8 @@ export function WorkshopsCalendar({
   const [cursor, setCursor] = useState(
     new Date(initial.getFullYear(), initial.getMonth(), 1)
   )
-  const [popoverPos, setPopoverPos] = useState<PopoverPos | null>(null)
+  const [openDay, setOpenDay] = useState<string | null>(null)
   const [direction, setDirection] = useState(1)
-  const [mounted, setMounted] = useState(false)
-  const cellRefs = useRef(new Map<string, HTMLButtonElement>())
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  /**
-   * Popover renders in a portal (escapes the sliding month grid's
-   * `overflow-hidden`), so position is computed from the trigger button's
-   * viewport rect rather than relying on CSS `absolute` anchoring, which
-   * clipped against both that ancestor and the viewport edge.
-   */
-  function openPopover(key: string) {
-    const el = cellRefs.current.get(key)
-    if (!el) return
-    const rect = el.getBoundingClientRect()
-
-    const spaceBelow = window.innerHeight - rect.bottom
-    const openUp = spaceBelow < POPOVER_EST_HEIGHT + POPOVER_MARGIN
-
-    const width = Math.min(
-      POPOVER_WIDTH,
-      window.innerWidth - POPOVER_MARGIN * 2
-    )
-    let left = rect.left + rect.width / 2 - width / 2
-    left = Math.min(
-      Math.max(left, POPOVER_MARGIN),
-      window.innerWidth - width - POPOVER_MARGIN
-    )
-
-    const offset = openUp
-      ? window.innerHeight - rect.top + POPOVER_MARGIN
-      : rect.bottom + POPOVER_MARGIN
-
-    setPopoverPos({ key, offset, left, width, openUp })
-  }
-
-  function closePopover(key: string) {
-    setPopoverPos((p) => (p?.key === key ? null : p))
-  }
 
   const days = useMemo(
     () => buildMonth(cursor.getFullYear(), cursor.getMonth(), byDay),
@@ -206,15 +153,14 @@ export function WorkshopsCalendar({
   })
 
   function go(delta: number) {
-    setPopoverPos(null)
+    setOpenDay(null)
     setDirection(delta)
     setCursor((c) => new Date(c.getFullYear(), c.getMonth() + delta, 1))
   }
 
   return (
     <div className={cn("bg-muted/40 w-full rounded-3xl p-6", className)}>
-      <div className="mb-6 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
-        <div />
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="overflow-hidden text-center">
           <AnimatePresence mode="popLayout" initial={false} custom={direction}>
             <motion.p
@@ -223,7 +169,10 @@ export function WorkshopsCalendar({
               initial={{ opacity: 0, x: 16 * direction }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -16 * direction }}
-              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              transition={{
+                duration: reduce ? 0 : 0.2,
+                ease: [0.22, 1, 0.36, 1],
+              }}
               className="font-serif text-2xl tracking-[-0.01em] whitespace-nowrap sm:text-3xl lg:text-4xl"
             >
               {monthLabel}
@@ -235,7 +184,7 @@ export function WorkshopsCalendar({
             type="button"
             onClick={() => go(-1)}
             aria-label="Previous month"
-            className="bg-background hover:bg-background/70 flex size-8 items-center justify-center rounded-full transition-colors"
+            className="bg-background hover:bg-background/70 flex size-11 items-center justify-center rounded-full transition-colors"
           >
             <ArrowLeft className="size-4" />
           </button>
@@ -266,7 +215,10 @@ export function WorkshopsCalendar({
             initial={{ opacity: 0, x: 24 * direction }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -24 * direction }}
-            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            transition={{
+              duration: reduce ? 0 : 0.2,
+              ease: [0.22, 1, 0.36, 1],
+            }}
             className="grid grid-cols-7 gap-1.5"
           >
             {days.map((cell) => {
@@ -296,96 +248,78 @@ export function WorkshopsCalendar({
               }
 
               return (
-                <button
+                <Popover
                   key={key}
-                  ref={(el) => {
-                    if (el) cellRefs.current.set(key, el)
-                    else cellRefs.current.delete(key)
-                  }}
-                  type="button"
-                  onMouseEnter={() => openPopover(key)}
-                  onMouseLeave={() => closePopover(key)}
-                  onFocus={() => openPopover(key)}
-                  onBlur={() => closePopover(key)}
-                  onClick={() => router.push(`/workshops/${workshop.slug}`)}
-                  className={cn(
-                    CELL,
-                    "text-brand hover:bg-brand/8 focus-visible:bg-brand/8 group cursor-pointer font-semibold focus-visible:outline-none"
-                  )}
+                  open={openDay === key}
+                  onOpenChange={(open) => setOpenDay(open ? key : null)}
                 >
-                  <HandDrawnCircle
-                    seed={cell.date.getDate()}
-                    className="text-brand/60 group-hover:text-brand group-focus-visible:text-brand top-1/2 left-1/2 size-12 -translate-x-1/2 -translate-y-1/2 transition-[color,scale] duration-200 group-hover:scale-110 group-focus-visible:scale-110 sm:size-14 lg:size-16"
-                  />
-                  <span className="relative">{cell.date.getDate()}</span>
-                </button>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      className={cn(
+                        CELL,
+                        "text-brand hover:bg-brand/8 focus-visible:bg-brand/8 group focus-visible:ring-brand cursor-pointer font-semibold focus-visible:ring-2 focus-visible:outline-none"
+                      )}
+                    >
+                      <HandDrawnCircle
+                        seed={cell.date.getDate()}
+                        className="text-brand/60 group-hover:text-brand group-focus-visible:text-brand top-1/2 left-1/2 size-12 -translate-x-1/2 -translate-y-1/2 transition-[color,scale] duration-200 group-hover:scale-110 group-focus-visible:scale-110 motion-reduce:transition-none sm:size-14 lg:size-16"
+                      />
+                      <span className="relative">{cell.date.getDate()}</span>
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    aria-label="Workshop preview"
+                    collisionPadding={12}
+                    sideOffset={12}
+                    className="max-h-[var(--radix-popover-content-available-height)] w-96 max-w-[calc(100vw-1.5rem)] overflow-y-auto rounded-3xl p-6 motion-reduce:animate-none"
+                  >
+                    <div className="space-y-6">
+                      {cell.workshops.map((event) => (
+                        <div key={event.slug} className="space-y-3">
+                          <p className="text-brand text-sm font-semibold">
+                            {event.schedule}
+                          </p>
+                          <p className="font-serif text-2xl leading-tight">
+                            {event.title}
+                          </p>
+                          <p className="text-muted-foreground flex items-start gap-2 text-sm">
+                            <MapPin className="mt-0.5 size-4 shrink-0" />
+                            {event.venue}, {event.city}
+                          </p>
+                          <p className="text-muted-foreground text-sm leading-relaxed">
+                            {event.summary}
+                          </p>
+                          <p className="text-sm font-semibold">
+                            <WorkshopAvailabilityText workshop={event} />
+                          </p>
+                          <Link
+                            href={`/workshops/${event.slug}`}
+                            className="text-brand inline-flex min-h-11 items-center gap-2 rounded-sm font-semibold underline focus-visible:ring-2 focus-visible:outline-none"
+                          >
+                            View workshop
+                            <span className="sr-only">: {event.title}</span>
+                            <ArrowRight className="size-4" />
+                          </Link>
+                        </div>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
               )
             })}
           </motion.div>
         </AnimatePresence>
       </div>
 
-      {mounted &&
-        createPortal(
-          <AnimatePresence>
-            {popoverPos &&
-              (() => {
-                const workshop = days.find(
-                  (d) => dateKey(d.date) === popoverPos.key
-                )?.workshops[0]
-                if (!workshop) return null
-
-                return (
-                  <motion.div
-                    key={popoverPos.key}
-                    initial={{
-                      opacity: 0,
-                      y: popoverPos.openUp ? -6 : 6,
-                      scale: 0.96,
-                    }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{
-                      opacity: 0,
-                      y: popoverPos.openUp ? -6 : 6,
-                      scale: 0.96,
-                    }}
-                    transition={{
-                      duration: 0.22,
-                      ease: [0.22, 1, 0.36, 1],
-                    }}
-                    style={{
-                      position: "fixed",
-                      ...(popoverPos.openUp
-                        ? { bottom: popoverPos.offset }
-                        : { top: popoverPos.offset }),
-                      left: popoverPos.left,
-                      width: popoverPos.width,
-                    }}
-                    className="bg-popover text-popover-foreground pointer-events-none z-50 rounded-3xl border p-8 shadow-xl"
-                  >
-                    <div className="flex flex-col items-center gap-2 text-center">
-                      <span className="bg-brand/10 text-brand rounded-full px-3 py-1 text-xs font-semibold">
-                        {workshop.schedule}
-                      </span>
-                      <p className="font-serif text-2xl leading-tight">
-                        {workshop.title}
-                      </p>
-                    </div>
-                    <div className="border-border/60 mt-5 space-y-3 border-t pt-5">
-                      <p className="text-muted-foreground flex items-center gap-1.5 text-sm">
-                        <MapPin className="size-4 shrink-0" />
-                        {workshop.venue}, {workshop.city}
-                      </p>
-                      <p className="text-muted-foreground text-sm leading-relaxed">
-                        {workshop.summary}
-                      </p>
-                    </div>
-                  </motion.div>
-                )
-              })()}
-          </AnimatePresence>,
-          document.body
-        )}
+      {!days.some((day) => day.inMonth && day.workshops.length > 0) && (
+        <p
+          className="text-muted-foreground mt-4 text-center text-sm"
+          role="status"
+        >
+          No workshops scheduled this month.
+        </p>
+      )}
     </div>
   )
 }
