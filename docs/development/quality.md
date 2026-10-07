@@ -93,3 +93,11 @@ separately from local checks. Run focused checks while editing and the full gate
 at package handoff. Avoid editing during validation or overlapping heavy runs.
 CI runs all handoff checks on PRs, including stacked PRs, without Production secrets.
 Required branch protection remains a separate GitHub configuration decision.
+
+Workshop availability fixtures use `scripts/quality/render-workshop-fixtures.cjs`
+to render actual server markup in a disposable TypeScript subprocess with
+in-memory catalogue changes. They verify disabled triggers and confirmation
+guards, not hydrated full-capacity journeys or a live receiving service. The
+2026-10-07 final gate passed 355 cases: 335 browser journeys and 20 policy/markup cases.
+Phone feedback coverage includes terminal filter overlays, sticky CTA visibility,
+historical dates, repeated fragment links and visitor scroll interruption.
