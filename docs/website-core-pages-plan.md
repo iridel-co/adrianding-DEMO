@@ -989,3 +989,10 @@ Ten repeated affected Chromium checks and the fresh full gate passed.
 Three compact 431px Chromium screenshots cover the final registration card,
 sticky registration and inline filter controls in `docs/reviews/pr04/`.
 Native-device, hosted and new-PR CI acceptance remain separate open boundaries.
+
+### Home heading follow-up — 2026-10-07
+
+Phone-to-tablet review found Corporate and testimonial headings compressed into
+narrow desktop side rails. Place both introductions above their cards at full
+section width; match programme heading sizing to “Join Our Workshops” and limit
+the testimonial heading to a readable two-line measure where space permits.
