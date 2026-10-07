@@ -8,6 +8,16 @@
       "patterns": ["."]
     },
     {
+      "id": "source-size",
+      "script": "check:source-size",
+      "stage": "edit",
+      "patterns": [
+        "^src/.*\\.(?:ts|tsx|css)$",
+        "^source-size\\.config\\.json$",
+        "^scripts/quality/source-size"
+      ]
+    },
+    {
       "id": "lint",
       "script": "lint",
       "stage": "edit",
@@ -43,7 +53,9 @@
       "patterns": [
         "^scripts/quality/",
         "^quality\\.config\\.json$",
-        "^\\.github/workflows/"
+        "^\\.github/workflows/",
+        "^source-size\\.config\\.json$",
+        "^src/app/_lib/use-step-navigation\\.ts$"
       ]
     },
     {

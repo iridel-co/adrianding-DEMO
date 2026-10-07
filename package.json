@@ -20,7 +20,8 @@
     "test:quality": "node --test scripts/quality/*.test.mjs",
     "quality:inspect": "node scripts/quality/inspect.mjs",
     "check:build": "npm run build && npm run check:og",
-    "test:browser": "npm run build && playwright test"
+    "test:browser": "npm run build && playwright test",
+    "check:source-size": "node scripts/quality/source-size.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
