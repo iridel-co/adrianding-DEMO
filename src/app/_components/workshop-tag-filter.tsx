@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { ScrollArrows } from "@/app/_components/scroll-arrows"
 import { EventCards } from "@/app/_components/event-cards"
 import { WORKSHOP_TAG_ICONS } from "@/app/_components/workshop-tags"
 import { WORKSHOP_TAGS, type Workshop, type WorkshopTag } from "@/lib/workshops"
@@ -46,14 +47,7 @@ const CHIP_ON =
 // fades the edge(s) that have more chips behind them. -mx/px bleed the scroller
 // to the viewport gutter while the first chip lines up with the label.
 const CHIP_ROW =
-  "no-scrollbar -mx-4 mt-2 flex flex-nowrap items-center gap-1.5 overflow-x-auto scroll-px-4 px-4 sm:-mx-6 sm:scroll-px-6 sm:px-6"
-const FADE_RIGHT =
-  "[mask-image:linear-gradient(to_right,#000_calc(100%-2.5rem),transparent)]"
-const FADE_LEFT =
-  "[mask-image:linear-gradient(to_left,#000_calc(100%-2.5rem),transparent)]"
-const FADE_BOTH =
-  "[mask-image:linear-gradient(to_right,transparent,#000_2.5rem,#000_calc(100%-2.5rem),transparent)]"
-
+  "no-scrollbar flex flex-nowrap items-center gap-1.5 overflow-x-auto scroll-px-4 px-4 sm:scroll-px-6 sm:px-6"
 export function WorkshopTagFilter({ workshops }: { workshops: Workshop[] }) {
   const [selected, setSelected] = useState<WorkshopTag[]>([])
 
@@ -116,19 +110,10 @@ export function WorkshopTagFilter({ workshops }: { workshops: Workshop[] }) {
       if (raf) cancelAnimationFrame(raf)
     }
   }, [chips.length])
-  const fade =
-    edges.left && edges.right
-      ? FADE_BOTH
-      : edges.right
-        ? FADE_RIGHT
-        : edges.left
-          ? FADE_LEFT
-          : ""
-
   return (
     <>
       <div className="mx-auto mb-8 max-w-7xl px-4 sm:px-6 lg:mb-12">
-        <div className="flex items-baseline justify-between gap-4">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
           <span
             id="workshop-filter-label"
             className="text-muted-foreground text-sm font-medium"
@@ -142,67 +127,91 @@ export function WorkshopTagFilter({ workshops }: { workshops: Workshop[] }) {
             Showing {filtered.length} of {workshops.length} workshops
           </p>
         </div>
-        <div
-          ref={rowRef}
-          role="group"
-          aria-labelledby="workshop-filter-label"
-          className={cn(CHIP_ROW, fade)}
-        >
-          <button
-            type="button"
-            aria-pressed={selected.length === 0}
-            onClick={() => setSelected([])}
-            className={CHIP_HIT}
+        <div className="relative -mx-4 mt-2 sm:-mx-6">
+          <div
+            ref={rowRef}
+            role="group"
+            aria-labelledby="workshop-filter-label"
+            className={CHIP_ROW}
           >
-            <span
-              className={cn(
-                CHIP_PILL,
-                selected.length === 0 ? CHIP_ON : CHIP_OFF
-              )}
+            <button
+              type="button"
+              aria-pressed={selected.length === 0}
+              onClick={() => setSelected([])}
+              className={CHIP_HIT}
             >
-              All
-              <span className="tabular-nums opacity-60">
-                {workshops.length}
-              </span>
-            </span>
-          </button>
-          {chips.map((tag) => {
-            const Icon = WORKSHOP_TAG_ICONS[tag]
-            const on = selected.includes(tag)
-            return (
-              <button
-                key={tag}
-                type="button"
-                aria-pressed={on}
-                onClick={() => toggle(tag)}
-                className={CHIP_HIT}
+              <span
+                className={cn(
+                  CHIP_PILL,
+                  selected.length === 0 ? CHIP_ON : CHIP_OFF
+                )}
               >
-                <span className={cn(CHIP_PILL, on ? CHIP_ON : CHIP_OFF)}>
-                  <Icon className="size-3.5" aria-hidden />
-                  {tag}
-                  <span className="tabular-nums opacity-60">
-                    {counts.get(tag)}
-                  </span>
+                All
+                <span className="tabular-nums opacity-60">
+                  {workshops.length}
                 </span>
-              </button>
-            )
-          })}
+              </span>
+            </button>
+            {chips.map((tag) => {
+              const Icon = WORKSHOP_TAG_ICONS[tag]
+              const on = selected.includes(tag)
+              return (
+                <button
+                  key={tag}
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() => toggle(tag)}
+                  className={CHIP_HIT}
+                >
+                  <span className={cn(CHIP_PILL, on ? CHIP_ON : CHIP_OFF)}>
+                    <Icon className="size-3.5" aria-hidden />
+                    {tag}
+                    <span className="tabular-nums opacity-60">
+                      {counts.get(tag)}
+                    </span>
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+          {(edges.left || edges.right) && (
+            <ScrollArrows
+              edges={edges}
+              previousLabel="Previous focus areas"
+              nextLabel="More focus areas"
+              overlay
+              onNudge={(dir) =>
+                rowRef.current?.scrollBy({
+                  left: dir * Math.max(160, rowRef.current.clientWidth * 0.8),
+                  behavior: window.matchMedia(
+                    "(prefers-reduced-motion: reduce)"
+                  ).matches
+                    ? "instant"
+                    : "smooth",
+                })
+              }
+            />
+          )}
         </div>
       </div>
 
       {filtered.length === 0 ? (
         <div className="mx-auto max-w-7xl px-4 py-16 text-center sm:px-6">
           <p className="font-serif text-3xl">
-            No open dates in that area right now.
+            {workshops.length === 0
+              ? "No workshops scheduled yet."
+              : "No open dates in those areas right now."}
           </p>
           <p className="text-muted-foreground mt-3">
             New dates are added through the year — or bring the programme to
             your team instead.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Button variant="outline" onClick={() => setSelected([])}>
-              Show all workshops
-            </Button>
+            {workshops.length > 0 && (
+              <Button variant="outline" onClick={() => setSelected([])}>
+                Show all workshops
+              </Button>
+            )}
             <Button variant="ghost" asChild>
               <Link href="/corporate-training#inquiry">
                 Ask about in-house training

@@ -9,7 +9,8 @@ import {
   type ReactNode,
 } from "react"
 import Image from "next/image"
-import { ArrowLeft, ArrowRight, Check } from "lucide-react"
+import { ArrowRight, Check } from "lucide-react"
+import { ScrollArrows } from "@/app/_components/scroll-arrows"
 import { Reveal } from "@/app/_components/reveal"
 import { useReducedMotionSafe } from "@/app/_lib/use-reduced-motion-safe"
 import { useIsTouch } from "@/app/_lib/use-is-touch"
@@ -119,9 +120,6 @@ const TITLE_STATIC =
 const REGISTER_PILL =
   "group/reg text-brand-foreground bg-brand before:bg-background hover:text-foreground relative isolate inline-flex shrink-0 items-center gap-2 overflow-hidden rounded-full px-5 py-2.5 text-sm font-semibold shadow-lg shadow-black/25 transition-[color,transform,box-shadow] duration-300 before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:transition-transform before:duration-300 before:content-[''] hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/40 hover:before:scale-x-100"
 
-const ARROW_BTN =
-  "border-border/80 text-foreground flex size-11 items-center justify-center rounded-full border transition-colors hover:border-foreground hover:bg-foreground hover:text-background disabled:cursor-default disabled:opacity-25 disabled:hover:border-border/80 disabled:hover:bg-transparent disabled:hover:text-foreground"
-
 /** Grid-rows collapse, shared by the blurb (open at rest) and the detail
  *  panel (open on expand). Literal classes only. */
 function Collapse({
@@ -142,37 +140,6 @@ function Collapse({
       className={`grid transition-[grid-template-rows,opacity] duration-[420ms] ease-[cubic-bezier(0.33,1,0.68,1)] motion-reduce:transition-none ${open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}
     >
       <div className="min-h-0 overflow-hidden">{children}</div>
-    </div>
-  )
-}
-
-function CarouselArrows({
-  edges,
-  onNudge,
-}: {
-  edges: { left: boolean; right: boolean }
-  onNudge: (dir: 1 | -1) => void
-}) {
-  return (
-    <div className="hidden items-center gap-2.5 lg:flex">
-      <button
-        type="button"
-        aria-label="Previous programmes"
-        onClick={() => onNudge(-1)}
-        disabled={!edges.left}
-        className={ARROW_BTN}
-      >
-        <ArrowLeft className="size-5" />
-      </button>
-      <button
-        type="button"
-        aria-label="Next programmes"
-        onClick={() => onNudge(1)}
-        disabled={!edges.right}
-        className={ARROW_BTN}
-      >
-        <ArrowRight className="size-5" />
-      </button>
     </div>
   )
 }
@@ -211,7 +178,7 @@ export function ProgramCarousel({
   // Hover take-over only with a real pointer on a desktop-width screen
   // (RULES §14). Both start `false`, so SSR and first paint are the static
   // layout — the rule's "touch control is the default".
-  const interactive = desktop && !touch
+  const interactive = desktop && !touch && items.length > 1
   useEffect(() => {
     const mqDesktop = window.matchMedia("(min-width: 1024px)")
     const sync = () => setDesktop(mqDesktop.matches)
@@ -259,7 +226,7 @@ export function ProgramCarousel({
       ro.disconnect()
       if (raf) cancelAnimationFrame(raf)
     }
-  }, [items.length])
+  }, [items])
 
   const nudge = (dir: 1 | -1) => {
     const el = railRef.current
@@ -394,7 +361,14 @@ export function ProgramCarousel({
               React warns "each child in a list should have a unique key". */}
           <Fragment key="heading">{heading}</Fragment>
           {hasOverflow && (
-            <CarouselArrows key="arrows" edges={edges} onNudge={nudge} />
+            <ScrollArrows
+              key="arrows"
+              edges={edges}
+              onNudge={nudge}
+              previousLabel="Previous programmes"
+              nextLabel="Next programmes"
+              className="flex self-end"
+            />
           )}
         </div>
       </div>
