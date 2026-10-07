@@ -1,129 +1,54 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useId, useRef, useState } from "react"
+import { useInquiryLanding } from "./use-inquiry-landing"
+import { AlsoInterested } from "./also-interested"
+import { CorporateInquiryReview } from "./inquiry-review"
+import {
+  PROGRAM_INQUIRE_EVENT,
+  type ProgramInquiryDetail,
+} from "@/app/_lib/program-inquiry"
 import { useRouter } from "next/navigation"
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { ArrowLeft, ArrowRight, Check, ChevronDown, Phone } from "lucide-react"
+import {
+  PROGRAMS,
+  ATTENDEE_BANDS,
+  schema,
+  STEPS,
+  type FormValues,
+} from "./inquiry-model"
+import { FormField as Field } from "@/app/_components/form-field"
+import { useStepNavigation } from "@/app/_lib/use-step-navigation"
+import { ArrowLeft, ArrowRight, ChevronDown, Phone } from "lucide-react"
 import { gsap, useGSAP } from "@/app/_lib/gsap"
 import { saveHandoff } from "@/app/_lib/handoff"
 import { smoothScrollToElement } from "@/app/_lib/smooth-scroll-to"
 import { DemoFillButton } from "@/app/_components/demo-fill"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { InquiryDatePicker } from "./inquiry-date-picker"
+import { composeDateRange } from "./inquiry-dates"
 import { Textarea } from "@/components/ui/textarea"
 import { CORPORATE_PROGRAMMES } from "@/lib/specializations"
 import { cn } from "@/lib/utils"
 
-/**
- * Corporate training inquiry — multi-step, progressive disclosure. Frontend
- * only: nothing is sent anywhere; submitting routes to
- * `/corporate-training/inquiry-received`.
- *
- * Step 3 (programme / headcount / date / venue) is the client's own ask — a
- * name and a free-text message was not enough to quote against, so those four
- * are now captured explicitly.
- *
- * Prefill (2026-09-19): the corporate carousel's Inquire button hands off a
- * programme two ways — a `?program=<key>` URL (read on mount, deep-link /
- * reload safe) and a `PROGRAM_INQUIRE_EVENT` window event (re-applies a
- * programme even if the URL didn't change, e.g. a second click after the
- * visitor picked something else by hand). Also new: an optional
- * "Also interested in" group of selectable tiles (real checkboxes, visually
- * hidden, inside a fieldset — changed from plain checkboxes 2026-09-24), so
- * one inquiry can cover more than one programme.
- *
- * Programme list (2026-09-24): reads `CORPORATE_PROGRAMMES` — Adrian's six
- * real programmes plus four demo-only placeholders — so the corporate page's
- * select and tiles show all ten. The landing page still reads the real six
- * only.
- *
- * Deep-link landing (2026-09-24): a cold load of
- * `/corporate-training?program=<key>#inquiry` prefills correctly above but
- * used to strand the visitor at scrollY ~100-650 instead of at this section
- * (4000+px down). The browser's *native* fragment jump fires immediately on
- * load — well before webfonts swap, the Programs carousel's images decode,
- * and hydration settle — and nothing re-corrects it afterward, so it lands
- * against a page that is still shifting under it. Fixed by landing ourselves,
- * once, after the same settle signals `ScrollRefresh` uses (fonts ready +
- * window load), via the existing `smoothScrollToElement` helper — and only if
- * the visitor hasn't already started scrolling by hand.
+/** Progressive inquiry keeps one RHF owner and a string date handoff.
+ * Programme URL/event prefill survives reload and repeated carousel activation.
+ * Hash landing waits for settled layout unless the visitor has interacted.
  */
-
-// Must match the constant in _components/program-carousel.tsx — see docs/feedback-passes/PLAN-feedback-2.md.
-const PROGRAM_INQUIRE_EVENT = "ad:program-inquire"
-
-const SPEC_TITLES = CORPORATE_PROGRAMMES.map((s) => s.title) as [
-  string,
-  ...string[],
-]
-
-const PROGRAMS = [
-  ...CORPORATE_PROGRAMMES.map((s) => s.title),
-  "Not sure yet — help us scope it",
-] as const
-
-// "Also interested in" tiles (2026-09-24). Selected = filled brand + white
-// check badge + slight scale + brand glow. The border AND the glow change
-// together with the fill on hover in both states (memory rule).
-const TILE_BASE =
-  "relative flex min-h-14 cursor-pointer items-center gap-3 rounded-lg border px-3.5 py-3 text-left text-sm font-medium select-none transition-[background-color,border-color,box-shadow,color,scale] duration-200 ease-out motion-reduce:transition-none has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-background"
-const TILE_OFF =
-  "border-input bg-background text-foreground shadow-sm shadow-black/5 hover:border-brand/60 hover:bg-brand/5 hover:shadow-md hover:shadow-brand/15"
-const TILE_ON =
-  "border-brand bg-brand text-brand-foreground scale-[1.02] shadow-lg shadow-brand/35 hover:border-brand-accent hover:bg-brand-accent hover:shadow-brand-accent/45"
-const TILE_ICON_BASE =
-  "flex size-9 shrink-0 items-center justify-center rounded-md transition-colors duration-200 motion-reduce:transition-none"
-const TILE_ICON_OFF = "bg-brand/10 text-brand"
-const TILE_ICON_ON = "bg-white/15 text-brand-foreground"
-const TILE_CHECK_BASE =
-  "flex size-5 shrink-0 items-center justify-center rounded-full transition-colors duration-200 motion-reduce:transition-none"
-const TILE_CHECK_OFF = "border-input border text-transparent"
-const TILE_CHECK_ON = "bg-background text-brand"
-
-const ATTENDEE_BANDS = [
-  "1 – 15",
-  "16 – 30",
-  "31 – 50",
-  "51 – 100",
-  "More than 100",
-] as const
-
-const schema = z.object({
-  fullName: z.string().min(2, "Please enter your full name."),
-  email: z.string().email("Enter a valid work email."),
-  phone: z.string().min(7, "Enter a valid contact number."),
-  company: z.string().min(2, "Which company?"),
-  role: z.string().min(2, "Your role or title."),
-  program: z.enum(PROGRAMS, { message: "Pick the closest programme." }),
-  attendees: z.enum(ATTENDEE_BANDS, { message: "Roughly how many people?" }),
-  targetDate: z.string().min(2, "Even a rough month helps us hold a date."),
-  venue: z.string().min(2, "Where would this run?"),
-  context: z.string().optional(),
-  consent: z.literal(true, { message: "You need to agree to continue." }),
-  alsoInterested: z.array(z.enum(SPEC_TITLES)).optional(),
-})
-
-type FormValues = z.infer<typeof schema>
-
-const STEPS: { title: string; fields: (keyof FormValues)[] }[] = [
-  { title: "Your details", fields: ["fullName", "email", "phone"] },
-  { title: "Your company", fields: ["company", "role"] },
-  {
-    title: "Your programme",
-    fields: ["program", "alsoInterested", "attendees", "targetDate", "venue"],
-  },
-  { title: "Confirm", fields: ["consent"] },
-]
 
 export function CorporateInquiryForm() {
   const router = useRouter()
+  const consentId = useId()
   const [hydrated, setHydrated] = useState(false)
-  const [step, setStep] = useState(0)
   const [submitting, setSubmitting] = useState(false)
+  const {
+    step,
+    pending,
+    next: advance,
+    back,
+  } = useStepNavigation(STEPS.length, submitting)
   const paneRef = useRef<HTMLDivElement>(null)
   const headingRef = useRef<HTMLHeadingElement>(null)
   const previousStep = useRef(step)
@@ -148,10 +73,13 @@ export function CorporateInquiryForm() {
   const [dateFrom, setDateFrom] = useState("")
   const [dateTo, setDateTo] = useState("")
   const formRef = useRef<HTMLFormElement>(null)
+  const prefillFocusFrame = useRef(0)
+  useEffect(() => () => cancelAnimationFrame(prefillFocusFrame.current), [])
   const [prefilled, setPrefilled] = useState<string | null>(null)
 
   const {
     register,
+    control,
     handleSubmit,
     trigger,
     getValues,
@@ -197,7 +125,8 @@ export function CorporateInquiryForm() {
     }
     setPrefilled(spec.title)
     if (focus) {
-      requestAnimationFrame(() =>
+      cancelAnimationFrame(prefillFocusFrame.current)
+      prefillFocusFrame.current = requestAnimationFrame(() =>
         formRef.current?.focus({ preventScroll: true })
       )
     }
@@ -216,7 +145,7 @@ export function CorporateInquiryForm() {
   // twice, or is already on this page.
   useEffect(() => {
     const onInquire = (e: Event) => {
-      const key = (e as CustomEvent<{ key?: unknown }>).detail?.key
+      const key = (e as CustomEvent<ProgramInquiryDetail>).detail?.key
       if (typeof key === "string") applyProgram(key, true)
     }
     window.addEventListener(PROGRAM_INQUIRE_EVENT, onInquire)
@@ -224,79 +153,7 @@ export function CorporateInquiryForm() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Cold-load landing correction (2026-09-24) — see the file doc-comment.
-  // The browser's native `#inquiry` fragment jump fires before layout has
-  // settled, so it lands short. Re-land ourselves once both settle signals
-  // `ScrollRefresh` uses (webfonts ready, window load) have fired — unless
-  // the visitor has already started scrolling by hand, which we treat as
-  // "let them be".
-  useEffect(() => {
-    if (window.location.hash !== "#inquiry") return
-
-    let interacted = false
-    let cancelLanding: (() => void) | undefined
-    const markInteracted = () => {
-      interacted = true
-      cancelLanding?.()
-      cancelLanding = undefined
-    }
-    const interactionEvents = [
-      "wheel",
-      "touchstart",
-      "keydown",
-      "pointerdown",
-    ] as const
-    interactionEvents.forEach((type) =>
-      window.addEventListener(type, markInteracted, { passive: true })
-    )
-
-    let settled = false
-    let frame = 0
-    const land = () => {
-      if (settled || interacted) return
-      settled = true
-      const target = document.getElementById("inquiry")
-      if (!target) return
-      cancelLanding = smoothScrollToElement(target)
-    }
-    const queueLand = () => {
-      cancelAnimationFrame(frame)
-      frame = requestAnimationFrame(land)
-    }
-
-    let fontsReady = !document.fonts
-    let pageLoaded = document.readyState === "complete"
-    const tryLand = () => {
-      if (fontsReady && pageLoaded) queueLand()
-    }
-    document.fonts?.ready.then(() => {
-      fontsReady = true
-      tryLand()
-    })
-    const onLoad = () => {
-      pageLoaded = true
-      tryLand()
-    }
-    if (pageLoaded) tryLand()
-    else window.addEventListener("load", onLoad)
-
-    // Catch-all for late shifts the two signals above miss (lazy sections
-    // expanding, a marquee measuring itself) — same reasoning as
-    // `ScrollRefresh`.
-    const ro = new ResizeObserver(tryLand)
-    ro.observe(document.body)
-
-    return () => {
-      interacted = true
-      cancelAnimationFrame(frame)
-      cancelLanding?.()
-      window.removeEventListener("load", onLoad)
-      interactionEvents.forEach((type) =>
-        window.removeEventListener(type, markInteracted)
-      )
-      ro.disconnect()
-    }
-  }, [])
+  useInquiryLanding()
 
   // The primary programme can never also be an extra.
   useEffect(() => {
@@ -381,11 +238,10 @@ export function CorporateInquiryForm() {
     { dependencies: [step], scope: paneRef }
   )
 
-  const next = async () => {
-    const ok = await trigger(STEPS[step].fields)
-    if (ok) setStep((s) => Math.min(s + 1, STEPS.length - 1))
-  }
-  const back = () => setStep((s) => Math.max(s - 1, 0))
+  const next = () =>
+    advance((captured) =>
+      trigger(STEPS[captured].fields, { shouldFocus: true })
+    )
 
   const onSubmit = (v: FormValues) => {
     setSubmitting(true)
@@ -452,28 +308,37 @@ export function CorporateInquiryForm() {
         {step === 0 && (
           <>
             <Field label="Full name" error={errors.fullName?.message}>
-              <Input
-                className="h-12 text-base"
-                autoComplete="name"
-                {...register("fullName")}
-              />
+              {(control) => (
+                <Input
+                  {...control}
+                  className="h-12 text-base"
+                  autoComplete="name"
+                  {...register("fullName")}
+                />
+              )}
             </Field>
             <Field label="Work email" error={errors.email?.message}>
-              <Input
-                type="email"
-                className="h-12 text-base"
-                autoComplete="email"
-                {...register("email")}
-              />
+              {(control) => (
+                <Input
+                  {...control}
+                  type="email"
+                  className="h-12 text-base"
+                  autoComplete="email"
+                  {...register("email")}
+                />
+              )}
             </Field>
             <Field label="Contact number" error={errors.phone?.message}>
-              <Input
-                type="tel"
-                className="h-12 text-base"
-                autoComplete="tel"
-                placeholder="0917 000 0000"
-                {...register("phone")}
-              />
+              {(control) => (
+                <Input
+                  {...control}
+                  type="tel"
+                  className="h-12 text-base"
+                  autoComplete="tel"
+                  placeholder="0917 000 0000"
+                  {...register("phone")}
+                />
+              )}
             </Field>
           </>
         )}
@@ -481,14 +346,23 @@ export function CorporateInquiryForm() {
         {step === 1 && (
           <>
             <Field label="Company" error={errors.company?.message}>
-              <Input className="h-12 text-base" {...register("company")} />
+              {(control) => (
+                <Input
+                  {...control}
+                  className="h-12 text-base"
+                  {...register("company")}
+                />
+              )}
             </Field>
             <Field label="Your role" error={errors.role?.message}>
-              <Input
-                className="h-12 text-base"
-                placeholder="e.g. Head of L&D"
-                {...register("role")}
-              />
+              {(control) => (
+                <Input
+                  {...control}
+                  className="h-12 text-base"
+                  placeholder="e.g. Head of L&D"
+                  {...register("role")}
+                />
+              )}
             </Field>
           </>
         )}
@@ -496,186 +370,107 @@ export function CorporateInquiryForm() {
         {step === 2 && (
           <>
             <Field label="Preferred programme" error={errors.program?.message}>
-              <SelectField defaultValue="" {...register("program")}>
-                <option value="" disabled>
-                  Select a programme
-                </option>
-                {PROGRAMS.map((p) => (
-                  <option key={p} value={p}>
-                    {p}
+              {(control) => (
+                <SelectField
+                  {...control}
+                  defaultValue=""
+                  {...register("program")}
+                >
+                  <option value="" disabled>
+                    Select a programme
                   </option>
-                ))}
-              </SelectField>
+                  {PROGRAMS.map((p) => (
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
+                  ))}
+                </SelectField>
+              )}
             </Field>
-            <fieldset className="space-y-1.5">
-              <legend className="text-sm leading-none font-medium">
-                Also interested in (optional)
-              </legend>
-              <p
-                id="also-interested-help"
-                className="text-muted-foreground mt-2 mb-3 text-xs"
-              >
-                Tick any others you&rsquo;d like the proposal to cover.
-              </p>
-              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-                {CORPORATE_PROGRAMMES.filter((p) => p.title !== primary).map(
-                  (p) => {
-                    const on = also.includes(p.title)
-                    const Icon = p.icon
-                    return (
-                      <label
-                        key={p.key}
-                        className={cn(TILE_BASE, on ? TILE_ON : TILE_OFF)}
-                      >
-                        <input
-                          type="checkbox"
-                          className="sr-only"
-                          checked={on}
-                          onChange={() => toggleAlso(p.title)}
-                          aria-describedby="also-interested-help"
-                        />
-                        <span
-                          className={cn(
-                            TILE_ICON_BASE,
-                            on ? TILE_ICON_ON : TILE_ICON_OFF
-                          )}
-                        >
-                          <Icon className="size-[1.125rem]" aria-hidden />
-                        </span>
-                        <span className="flex-1 leading-snug">{p.title}</span>
-                        <span
-                          aria-hidden
-                          className={cn(
-                            TILE_CHECK_BASE,
-                            on ? TILE_CHECK_ON : TILE_CHECK_OFF
-                          )}
-                        >
-                          <Check className="size-3.5" strokeWidth={3} />
-                        </span>
-                      </label>
-                    )
-                  }
-                )}
-              </div>
-            </fieldset>
+            <AlsoInterested
+              primary={primary}
+              selected={also}
+              onToggle={toggleAlso}
+            />
             <Field
               label="Number of attendees"
               error={errors.attendees?.message}
             >
-              <SelectField defaultValue="" {...register("attendees")}>
-                <option value="" disabled>
-                  Select a range
-                </option>
-                {ATTENDEE_BANDS.map((a) => (
-                  <option key={a} value={a}>
-                    {a} people
+              {(control) => (
+                <SelectField
+                  {...control}
+                  defaultValue=""
+                  {...register("attendees")}
+                >
+                  <option value="" disabled>
+                    Select a range
                   </option>
-                ))}
-              </SelectField>
-            </Field>
-            <Field label="Possible date" error={errors.targetDate?.message}>
-              <Tabs
-                value={dateMode}
-                onValueChange={(v) => switchDateMode(v as "pick" | "text")}
-                className="mb-3"
-              >
-                <TabsList className="grid w-full grid-cols-2 sm:inline-flex sm:w-auto">
-                  <TabsTrigger value="pick">Pick dates</TabsTrigger>
-                  <TabsTrigger value="text">Not fixed yet</TabsTrigger>
-                </TabsList>
-              </Tabs>
-
-              {dateMode === "pick" ? (
-                <>
-                  {/* Leave `to` blank for a single day; fill it for a range. */}
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <div>
-                      <span className="text-muted-foreground mb-1.5 block text-xs">
-                        From
-                      </span>
-                      <Input
-                        type="date"
-                        className="h-12 text-base"
-                        value={dateFrom}
-                        min={todayIso()}
-                        onChange={(e) => {
-                          setDateFrom(e.target.value)
-                          applyPickedDates(e.target.value, dateTo)
-                        }}
-                      />
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground mb-1.5 block text-xs">
-                        To{" "}
-                        <span className="text-muted-foreground/70">
-                          (optional)
-                        </span>
-                      </span>
-                      <Input
-                        type="date"
-                        className="h-12 text-base"
-                        value={dateTo}
-                        min={dateFrom || todayIso()}
-                        onChange={(e) => {
-                          setDateTo(e.target.value)
-                          applyPickedDates(dateFrom, e.target.value)
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <p className="text-muted-foreground mt-2 text-xs">
-                    One date for a single session, or add an end date for a
-                    range.
-                  </p>
-                </>
-              ) : (
-                <Input
-                  className="h-12 text-base"
-                  placeholder="e.g. Second week of November, or Q1 2027"
-                  {...register("targetDate")}
-                />
+                  {ATTENDEE_BANDS.map((a) => (
+                    <option key={a} value={a}>
+                      {a} people
+                    </option>
+                  ))}
+                </SelectField>
               )}
             </Field>
+            <Controller
+              name="targetDate"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <InquiryDatePicker
+                  dateMode={dateMode}
+                  dateFrom={dateFrom}
+                  dateTo={dateTo}
+                  onModeChange={switchDateMode}
+                  onDatesChange={(from, to) => {
+                    setDateFrom(from)
+                    setDateTo(to)
+                    applyPickedDates(from, to)
+                  }}
+                  textControl={field}
+                  error={errors.targetDate?.message}
+                />
+              )}
+            />
             <Field label="Possible venue" error={errors.venue?.message}>
-              <Input
-                className="h-12 text-base"
-                placeholder="e.g. Our Cebu office, or a hotel you arrange"
-                {...register("venue")}
-              />
+              {(control) => (
+                <Input
+                  {...control}
+                  className="h-12 text-base"
+                  placeholder="e.g. Our Cebu office, or a hotel you arrange"
+                  {...register("venue")}
+                />
+              )}
             </Field>
             <Field
               label="Anything else we should know? (optional)"
               error={errors.context?.message}
             >
-              <Textarea
-                rows={3}
-                className="text-base"
-                placeholder="What prompted this, what good would look like…"
-                {...register("context")}
-              />
+              {(control) => (
+                <Textarea
+                  {...control}
+                  rows={3}
+                  className="text-base"
+                  placeholder="What prompted this, what good would look like…"
+                  {...register("context")}
+                />
+              )}
             </Field>
           </>
         )}
 
         {step === 3 && (
           <>
-            <dl className="bg-muted/40 space-y-2 rounded-sm p-4 text-sm">
-              <Row k="Name" v={getValues("fullName") || "—"} />
-              <Row k="Email" v={getValues("email") || "—"} />
-              <Row k="Company" v={getValues("company") || "—"} />
-              <Row k="Role" v={getValues("role") || "—"} />
-              <Row k="Programme" v={getValues("program") || "—"} />
-              <Row
-                k="Also interested in"
-                v={(getValues("alsoInterested") ?? []).join(", ") || "—"}
-              />
-              <Row k="Attendees" v={getValues("attendees") || "—"} />
-              <Row k="Target date" v={getValues("targetDate") || "—"} />
-              <Row k="Venue" v={getValues("venue") || "—"} />
-            </dl>
+            <CorporateInquiryReview values={getValues} />
             <label className="flex items-start gap-3">
               <input
                 type="checkbox"
+                id={consentId}
+                aria-invalid={Boolean(errors.consent)}
+                aria-describedby={
+                  errors.consent ? `${consentId}-error` : undefined
+                }
                 className="accent-brand mt-1 size-4 shrink-0"
                 {...register("consent")}
               />
@@ -685,7 +480,11 @@ export function CorporateInquiryForm() {
                 Philippine Data Privacy Act.
               </span>
             </label>
-            <p aria-live="polite" className="text-destructive min-h-5 text-sm">
+            <p
+              id={`${consentId}-error`}
+              aria-live="polite"
+              className="text-destructive min-h-5 text-sm"
+            >
               {errors.consent?.message}
             </p>
           </>
@@ -712,6 +511,7 @@ export function CorporateInquiryForm() {
               type="button"
               variant="ghost"
               onClick={back}
+              disabled={pending || submitting}
               className="min-w-0 flex-1 sm:flex-none"
             >
               <ArrowLeft className="size-4" />
@@ -726,7 +526,11 @@ export function CorporateInquiryForm() {
               key="continue"
               type="button"
               variant="brand"
-              onClick={next}
+              onClick={(event) => {
+                if (event.detail < 2) void next()
+              }}
+              disabled={pending || submitting}
+              aria-busy={pending}
               className="min-w-0 flex-1 sm:flex-none"
             >
               Continue
@@ -749,49 +553,6 @@ export function CorporateInquiryForm() {
   )
 }
 
-/** `YYYY-MM-DD` for today, so the pickers can't offer a date in the past. */
-function todayIso() {
-  const d = new Date()
-  const p = (n: number) => String(n).padStart(2, "0")
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`
-}
-
-/**
- * Turns the two `<input type="date">` values into the single human-readable
- * string the rest of the flow carries (review step, handoff, confirmation page).
- *
- * Formats from the raw `YYYY-MM-DD` parts rather than `new Date(iso)` — that
- * parses as UTC midnight, which renders as the *previous* day for anyone west
- * of Greenwich, and this is a Philippine audience picking Philippine dates.
- */
-const MONTHS = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-]
-
-function formatIso(iso: string) {
-  const [y, m, d] = iso.split("-").map(Number)
-  if (!y || !m || !d) return ""
-  return `${d} ${MONTHS[m - 1]} ${y}`
-}
-
-function composeDateRange(from: string, to: string) {
-  const a = from ? formatIso(from) : ""
-  const b = to ? formatIso(to) : ""
-  if (a && b && a !== b) return `${a} – ${b}`
-  return a || b || ""
-}
-
 /** Native select styled to match `Input` — same treatment as the workshop form. */
 const SelectField = ({
   children,
@@ -807,32 +568,3 @@ const SelectField = ({
     <ChevronDown className="text-muted-foreground pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2" />
   </div>
 )
-
-function Field({
-  label,
-  error,
-  children,
-}: {
-  label: string
-  error?: string
-  children: React.ReactNode
-}) {
-  return (
-    <div className="space-y-1.5">
-      <Label>{label}</Label>
-      {children}
-      {error && <p className="text-destructive text-sm">{error}</p>}
-    </div>
-  )
-}
-
-function Row({ k, v }: { k: string; v: string }) {
-  return (
-    <div className="flex justify-between gap-4">
-      <dt className="text-muted-foreground shrink-0">{k}</dt>
-      <dd className="text-foreground min-w-0 text-right font-medium [overflow-wrap:anywhere]">
-        {v}
-      </dd>
-    </div>
-  )
-}

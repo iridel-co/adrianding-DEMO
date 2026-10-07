@@ -1,69 +1,28 @@
 "use client"
 
-import {
-  cloneElement,
-  isValidElement,
-  useEffect,
-  useId,
-  useRef,
-  useState,
-  type HTMLAttributes,
-} from "react"
+import { useEffect, useId, useRef, useState } from "react"
+import { RegistrationReview } from "./registration-review"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
+import {
+  SALARY_RANGES,
+  schema,
+  STEPS,
+  type FormValues,
+} from "./registration-model"
+import { FormField as Field } from "@/app/_components/form-field"
+import { useStepNavigation } from "@/app/_lib/use-step-navigation"
 import { ArrowLeft, ArrowRight, ChevronDown, Phone, Check } from "lucide-react"
 import { gsap, useGSAP } from "@/app/_lib/gsap"
 import { saveHandoff } from "@/app/_lib/handoff"
 import { DemoFillButton } from "@/app/_components/demo-fill"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import type { WorkshopAvailability } from "@/lib/workshop-availability"
 import { cn } from "@/lib/utils"
 
-/**
- * Workshop registration — multi-step, progressive disclosure (PRD UX direction).
- * Frontend only: nothing is sent anywhere.
- *
- * On submit this hands the entered details to `sessionStorage` and routes to
- * `/workshops/<slug>/registered`. It deliberately does NOT show an in-dialog
- * "done" state any more: the dialog is uncontrolled, so closing it threw the
- * confirmation away, and the client's whole point was that a submission has to
- * land somewhere that keeps selling (payment urgency, primer, what to expect).
- */
-
-const SALARY_RANGES = [
-  "Under ₱30,000",
-  "₱30,000 – ₱50,000",
-  "₱50,000 – ₱80,000",
-  "₱80,000 – ₱120,000",
-  "Over ₱120,000",
-  "Prefer not to say",
-] as const
-
-const schema = z.object({
-  fullName: z.string().min(2, "Please enter your full name."),
-  email: z.string().email("Enter a valid email address."),
-  phone: z.string().min(7, "Enter a valid mobile number."),
-  occupation: z.string().min(2, "Tell us what you do."),
-  salaryRange: z.enum(SALARY_RANGES, {
-    message: "Select a range.",
-  }),
-  city: z.string().optional(),
-  consent: z.literal(true, {
-    message: "You need to agree to continue.",
-  }),
-})
-
-type FormValues = z.infer<typeof schema>
-
-const STEPS: { title: string; fields: (keyof FormValues)[] }[] = [
-  { title: "Who's registering", fields: ["fullName", "email", "phone"] },
-  { title: "About you", fields: ["occupation", "salaryRange", "city"] },
-  { title: "Confirm", fields: ["consent"] },
-]
+/** Progressive registration hands details to the dedicated confirmation route. */
 
 type Props = {
   slug: string
@@ -81,8 +40,14 @@ export function RegistrationForm({
   availability,
 }: Props) {
   const router = useRouter()
-  const [step, setStep] = useState(0)
+  const consentId = useId()
   const [submitting, setSubmitting] = useState(false)
+  const {
+    step,
+    pending,
+    next: advance,
+    back,
+  } = useStepNavigation(STEPS.length, submitting)
   const paneRef = useRef<HTMLDivElement>(null)
   const headingRef = useRef<HTMLHeadingElement>(null)
 
@@ -143,11 +108,10 @@ export function RegistrationForm({
     { dependencies: [step], scope: paneRef }
   )
 
-  const next = async () => {
-    const ok = await trigger(STEPS[step].fields)
-    if (ok) setStep((s) => Math.min(s + 1, STEPS.length - 1))
-  }
-  const back = () => setStep((s) => Math.max(s - 1, 0))
+  const next = () =>
+    advance((captured) =>
+      trigger(STEPS[captured].fields, { shouldFocus: true })
+    )
 
   const onSubmit = (v: FormValues) => {
     if (!availability.canRegister) return
@@ -198,30 +162,39 @@ export function RegistrationForm({
         {step === 0 && (
           <>
             <Field label="Full name" error={errors.fullName?.message}>
-              <Input
-                className="placeholder:text-muted-foreground/50 h-12 text-base"
-                autoComplete="name"
-                placeholder="Juan Dela Cruz"
-                {...register("fullName")}
-              />
+              {(control) => (
+                <Input
+                  {...control}
+                  className="placeholder:text-muted-foreground/50 h-12 text-base"
+                  autoComplete="name"
+                  placeholder="Juan Dela Cruz"
+                  {...register("fullName")}
+                />
+              )}
             </Field>
             <Field label="Email" error={errors.email?.message}>
-              <Input
-                type="email"
-                className="placeholder:text-muted-foreground/50 h-12 text-base"
-                autoComplete="email"
-                placeholder="juan@email.com"
-                {...register("email")}
-              />
+              {(control) => (
+                <Input
+                  {...control}
+                  type="email"
+                  className="placeholder:text-muted-foreground/50 h-12 text-base"
+                  autoComplete="email"
+                  placeholder="juan@email.com"
+                  {...register("email")}
+                />
+              )}
             </Field>
             <Field label="Mobile number" error={errors.phone?.message}>
-              <Input
-                type="tel"
-                className="placeholder:text-muted-foreground/50 h-12 text-base"
-                autoComplete="tel"
-                placeholder="0917 000 0000"
-                {...register("phone")}
-              />
+              {(control) => (
+                <Input
+                  {...control}
+                  type="tel"
+                  className="placeholder:text-muted-foreground/50 h-12 text-base"
+                  autoComplete="tel"
+                  placeholder="0917 000 0000"
+                  {...register("phone")}
+                />
+              )}
             </Field>
           </>
         )}
@@ -229,55 +202,68 @@ export function RegistrationForm({
         {step === 1 && (
           <>
             <Field label="Occupation / role" error={errors.occupation?.message}>
-              <Input
-                className="placeholder:text-muted-foreground/50 h-12 text-base"
-                placeholder="e.g. Insurance advisor"
-                {...register("occupation")}
-              />
+              {(control) => (
+                <Input
+                  {...control}
+                  className="placeholder:text-muted-foreground/50 h-12 text-base"
+                  placeholder="e.g. Insurance advisor"
+                  {...register("occupation")}
+                />
+              )}
             </Field>
             <Field label="Salary range" error={errors.salaryRange?.message}>
-              <div className="relative">
-                <select
-                  aria-label="Salary range (required)"
-                  className="border-input bg-background focus-visible:ring-ring h-12 w-full appearance-none rounded-md border py-3 pr-10 pl-3 text-base shadow-sm transition-colors focus-visible:ring-1 focus-visible:outline-none"
-                  defaultValue=""
-                  {...register("salaryRange")}
-                >
-                  <option value="" disabled>
-                    Select a range
-                  </option>
-                  {SALARY_RANGES.map((r) => (
-                    <option key={r} value={r}>
-                      {r}
+              {(control) => (
+                <div className="relative">
+                  <select
+                    {...control}
+                    aria-label="Salary range (required)"
+                    className="border-input bg-background focus-visible:ring-ring h-12 w-full appearance-none rounded-md border py-3 pr-10 pl-3 text-base shadow-sm transition-colors focus-visible:ring-1 focus-visible:outline-none"
+                    defaultValue=""
+                    {...register("salaryRange")}
+                  >
+                    <option value="" disabled>
+                      Select a range
                     </option>
-                  ))}
-                </select>
-                <ChevronDown className="text-muted-foreground pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2" />
-              </div>
+                    {SALARY_RANGES.map((r) => (
+                      <option key={r} value={r}>
+                        {r}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="text-muted-foreground pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2" />
+                </div>
+              )}
             </Field>
             <Field label="City (optional)" error={errors.city?.message}>
-              <Input
-                className="placeholder:text-muted-foreground/50 h-12 text-base"
-                autoComplete="address-level2"
-                placeholder="Cebu City"
-                {...register("city")}
-              />
+              {(control) => (
+                <Input
+                  {...control}
+                  className="placeholder:text-muted-foreground/50 h-12 text-base"
+                  autoComplete="address-level2"
+                  placeholder="Cebu City"
+                  {...register("city")}
+                />
+              )}
             </Field>
           </>
         )}
 
         {step === 2 && (
           <>
-            <dl className="bg-muted/40 grid grid-cols-1 gap-x-4 gap-y-2 rounded-sm p-4 text-sm sm:grid-cols-[auto_1fr]">
-              <Row k="Workshop" v={workshopTitle} />
-              <Row k="Schedule" v={schedule} />
-              <Row k="Venue" v={venue} />
-              <Row k="Name" v={getValues("fullName") || "—"} />
-              <Row k="Email" v={getValues("email") || "—"} />
-            </dl>
+            <RegistrationReview
+              values={getValues}
+              workshopTitle={workshopTitle}
+              schedule={schedule}
+              venue={venue}
+            />
             <label className="flex items-start gap-3">
               <input
                 type="checkbox"
+                id={consentId}
+                aria-invalid={Boolean(errors.consent)}
+                aria-describedby={
+                  errors.consent ? `${consentId}-error` : undefined
+                }
                 className="accent-brand mt-1 size-4 shrink-0"
                 {...register("consent")}
               />
@@ -289,6 +275,7 @@ export function RegistrationForm({
             </label>
             {/* Reserve error space so checkbox blur cannot move Back during a click. */}
             <p
+              id={`${consentId}-error`}
               aria-live="polite"
               className="text-destructive -mt-3 min-h-5 text-sm"
             >
@@ -326,6 +313,7 @@ export function RegistrationForm({
               type="button"
               variant="ghost"
               onClick={back}
+              disabled={pending || submitting}
             >
               <ArrowLeft className="size-4" />
               Back
@@ -348,7 +336,11 @@ export function RegistrationForm({
               key="continue"
               type="button"
               variant="brand"
-              onClick={next}
+              onClick={(event) => {
+                if (event.detail < 2) void next()
+              }}
+              disabled={pending || submitting}
+              aria-busy={pending}
             >
               Continue
               <ArrowRight className="size-4" />
@@ -368,38 +360,5 @@ export function RegistrationForm({
         </div>
       </div>
     </form>
-  )
-}
-
-function Field({
-  label,
-  error,
-  children,
-}: {
-  label: string
-  error?: string
-  children: React.ReactNode
-}) {
-  const id = useId()
-  const control = isValidElement<HTMLAttributes<HTMLElement>>(children)
-    ? cloneElement(children, { "aria-labelledby": id })
-    : children
-  return (
-    <div className="min-w-0 space-y-1.5">
-      <Label id={id}>{label}</Label>
-      {control}
-      {error && <p className="text-destructive text-sm">{error}</p>}
-    </div>
-  )
-}
-
-function Row({ k, v }: { k: string; v: string }) {
-  return (
-    <>
-      <dt className="text-muted-foreground sm:text-right">{k}</dt>
-      <dd className="text-foreground min-w-0 text-left font-medium [overflow-wrap:anywhere]">
-        {v}
-      </dd>
-    </>
   )
 }

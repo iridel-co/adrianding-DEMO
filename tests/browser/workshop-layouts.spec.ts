@@ -233,3 +233,35 @@ test("focused Home workshop resets edge tracking after desktop-to-mobile resize"
   await previous.click()
   await expect(previous).toBeDisabled()
 })
+
+test("Workshop form labels, errors and overlapping Continue activations", async ({
+  page,
+}) => {
+  await page.goto("/workshops/exceptional-salesmanship")
+  await page.getByRole("button", { name: "Register now", exact: true }).click()
+  const form = page
+    .getByRole("dialog", { name: "Reserve your seat" })
+    .locator("form")
+  const name = form.getByLabel("Full name", { exact: true })
+  await form.getByRole("button", { name: "Continue", exact: true }).click()
+  await expect(name).toBeFocused()
+  await expect(name).toHaveAttribute("aria-invalid", "true")
+  await expect(name).toHaveAccessibleDescription("Please enter your full name.")
+  await form.getByText("Full name", { exact: true }).click()
+  await expect(name).toBeFocused()
+  await form.getByRole("button", { name: /Demo shortcut/ }).click()
+  await expect(name).toHaveAttribute("aria-invalid", "false")
+  const forward = form.getByRole("button", { name: "Continue", exact: true })
+  await forward.evaluate((button: HTMLButtonElement) => {
+    button.click()
+    button.click()
+  })
+  await expect(form.getByRole("heading", { name: /Step 2 of 3/ })).toBeVisible()
+  await form.getByRole("button", { name: "Back", exact: true }).click()
+  await expect(name).toHaveValue("Juan Dela Cruz")
+  await forward.dblclick({ delay: 0 })
+  await expect(form.getByRole("heading", { name: /Step 2 of 3/ })).toBeVisible()
+  await expect(
+    form.getByLabel("Salary range (required)", { exact: true })
+  ).toHaveValue("₱50,000 – ₱80,000")
+})
