@@ -9,7 +9,7 @@ the first failure. It does not fix files or perform Git or external writes.
 
 | Stage      | Eligible checks                                                           |
 | ---------- | ------------------------------------------------------------------------- |
-| edit       | Prettier, source ESLint, CSS Stylelint                                    |
+| edit       | Prettier, source size, source ESLint, CSS Stylelint                       |
 | checkpoint | edit checks, generated Next types and TypeScript, harness tests           |
 | handoff    | checkpoint checks, fresh Next build, built OG checks, browser regressions |
 
@@ -108,3 +108,25 @@ The edit gate includes `check:source-size`; thresholds and exact-file exceptions
 live in `source-size.config.json`. It reports nonempty/total physical source lines,
 not logic complexity. Warnings prompt review and hard maxima require an explicit
 reasoned exception. See [code conventions](code-conventions.md) for the contract.
+
+## Browser test scope
+
+Protect visitor behavior: navigation and interruption, accessible controls, form
+validation and retained answers, consent, availability and confirmation fallbacks.
+Core journeys run in all five engine/viewport projects. Mark responsive matrices
+`@layout`; run them in desktop Chromium and mobile WebKit only, using representative
+widths and boundaries where the layout actually changes. Mark pure policy and
+server-markup fixtures `@policy`; run these once in Chromium, since repeating the
+same domain calculation or static markup across engines adds no evidence.
+
+Use containment and usable controls for layout assertions. Exact padding, equal
+button widths, decorative clipping, font emphasis and editorial wording belong
+in visual review. Add a regression for a meaningful failure, not every annotation.
+Avoid repeating full form submissions at nearby widths; the cross-engine journey
+already covers them. Resize/motion and overflow regressions remain when they
+protect interactions. Tags select projects, not optional/skipped acceptance work.
+
+During edits use the scoped edit/checkpoint gate and a focused Playwright file or
+`--grep` selection. At integrated handoff and on PRs, `quality:ci` still runs the
+entire maintained suite, production build and OG validation. No path-based CI
+exemptions are introduced. Device and hosted review remain separate evidence.

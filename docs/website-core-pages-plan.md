@@ -1042,3 +1042,18 @@ position restoration is excluded. Application behavior is unchanged.
 Focused validation: all 40 anchor-navigation cases passed (two repetitions
 across five browser projects); formatting, lint and types passed. A fresh full
 remote gate remains pending after publication of this test correction.
+
+### PR04 browser-suite maintenance — 2026-10-07
+
+Approved follow-up: reduce repeated viewport/engine matrices and assertions tied
+to visual nits. Preserve all-engine core journeys, meaningful overflow/resize
+coverage and full PR quality validation. Layout matrices use Chromium and mobile
+WebKit; pure policy/server-markup fixtures run once. Use user-visible navigation
+outcomes rather than spying on internal scroll commands. Validation: full `quality:ci` passed formatting, source-size, lint/CSS, types,
+19 tooling/lifecycle checks, production build, nine OG checks and 176 Playwright
+cases (172 browser journeys and four policy/markup cases). Browser execution
+took 4.5 minutes locally. The prior suite had 365 cases; the revised suite removes
+189 repetitions/visual cases (52%) and 134 net test-source lines. Core journeys
+remain in all five projects; layout cases run in two and policy cases in one.
+GitHub run `37645634176` passed for the preceding scroll-test fix `3f48b65`;
+remote CI for this suite revision remains separate pending publication.

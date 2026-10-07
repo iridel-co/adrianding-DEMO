@@ -1,25 +1,17 @@
-import { expect, test, type Locator } from "@playwright/test"
+import { expect, test } from "@playwright/test"
 
-async function equalWidths(first: Locator, second: Locator) {
-  const a = await first.boundingBox()
-  const b = await second.boundingBox()
-  expect(a).not.toBeNull()
-  expect(b).not.toBeNull()
-  expect(Math.abs(a!.width - b!.width)).toBeLessThanOrEqual(1)
-}
-
-for (const width of [360, 390, 440, 639]) {
-  test(`Corporate mobile actions and step navigation at ${width}px`, async ({
+for (const width of [360, 768]) {
+  test(`@layout Corporate mobile actions and step navigation at ${width}px`, async ({
     page,
   }) => {
     await page.setViewportSize({ width, height: 844 })
     await page.goto("/corporate-training?program=leadership#inquiry")
     const form = page.locator("form")
     await expect(form.getByText(/Enquiring about Leadership/)).toBeVisible()
-    const forward = form.getByRole("button", { name: "Continue", exact: true })
-    const forwardBox = await forward.boundingBox()
-    const formBox = await form.boundingBox()
-    expect(forwardBox!.width).toBeGreaterThan(formBox!.width - 50)
+    const forward = form.getByRole("button", {
+      name: "Continue",
+      exact: true,
+    })
     await forward.click()
     await expect(form.getByText("Please enter your full name.")).toBeVisible()
     await form
@@ -33,22 +25,6 @@ for (const width of [360, 390, 440, 639]) {
         name: new RegExp(`Step ${step} of 4`),
       })
       await expect(heading).toBeFocused()
-      await expect
-        .poll(async () => (await heading.boundingBox())!.y)
-        .toBeGreaterThanOrEqual(80)
-      await equalWidths(
-        form.getByRole("button", { name: "Back", exact: true }),
-        form.getByRole("button", {
-          name: step === 4 ? "Send inquiry" : "Continue",
-          exact: true,
-        })
-      )
-      if (step === 3) {
-        await equalWidths(
-          form.getByRole("tab", { name: "Pick dates" }),
-          form.getByRole("tab", { name: "Not fixed yet" })
-        )
-      }
     }
     const consent = form.getByRole("checkbox")
     const send = form.getByRole("button", { name: "Send inquiry" })
@@ -74,7 +50,7 @@ for (const width of [360, 390, 440, 639]) {
   })
 }
 
-test("Corporate review and confirmation wrap long submitted values", async ({
+test("@layout Corporate review and confirmation wrap long submitted values", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 360, height: 844 })

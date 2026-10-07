@@ -5,7 +5,7 @@ test.beforeEach(async ({ page }) => {
   await page.clock.install({ time: new Date("2026-10-04T04:00:00Z") })
 })
 
-test("availability distinguishes capacity states and reopening", () => {
+test("@policy availability distinguishes capacity states and reopening", () => {
   for (const seatsLeft of [40, 11, 1]) {
     expect(
       getWorkshopAvailability({ status: "open", seatsLeft, seatsTotal: 40 })
@@ -49,8 +49,8 @@ test("availability distinguishes capacity states and reopening", () => {
   ).toBe(true)
 })
 
-for (const width of [360, 440, 768, 1024, 1440]) {
-  test(`Workshop controls and calendar preview at ${width}px`, async ({
+for (const width of [360, 1024]) {
+  test(`@layout Workshop controls and calendar preview at ${width}px`, async ({
     page,
   }, testInfo) => {
     await page.setViewportSize({ width, height: 900 })
@@ -110,8 +110,8 @@ for (const width of [360, 440, 768, 1024, 1440]) {
   })
 }
 
-for (const width of [360, 390, 440, 768]) {
-  test(`Workshop dialog retains fields and gates consent at ${width}px`, async ({
+for (const width of [360]) {
+  test(`@layout Workshop dialog retains fields and gates consent at ${width}px`, async ({
     page,
   }, testInfo) => {
     await page.setViewportSize({ width, height: 800 })
@@ -143,14 +143,6 @@ for (const width of [360, 390, 440, 768]) {
       })
     }
     const back = dialog.getByRole("button", { name: "Back", exact: true })
-    if (width < 640) {
-      expect(
-        Math.abs(
-          (await back.boundingBox())!.width -
-            (await submit.boundingBox())!.width
-        )
-      ).toBeLessThanOrEqual(1)
-    }
     expect(
       await dialog.evaluate((el) => el.scrollWidth <= el.clientWidth)
     ).toBe(true)

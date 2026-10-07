@@ -14,6 +14,8 @@ export default defineConfig({
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },
+  // Core journeys: all projects. Layout matrices: Chromium + mobile WebKit.
+  // Pure policy/server-markup fixtures: Chromium once.
   projects: [
     {
       name: "desktop",
@@ -21,6 +23,7 @@ export default defineConfig({
     },
     {
       name: "mobile",
+      grepInvert: /@layout|@policy/,
       use: {
         browserName: "chromium",
         viewport: { width: 390, height: 844 },
@@ -30,14 +33,17 @@ export default defineConfig({
     },
     {
       name: "firefox-desktop",
+      grepInvert: /@layout|@policy/,
       use: { browserName: "firefox", viewport: { width: 1440, height: 900 } },
     },
     {
       name: "webkit-desktop",
+      grepInvert: /@layout|@policy/,
       use: { browserName: "webkit", viewport: { width: 1440, height: 900 } },
     },
     {
       name: "webkit-mobile",
+      grepInvert: /@policy/,
       use: {
         browserName: "webkit",
         viewport: { width: 390, height: 844 },

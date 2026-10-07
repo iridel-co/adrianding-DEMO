@@ -24,7 +24,7 @@ const rendered: {
 )
 const fixtures = rendered.capacity
 
-test("empty catalogue and event-free calendar show distinct useful states", async ({
+test("@policy empty catalogue and event-free calendar show distinct useful states", async ({
   page,
 }) => {
   await page.setContent(rendered.emptyList)
@@ -41,7 +41,7 @@ test("empty catalogue and event-free calendar show distinct useful states", asyn
   )
 })
 
-test("registration triggers render disabled for full and unknown capacity", async ({
+test("@policy registration triggers render disabled for full and unknown capacity", async ({
   page,
 }) => {
   for (const fixture of fixtures) {
@@ -53,7 +53,7 @@ test("registration triggers render disabled for full and unknown capacity", asyn
   }
 })
 
-test("full and unknown confirmation fixtures show no booking success or payment", async ({
+test("@policy full and unknown confirmation fixtures show no booking success or payment", async ({
   page,
 }) => {
   for (const fixture of fixtures.filter((item) => item.confirmation)) {

@@ -8,13 +8,9 @@ test("inquiry CTA can revisit the same fragment while preserving programme prefi
   for (let attempt = 0; attempt < 2; attempt += 1) {
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }))
     await cta.click()
-    await expect
-      .poll(() =>
-        page
-          .locator("#inquiry")
-          .evaluate((element) => element.getBoundingClientRect().top)
-      )
-      .toBeLessThan(180)
+    await expect(
+      page.locator("#inquiry").getByRole("heading").first()
+    ).toBeInViewport()
     await expect(page).toHaveURL(/program=leadership#inquiry$/)
   }
 })
@@ -46,11 +42,8 @@ test("cross-page Train with Me landing yields to immediate visitor scrolling", a
     window.scrollTo({ top: 0, behavior: "instant" })
   })
   await page.clock.fastForward(3000)
-  // Native smooth-scroll cancellation may retain up to two compositor pixels.
-  // A delayed landing correction would jump thousands of pixels back to the form.
-  await expect
-    .poll(() => page.evaluate(() => Math.abs(window.scrollY)))
-    .toBeLessThanOrEqual(2)
+  await expect(page.locator(".he-word")).toBeInViewport()
+  await expect(page.locator("#which-path")).not.toBeInViewport()
 })
 
 test("active same-page smooth scrolling yields to a touch gesture", async ({
@@ -65,23 +58,9 @@ test("active same-page smooth scrolling yields to a touch gesture", async ({
   await page.evaluate(() => {
     window.dispatchEvent(new Event("touchstart"))
     window.scrollTo({ top: 0, behavior: "instant" })
-    // Observe application commands after cancellation rather than compositor pixels.
-    // Native smooth-scroll cancellation can retain a few pixels on Linux Chromium.
-    const scrollTo = window.scrollTo.bind(window)
-    const commands: unknown[][] = []
-    Object.assign(window, { postTouchScrollCommands: commands })
-    window.scrollTo = (options?: ScrollToOptions | number, y?: number) => {
-      // GSAP refresh may restore the current position using the numeric overload.
-      // The anchor helper always issues an options object.
-      if (typeof options === "object") commands.push([options])
-      if (typeof options === "number") scrollTo(options, y ?? 0)
-      else scrollTo(options)
-    }
   })
   // Exercise both the settling interval and the corrective-scroll deadline.
   await page.clock.fastForward(3000)
-  expect(
-    await page.evaluate(() => Reflect.get(window, "postTouchScrollCommands"))
-  ).toEqual([])
+  await expect(page.getByRole("heading", { level: 1 })).toBeInViewport()
   await expect(page.locator("#inquiry")).not.toBeInViewport()
 })

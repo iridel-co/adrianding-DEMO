@@ -1,8 +1,8 @@
 import { expect, test } from "@playwright/test"
 
 const start = new Date("2026-10-09T09:00:00+08:00").getTime()
-for (const width of [360, 431, 454, 768, 1440]) {
-  test(`countdown fills card and contains large day counts at ${width}px`, async ({
+for (const width of [360, 1440]) {
+  test(`@layout countdown contains large day counts at ${width}px`, async ({
     page,
   }) => {
     await page.clock.install({
@@ -16,8 +16,7 @@ for (const width of [360, 431, 454, 768, 1440]) {
     const units = rail.getByRole("group")
     await expect(units).toHaveCount(4)
     await rail.scrollIntoViewIfNeeded()
-    await expect(rail).not.toContainText("this date is filling up")
-    for (const days of [1000, 100, 99]) {
+    for (const days of [1000, 99]) {
       await page.clock.setSystemTime(new Date(start - days * 86400000 - 10000))
       await page.clock.runFor(1000)
       const boxes = await units.evaluateAll((elements) =>
@@ -37,12 +36,7 @@ for (const width of [360, 431, 454, 768, 1440]) {
       for (const box of boxes) {
         expect(box.numberLeft).toBeGreaterThanOrEqual(box.x - 1)
         expect(box.numberRight).toBeLessThanOrEqual(box.x + box.width + 1)
-        expect(Math.abs(box.width - boxes[0].width)).toBeLessThan(1)
-        expect(Math.abs(box.y - boxes[0].y)).toBeLessThan(1)
       }
-      const grid = await units.first().locator("..").boundingBox()
-      const railBox = await rail.boundingBox()
-      expect(Math.abs(grid!.width - (railBox!.width - 48))).toBeLessThan(2)
     }
     expect(errors).toEqual([])
   })
