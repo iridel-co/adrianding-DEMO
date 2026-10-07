@@ -14,7 +14,10 @@ import {
 } from "framer-motion"
 import { useReducedMotionSafe } from "@/app/_lib/use-reduced-motion-safe"
 import { useIsTouch } from "@/app/_lib/use-is-touch"
-import { smoothScrollToElement } from "@/app/_lib/smooth-scroll-to"
+import {
+  smoothScrollToElement,
+  scrollInteractionEvents,
+} from "@/app/_lib/smooth-scroll-to"
 import { AttentionOnView } from "@/app/_components/attention-on-view"
 import { Reveal } from "@/app/_components/reveal"
 import { TextSweepReveal } from "@/app/_components/text-sweep-reveal"
@@ -180,7 +183,7 @@ const PATHS: readonly [Path, Path] = [
     cta: "See upcoming workshops",
   },
   {
-    href: "/corporate-training#inquiry",
+    href: "/corporate-training",
     bg: "/images/hero/corporate-bg.jpg",
     bgBlur:
       "data:image/jpeg;base64,/9j/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAAGAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAT/xAAgEAABAwQCAwAAAAAAAAAAAAABAAIDBRESIQQTMUHh/8QAFAEBAAAAAAAAAAAAAAAAAAAAAv/EABYRAQEBAAAAAAAAAAAAAAAAAAABMf/aAAwDAQACEQMRAD8AsolbZypJWyxvDWtGO8j5PtUS1CMSvx7QLm2/qInBuv/Z",
@@ -261,11 +264,24 @@ export function LandingPaths() {
   // a single native scroll).
   useEffect(() => {
     if (window.location.hash !== "#which-path") return
+    let cancelLanding: (() => void) | undefined
+    const cancel = () => {
+      window.clearTimeout(id)
+      cancelLanding?.()
+    }
     const id = window.setTimeout(() => {
       const section = gridRef.current?.closest<HTMLElement>("section")
-      if (section) smoothScrollToElement(section)
+      if (section) cancelLanding = smoothScrollToElement(section)
     }, 400)
-    return () => window.clearTimeout(id)
+    scrollInteractionEvents.forEach((type) =>
+      window.addEventListener(type, cancel, { passive: true })
+    )
+    return () => {
+      cancel()
+      scrollInteractionEvents.forEach((type) =>
+        window.removeEventListener(type, cancel)
+      )
+    }
   }, [])
 
   const gridStyle: React.CSSProperties =
