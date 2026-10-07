@@ -2,6 +2,8 @@
 
 import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react"
 
+/** Normal controls keep both edges visible and disable terminal directions.
+ * Overlay controls show only available directions with the corresponding fade. */
 export function ScrollArrows({
   edges,
   onNudge,

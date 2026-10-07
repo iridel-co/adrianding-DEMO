@@ -1,8 +1,9 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { useHorizontalOverflow } from "@/app/_lib/use-horizontal-overflow"
 import { ScrollArrows } from "@/app/_components/scroll-arrows"
 import { EventCards } from "@/app/_components/event-cards"
 import { WORKSHOP_TAG_ICONS } from "@/app/_components/workshop-tags"
@@ -82,34 +83,9 @@ export function WorkshopTagFilter({ workshops }: { workshops: Workshop[] }) {
   }
 
   const rowRef = useRef<HTMLDivElement>(null)
-  // Starts with no fade, so SSR and first paint agree (RULES §10); corrected after mount.
-  const [edges, setEdges] = useState({ left: false, right: false })
-  useEffect(() => {
-    const el = rowRef.current
-    if (!el) return
-    let raf = 0
-    const sync = () => {
-      raf = 0
-      const { scrollWidth: sw, clientWidth: cw, scrollLeft } = el
-      const overflow = sw - cw > 1
-      setEdges({
-        left: overflow && scrollLeft > 1,
-        right: overflow && scrollLeft < sw - cw - 1,
-      })
-    }
-    const queue = () => {
-      if (!raf) raf = requestAnimationFrame(sync)
-    }
-    sync()
-    el.addEventListener("scroll", queue, { passive: true })
-    const ro = new ResizeObserver(queue)
-    ro.observe(el)
-    return () => {
-      el.removeEventListener("scroll", queue)
-      ro.disconnect()
-      if (raf) cancelAnimationFrame(raf)
-    }
-  }, [chips.length])
+  const { edges } = useHorizontalOverflow(rowRef, {
+    resetKey: chips.join("|"),
+  })
   return (
     <>
       <div className="mx-auto mb-8 max-w-7xl px-4 sm:px-6 lg:mb-12">

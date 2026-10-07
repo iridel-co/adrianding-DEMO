@@ -10,6 +10,8 @@ import {
 } from "react"
 import Image from "next/image"
 import { ArrowRight, Check } from "lucide-react"
+import { dispatchProgramInquiry } from "@/app/_lib/program-inquiry"
+import { useHorizontalOverflow } from "@/app/_lib/use-horizontal-overflow"
 import { ScrollArrows } from "@/app/_components/scroll-arrows"
 import { Reveal } from "@/app/_components/reveal"
 import { useReducedMotionSafe } from "@/app/_lib/use-reduced-motion-safe"
@@ -54,8 +56,7 @@ import { smoothScrollToElement } from "@/app/_lib/smooth-scroll-to"
  * window CustomEvent with `{ key }` (so a second click on the same programme,
  * after the visitor changed the form's select by hand, re-applies — a URL
  * that didn't change can't do that). `inquiry-form.tsx` (task C) listens for
- * both. The event name string is duplicated as a local constant in both
- * files on purpose, so neither task depends on the other to compile.
+ * both through the shared programme inquiry event contract.
  *
  * The landing page keeps `SpecRevealCards` unchanged — do not merge these two
  * components, they solve different layouts (vertical expand-in-place stack
@@ -87,7 +88,6 @@ const ACTIVE_REM = 34 // hovered / focused / tapped card
 const SIBLING_REM = (n: number) => (n * REST_REM - ACTIVE_REM) / (n - 1) // 20.67rem for n=10 (19.6 for n=6)
 const EASE = "cubic-bezier(0.33, 1, 0.68, 1)" // = SpecRevealCards' [0.33,1,0.68,1]
 const DURATION_MS = 420 // = SpecRevealCards' 0.42s
-const PROGRAM_INQUIRE_EVENT = "ad:program-inquire" // Must match the constant in corporate-training/_sections/inquiry-form.tsx — see docs/feedback-passes/PLAN-feedback-2.md.
 
 const RAIL =
   "no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-6 px-6 pb-1 sm:scroll-px-8 sm:px-8 lg:snap-none lg:gap-5 lg:scroll-px-0 lg:pr-0 lg:pb-0 lg:pl-10"
@@ -153,9 +153,7 @@ function inquire(key: string, reduce: boolean) {
     "",
     `/corporate-training?program=${encodeURIComponent(key)}#inquiry`
   )
-  window.dispatchEvent(
-    new CustomEvent(PROGRAM_INQUIRE_EVENT, { detail: { key } })
-  )
+  dispatchProgramInquiry(key)
   const target = document.getElementById("inquiry")
   if (!target) return
   if (reduce) target.scrollIntoView({ block: "start", behavior: "instant" })
@@ -197,36 +195,9 @@ export function ProgramCarousel({
   }, [interactive])
 
   const railRef = useRef<HTMLDivElement>(null)
-  const [edges, setEdges] = useState({ left: false, right: false })
-
-  useEffect(() => {
-    const el = railRef.current
-    if (!el) return
-    let raf = 0
-    const sync = () => {
-      raf = 0
-      const { scrollWidth: sw, clientWidth: cw, scrollLeft } = el
-      const overflow = sw - cw > 1
-      setEdges({
-        left: overflow && scrollLeft > 1,
-        right: overflow && scrollLeft < sw - cw - 1,
-      })
-    }
-    const queue = () => {
-      if (!raf) raf = requestAnimationFrame(sync)
-    }
-    sync()
-    el.addEventListener("scroll", queue, { passive: true })
-    el.addEventListener("transitionend", queue)
-    const ro = new ResizeObserver(queue)
-    ro.observe(el)
-    return () => {
-      el.removeEventListener("scroll", queue)
-      el.removeEventListener("transitionend", queue)
-      ro.disconnect()
-      if (raf) cancelAnimationFrame(raf)
-    }
-  }, [items])
+  const { edges } = useHorizontalOverflow(railRef, {
+    resetKey: items.map((item) => item.key).join("|"),
+  })
 
   const nudge = (dir: 1 | -1) => {
     const el = railRef.current

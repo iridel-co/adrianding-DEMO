@@ -1,17 +1,12 @@
 "use client"
 
-import { WorkshopAvailabilityText } from "@/app/_components/workshop-availability-text"
-
+import { EventCard } from "./event-card"
 import { ScrollArrows } from "./scroll-arrows"
+import { useHorizontalOverflow } from "@/app/_lib/use-horizontal-overflow"
 
 import { useEffect, useRef, useState } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { ArrowRight, MapPin, Ticket } from "lucide-react"
 import { Reveal } from "@/app/_components/reveal"
-import { WorkshopTagPills } from "@/app/_components/workshop-tags"
 import { type Workshop } from "@/lib/workshops"
-import { getWorkshopAvailability } from "@/lib/workshop-availability"
 
 /**
  * Shared event grid — one rounded, image-filled card per workshop, with a
@@ -125,15 +120,6 @@ const GRID_COL = "contents lg:flex lg:flex-1 lg:flex-col lg:gap-8"
 const GRID_HOVER =
   "isolate will-change-transform shadow-2xl shadow-black/0 transition-[scale,box-shadow] duration-600 ease-out hover:duration-700 hover:ease-[cubic-bezier(0.16,1,0.3,1)] hover:z-10 hover:scale-[1.035] hover:shadow-black/40"
 
-function shortDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-PH", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "Asia/Manila",
-  })
-}
-
 export function EventCards({
   workshops,
   className,
@@ -146,7 +132,7 @@ export function EventCards({
    *  so the card images — one of which is the LCP — load eagerly. */
   priority?: boolean
   /** "row" (default): horizontal scroll row with the hover take-over, used on
-   *  the landing. "grid": static 2-column grid, no scroll/hover — every card
+   *  the landing. "grid": mobile snap rail, desktop 2-column grid — every card
    *  renders in its expanded state. Used on /workshops. */
   variant?: "row" | "grid"
 }) {
@@ -155,13 +141,6 @@ export function EventCards({
   // null = resting. Set on a card's mouse-enter, cleared only by the row's own
   // mouse-leave — never per card — so adjacent cards hand off cleanly.
   const [active, setActive] = useState<number | null>(null)
-
-  // Mirror `active` into a ref so the arrow-state sync (below) can read the live
-  // hover state without having to be re-created every time it changes.
-  const activeRef = useRef<number | null>(null)
-  useEffect(() => {
-    activeRef.current = active
-  }, [active])
 
   // The width take-over is lg-only and pointer-only. Drive the flex sizing from
   // an inline style, but only once we know we're on a wide viewport with a real
@@ -202,44 +181,12 @@ export function EventCards({
   // Controls follow actual overflow at every breakpoint. `edges` says whether there's more row to scroll in
   // each direction — drives the buttons' disabled state.
   const rowRef = useRef<HTMLDivElement>(null)
-  const [edges, setEdges] = useState({ left: false, right: false })
-
   const listKey = workshops.map((w) => w.slug).join("|")
-  useEffect(() => {
-    const el = rowRef.current
-    if (!el) return
-    el.scrollLeft = 0
-    let raf = 0
-    const sync = () => {
-      raf = 0
-      // Don't re-evaluate mid-hover: an expanded card balloons scrollWidth and
-      // would flip an arrow's enabled state under the pointer.
-      if (activeRef.current !== null && interactive) return
-      const { scrollWidth: sw, clientWidth: cw, scrollLeft } = el
-      const overflow =
-        getComputedStyle(el).overflowX !== "visible" && sw - cw > 1
-      setEdges({
-        left: overflow && scrollLeft > 1,
-        right: overflow && scrollLeft < sw - cw - 1,
-      })
-    }
-    const queue = () => {
-      if (!raf) raf = requestAnimationFrame(sync)
-    }
-    sync()
-    el.addEventListener("scroll", queue, { passive: true })
-    // A card's hover take-over grows scrollWidth without a scroll/resize event.
-    el.addEventListener("transitionend", queue)
-    const ro = new ResizeObserver(queue)
-    ro.observe(el)
-    for (const card of el.querySelectorAll("a")) ro.observe(card)
-    return () => {
-      el.removeEventListener("scroll", queue)
-      el.removeEventListener("transitionend", queue)
-      ro.disconnect()
-      if (raf) cancelAnimationFrame(raf)
-    }
-  }, [isGrid, listKey, interactive])
+  const { edges } = useHorizontalOverflow(rowRef, {
+    resetKey: `${variant}:${listKey}:${interactive}`,
+    suppressed: interactive && active !== null,
+    childSelector: "a, :scope > div",
+  })
 
   const nudge = (dir: 1 | -1) => {
     const el = rowRef.current
@@ -256,95 +203,19 @@ export function EventCards({
 
   const renderCard = (w: Workshop, i: number) => {
     const isActive = interactive && active === i
-    const availability = getWorkshopAvailability(w)
-    // A resting desktop card shows just its date eyebrow + title. The
-    // summary, venue/price and Register button unfurl on the hovered
-    // card, and show always on mobile (where every card is full-width).
-    const revealed = !interactive || isActive
     return (
-      <Link
+      <EventCard
         key={w.slug}
-        href={`/workshops/${w.slug}`}
-        onMouseEnter={() => interactive && setActive(i)}
-        onFocus={() => interactive && setActive(i)}
-        onBlur={() => setActive(null)}
+        workshop={w}
+        priority={priority}
+        revealed={!interactive || isActive}
+        onActivate={() => interactive && setActive(i)}
+        onDeactivate={() => setActive(null)}
         style={cardStyle(i)}
         className={`${CARD} ${isGrid ? GRID_HOVER : ""} ${
           isGrid || interactive ? "" : "lg:min-w-80 lg:flex-1 lg:basis-0"
         }`}
-      >
-        <Image
-          src={w.image}
-          alt={`${w.title} — Coach Adrian Ding`}
-          fill
-          priority={priority}
-          sizes="(min-width: 1024px) 55vw, 100vw"
-          className="object-cover object-[center_26%]"
-        />
-        <div className="absolute inset-0 bg-linear-to-t from-black/75 via-black/40 to-black/5" />
-
-        <WorkshopTagPills
-          tags={w.tags}
-          className="absolute top-5 right-6 left-6 z-[1] lg:top-6 lg:right-8 lg:left-8"
-        />
-
-        <div className="relative flex h-full w-full flex-col justify-end gap-3 px-6 py-8 text-left text-white lg:px-8">
-          <p className="text-xs font-semibold tracking-[0.22em] text-white/75 uppercase">
-            {w.status === "past" ? "Past workshop · " : ""}
-            {shortDate(w.start)}
-          </p>
-          <h3 className="text-[1.75rem] leading-[1.08] font-extrabold tracking-[-0.01em] text-balance lg:text-[2.125rem]">
-            {w.title}
-          </h3>
-
-          <div
-            className={`grid w-full transition-[grid-template-rows,opacity] duration-500 ease-out ${
-              revealed
-                ? "grid-rows-[1fr] opacity-100"
-                : "grid-rows-[0fr] opacity-0 lg:pointer-events-none"
-            }`}
-          >
-            <div className="flex min-h-0 flex-col gap-4 overflow-hidden pt-3">
-              <p className="text-sm font-semibold text-white">
-                <WorkshopAvailabilityText workshop={w} onDark />
-              </p>
-              <p className="max-w-md text-base leading-relaxed text-white/85">
-                {w.summary}
-              </p>
-              {/* Venue/price and Register share one row, pinned to the
-                  card's bottom edge — `justify-between` spaces them
-                  apart instead of stacking Register on its own row. */}
-              <div className="flex items-end justify-between gap-3 pt-1">
-                <dl className="flex flex-col gap-1.5 text-sm text-white/85">
-                  <div className="flex items-center gap-1.5">
-                    <MapPin className="size-4 shrink-0" />
-                    <span className="line-clamp-1">{w.venue}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Ticket className="size-4 shrink-0" />
-                    <span className="font-semibold text-white">{w.price}</span>
-                  </div>
-                </dl>
-                {/* Register carries its own hover animation, separate
-                    from the card-wide hover that drives the expansion.
-                    Same wipe-fill + color-invert mechanic as `Button`
-                    (see button.tsx) — a `::before` sweeps in from the
-                    left and the label inverts brand-red-on-white to
-                    white-on-dark. Lift-only, never scale: this pill
-                    sits at the bottom-right corner of an
-                    `overflow-hidden rounded-4xl` card, so any
-                    transform that grows the box (scale) clips against
-                    that edge. Translate is safe since it only needs
-                    headroom above. */}
-                <span className="group/reg text-brand-foreground bg-brand before:bg-background hover:text-foreground relative isolate inline-flex shrink-0 items-center gap-2 overflow-hidden rounded-full px-5 py-2.5 text-sm font-semibold shadow-lg shadow-black/25 transition-[color,transform,box-shadow] duration-300 before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:transition-transform before:duration-300 before:content-[''] hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/40 hover:before:scale-x-100">
-                  {availability.canRegister ? "Register" : "View details"}
-                  <ArrowRight className="size-4 transition-transform duration-300 group-hover/reg:translate-x-1" />
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Link>
+      />
     )
   }
 
