@@ -10,7 +10,7 @@ import { RegistrationDialog } from "./registration-dialog"
 
 /**
  * Bottom-fixed registration bar — the conversion device on this page, and the
- * only CTA that is always reachable on a phone.
+ * CTA available between the primary card and closing registration section.
  *
  * It appears only after the complete overview registration card passes above
  * the viewport, and hides again when the visitor returns to that card.
