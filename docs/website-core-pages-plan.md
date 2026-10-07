@@ -996,3 +996,34 @@ Phone-to-tablet review found Corporate and testimonial headings compressed into
 narrow desktop side rails. Place both introductions above their cards at full
 section width; match programme heading sizing to “Join Our Workshops” and limit
 the testimonial heading to a readable two-line measure where space permits.
+
+### PR04 quality audit and cleanup plan — 2026-10-07
+
+Follow-up source/browser audit found unassociated Corporate field labels and
+rapid duplicate Continue activations skipping a Corporate step. The same
+navigation pattern exists in Workshop registration and requires focused coverage.
+These findings supersede the earlier no-actionable-regressions claim for current
+acceptance; previous passing gates remain historical evidence.
+
+[Quality fixes and cleanup plan](development/pr04-quality-cleanup-plan.md)
+defines small corrective work in PR #4 and the dependent `PR04-CLEANUP` structural
+package, complete affected-file inventory, shared conventions and acceptance gates.
+Status: local implementation and integrated handoff validation completed; commit/push through existing PR #4 authorized.
+
+PR04-CLEANUP implementation, 2026-10-07: shared accessible fields, serialized step
+navigation, route-local form/date/review sections, shared overflow measurement and
+presentation/landing extraction are implemented. Source-size checks are configurable
+and part of the edit gate; no size overrides remain. See the linked cleanup plan
+for retained/deferred inventory and validation evidence. Native/hosted/remote-CI
+acceptance and cleanup publication remain separate from local checks.
+
+PR04-CLEANUP final local evidence: full `quality:ci` passed 365 Playwright cases,
+19 tooling/lifecycle checks, source-size enforcement, formatting/lint/CSS/types,
+production build and nine OG checks. Four actual-page phone/tablet captures were
+visually inspected. The linked plan records corrected audit findings, retained
+boundaries and counts. Local preview restored; no cleanup commit/push/PR performed.
+
+PR04-CLEANUP delivery steering, 2026-10-07: user authorized commit/push on the
+existing PR branch. The previously proposed separate cleanup PR is superseded by
+atomic commits on `fix/public-form-layouts` / PR #4. Local validation evidence
+above applies; post-publication remote CI and hosted proof remain separate.

@@ -101,3 +101,10 @@ guards, not hydrated full-capacity journeys or a live receiving service. The
 2026-10-07 final gate passed 355 cases: 335 browser journeys and 20 policy/markup cases.
 Phone feedback coverage includes terminal filter overlays, sticky CTA visibility,
 historical dates, repeated fragment links and visitor scroll interruption.
+
+## Source size and conventions
+
+The edit gate includes `check:source-size`; thresholds and exact-file exceptions
+live in `source-size.config.json`. It reports nonempty/total physical source lines,
+not logic complexity. Warnings prompt review and hard maxima require an explicit
+reasoned exception. See [code conventions](code-conventions.md) for the contract.

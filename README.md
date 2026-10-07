@@ -775,3 +775,6 @@ platform-specific config exists in the repo.
 5. Remove the [temporary review tool](#temporary-review-tools) once its decision lands.
 6. Run mobile QA on real hardware (currently headless-only) before final delivery.
    </content>
+
+Shared public-site form and rail contracts, including configurable source-size
+review thresholds, are documented in [code conventions](docs/development/code-conventions.md).
