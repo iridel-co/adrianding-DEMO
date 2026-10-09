@@ -15,8 +15,20 @@
  * *instant* scroll if it landed short of the (re-measured) target — instant,
  * not "auto", since `scroll-behavior: smooth` on `<html>` would otherwise
  * turn "auto" into just another animation to abandon.
+ * Visitor input cancels both the animation and correction; a newer navigation
+ * also replaces the previous scroll instead of leaving competing deadlines.
  */
+let cancelActiveScroll: (() => void) | undefined
+
+export const scrollInteractionEvents = [
+  "wheel",
+  "touchstart",
+  "pointerdown",
+  "keydown",
+] as const
+
 function driveScroll(getTargetY: () => number) {
+  cancelActiveScroll?.()
   // Effects can run before SSR-safe motion hooks resolve the visitor's preference.
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     window.scrollTo({ top: getTargetY(), behavior: "instant" })
@@ -26,10 +38,27 @@ function driveScroll(getTargetY: () => number) {
 
   let lastY = window.scrollY
   let steady = 0
+  let finished = false
 
-  const finish = () => {
+  const cleanup = () => {
     window.clearInterval(interval)
     window.clearTimeout(ceiling)
+    scrollInteractionEvents.forEach((type) =>
+      window.removeEventListener(type, cancel)
+    )
+    if (cancelActiveScroll === cancel) cancelActiveScroll = undefined
+  }
+  const cancel = () => {
+    if (finished) return
+    finished = true
+    cleanup()
+    window.scrollTo({ top: window.scrollY, behavior: "instant" })
+  }
+
+  const finish = () => {
+    if (finished) return
+    finished = true
+    cleanup()
     const y = getTargetY()
     if (Math.abs(window.scrollY - y) > 2) {
       window.scrollTo({ top: y, behavior: "instant" })
@@ -47,12 +76,11 @@ function driveScroll(getTargetY: () => number) {
     lastY = y
   }, 120)
   const ceiling = window.setTimeout(finish, 2400)
-
-  return () => {
-    window.clearInterval(interval)
-    window.clearTimeout(ceiling)
-    window.scrollTo({ top: window.scrollY, behavior: "instant" })
-  }
+  scrollInteractionEvents.forEach((type) =>
+    window.addEventListener(type, cancel, { passive: true })
+  )
+  cancelActiveScroll = cancel
+  return cancel
 }
 
 /** Scrolls `target` into view, honoring its own `scroll-margin-top` (e.g.

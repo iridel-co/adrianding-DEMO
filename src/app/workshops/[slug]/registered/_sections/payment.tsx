@@ -1,3 +1,4 @@
+import { WorkshopAvailabilityText } from "@/app/_components/workshop-availability-text"
 import { Banknote, Mail, QrCode } from "lucide-react"
 import { Reveal } from "@/app/_components/reveal"
 import type { Workshop } from "@/lib/workshops"
@@ -26,9 +27,7 @@ export function RegisteredPayment({ workshop }: { workshop: Workshop }) {
               Your seat is held for 48 hours.
             </h2>
             <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/80 lg:text-lg">
-              Seats are released back to the waiting list after that, and this
-              cohort is already filling. Send payment and reply with the proof
-              to make it permanent.
+              Send payment and reply with the proof to confirm your seat.
             </p>
 
             <div className="mt-8 flex flex-wrap items-center gap-x-10 gap-y-4">
@@ -46,13 +45,17 @@ export function RegisteredPayment({ workshop }: { workshop: Workshop }) {
                 </p>
                 {/* TODO: seat counts are CMS-managed in the real build. */}
                 <p className="mt-1.5 text-2xl font-semibold tracking-[-0.01em] lg:text-3xl">
-                  {workshop.seatsLeft} of {workshop.seatsTotal} seats left
+                  <WorkshopAvailabilityText
+                    workshop={workshop}
+                    onDark
+                    className="font-normal"
+                  />
                 </p>
               </div>
             </div>
 
-            <div className="mt-10 grid gap-6 sm:grid-cols-[1.4fr_1fr] lg:gap-8">
-              <div className="rounded-lg bg-black/15 p-6 lg:p-8">
+            <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr] lg:gap-8">
+              <div className="min-w-0 rounded-lg bg-black/15 p-6 lg:p-8">
                 <p className="flex items-center gap-2 text-sm font-semibold">
                   <Banknote className="size-4" />
                   Bank transfer

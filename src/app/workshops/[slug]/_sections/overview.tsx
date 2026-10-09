@@ -1,8 +1,9 @@
+import { WorkshopAvailabilityText } from "@/app/_components/workshop-availability-text"
 import { CalendarDays, Check, MapPin, Tag } from "lucide-react"
 import { Countdown } from "@/app/_components/countdown"
 import { PrimerPlayer } from "@/app/_components/primer-player"
 import { TrustLogos } from "@/app/_components/trust-logos"
-import { Button } from "@/components/ui/button"
+import { getWorkshopAvailability } from "@/lib/workshop-availability"
 import type { Workshop } from "@/lib/workshops"
 import { RegistrationDialog } from "./registration-dialog"
 
@@ -16,8 +17,7 @@ import { RegistrationDialog } from "./registration-dialog"
  * its own for a visitor who arrived from an ad and will never see another page.
  */
 export function WorkshopOverview({ workshop }: { workshop: Workshop }) {
-  const isOpen = workshop.status === "open"
-  const nearlyFull = workshop.seatsLeft > 0 && workshop.seatsLeft <= 12
+  const availability = getWorkshopAvailability(workshop)
 
   return (
     <section className="mx-auto max-w-5xl px-6 pt-16 pb-16 sm:px-8 lg:pt-24 lg:pb-24">
@@ -50,41 +50,38 @@ export function WorkshopOverview({ workshop }: { workshop: Workshop }) {
           </dl>
         </div>
 
-        {isOpen && (
-          <aside className="bg-muted/40 w-full shrink-0 rounded-lg p-6 lg:max-w-xs">
-            <p className="text-muted-foreground text-xs tracking-[0.14em] uppercase">
-              Starts in
-            </p>
-            <div className="mt-3">
-              <Countdown target={workshop.start} />
-            </div>
-
-            {workshop.seatsLeft > 0 && (
-              <p
-                className={`mt-6 text-sm font-medium ${
-                  nearlyFull ? "text-brand" : "text-foreground/80"
-                }`}
-              >
-                {workshop.seatsLeft} of {workshop.seatsTotal} seats left
-                {nearlyFull ? " — this date is filling up" : ""}
-              </p>
+        {workshop.status === "open" && (
+          <aside
+            id="workshop-registration-card"
+            className="bg-muted/40 w-full shrink-0 rounded-lg p-6 lg:max-w-xs"
+          >
+            {availability.canRegister && (
+              <>
+                <p className="text-muted-foreground text-xs tracking-[0.14em] uppercase">
+                  Starts in
+                </p>
+                <div className="mt-4">
+                  <Countdown target={workshop.start} />
+                </div>
+              </>
             )}
 
-            <RegistrationDialog
-              slug={workshop.slug}
-              workshopTitle={workshop.title}
-              schedule={workshop.schedule}
-              venue={`${workshop.venue}, ${workshop.city}`}
-            >
-              <Button variant="brand" size="lg" className="mt-5 w-full">
-                Reserve your seat
-              </Button>
-            </RegistrationDialog>
-
-            <p className="text-muted-foreground mt-4 text-xs leading-relaxed">
-              No payment on this page. Register first — we email you the payment
-              details and hold your seat for 48 hours.
+            <p className="text-foreground/80 mt-5 text-center text-sm">
+              <WorkshopAvailabilityText workshop={workshop} />
             </p>
+
+            <RegistrationDialog
+              workshop={workshop}
+              triggerLabel="Reserve your seat"
+              className="mt-2 w-full"
+            />
+
+            {availability.canRegister && (
+              <p className="text-muted-foreground mt-4 text-xs leading-relaxed">
+                No payment now. We email payment details and hold your seat for
+                48 hours.
+              </p>
+            )}
           </aside>
         )}
       </div>
