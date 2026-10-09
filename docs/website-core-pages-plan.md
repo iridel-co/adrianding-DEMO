@@ -1066,3 +1066,8 @@ and workshop filters. At desktop width all filters fit and chevrons are absent.
 Captures use the local production preview, reduced motion and the demo clock
 set to 7 October 2026. These supplement the existing 431px PR screenshots; no
 application code changed. Native-device and hosted evidence remain separate.
+
+PR04 tablet screenshot evidence, 2026-10-09: three visually inspected 768px
+Chromium captures supplement the phone and desktop timer, sticky registration
+and filter screenshots. PR dropdowns label each viewport explicitly. Local
+production preview and the same demo clock were used; application code unchanged.
