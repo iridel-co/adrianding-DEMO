@@ -1057,3 +1057,12 @@ took 4.5 minutes locally. The prior suite had 365 cases; the revised suite remov
 remain in all five projects; layout cases run in two and policy cases in one.
 GitHub run `37645634176` passed for the preceding scroll-test fix `3f48b65`;
 remote CI for this suite revision remains separate pending publication.
+
+### PR04 desktop screenshot evidence — 2026-10-09
+
+Added three visually inspected 1440px Chromium captures in `docs/reviews/pr04/`:
+registration card/countdown, sticky registration after the primary card passes,
+and workshop filters. At desktop width all filters fit and chevrons are absent.
+Captures use the local production preview, reduced motion and the demo clock
+set to 7 October 2026. These supplement the existing 431px PR screenshots; no
+application code changed. Native-device and hosted evidence remain separate.
