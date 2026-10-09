@@ -71,9 +71,9 @@ export type Workshop = {
   whatToExpect: string[]
   /** One line under the primer video player, per course. */
   primerBlurb: string
-  seatsTotal: number | null
+  seatsTotal: number
   /** Drives the scarcity pill. TODO: CMS-managed in the real build. */
-  seatsLeft: number | null
+  seatsLeft: number
 }
 
 export const WORKSHOPS: Workshop[] = [

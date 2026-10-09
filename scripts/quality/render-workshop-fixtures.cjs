@@ -42,7 +42,7 @@ const {
 async function main() {
   const original = WORKSHOPS[0]
   const result = []
-  for (const seatsLeft of [0, null, 1]) {
+  for (const seatsLeft of [0, -1, 1]) {
     WORKSHOPS[0] = { ...original, seatsLeft }
     const trigger = renderToStaticMarkup(
       createElement(RegistrationDialog, {

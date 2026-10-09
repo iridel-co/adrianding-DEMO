@@ -6,8 +6,7 @@ export type WorkshopAvailability = {
   label: string
 }
 
-/** Catalogue status is authoritative in this static demo. Live capacity and
- * seat enforcement belong to the receiving booking service. */
+/** Derives display availability; the booking service must enforce live capacity. */
 export function getWorkshopAvailability(
   workshop: Pick<Workshop, "status" | "seatsLeft" | "seatsTotal">
 ): WorkshopAvailability {
@@ -16,8 +15,6 @@ export function getWorkshopAvailability(
   }
   const { seatsLeft, seatsTotal } = workshop
   if (
-    seatsLeft === null ||
-    seatsTotal === null ||
     !Number.isInteger(seatsLeft) ||
     !Number.isInteger(seatsTotal) ||
     seatsTotal <= 0 ||

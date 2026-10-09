@@ -29,8 +29,6 @@ test("@policy availability distinguishes capacity states and reopening", () => {
     ).toBe(false)
   }
   for (const [seatsLeft, seatsTotal] of [
-    [null, 40],
-    [1, null],
     [-1, 40],
     [41, 40],
     [1.5, 40],
@@ -135,7 +133,17 @@ for (const width of [360]) {
     ).toBeFocused()
     const submit = dialog.getByRole("button", { name: "Finish" })
     await dialog.getByRole("checkbox").uncheck()
-    await expect(submit).toBeDisabled()
+    await expect(submit).toBeEnabled()
+    await submit.click()
+    await expect(dialog.getByRole("checkbox")).toBeFocused()
+    await expect(dialog.getByRole("checkbox")).toHaveAttribute(
+      "aria-invalid",
+      "true"
+    )
+    await expect(dialog.getByRole("checkbox")).toHaveAccessibleDescription(
+      "You need to agree to continue."
+    )
+    await expect(page).not.toHaveURL(/\/registered$/)
     await expect(submit).toBeVisible()
     if (testInfo.project.name === "desktop" && width === 360) {
       await page.screenshot({
@@ -234,6 +242,9 @@ test("Workshop form labels, errors and overlapping Continue activations", async 
   const form = page
     .getByRole("dialog", { name: "Reserve your seat" })
     .locator("form")
+  await expect(
+    form.getByRole("heading", { name: /Step 1 of 3/ })
+  ).not.toBeFocused()
   const name = form.getByLabel("Full name", { exact: true })
   await form.getByRole("button", { name: "Continue", exact: true }).click()
   await expect(name).toBeFocused()

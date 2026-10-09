@@ -30,7 +30,14 @@ for (const width of [360, 768]) {
     const send = form.getByRole("button", { name: "Send inquiry" })
     await consent.uncheck()
     await expect(send).toBeVisible()
-    await expect(send).toBeDisabled()
+    await expect(send).toBeEnabled()
+    await send.click()
+    await expect(consent).toBeFocused()
+    await expect(consent).toHaveAttribute("aria-invalid", "true")
+    await expect(consent).toHaveAccessibleDescription(
+      "You need to agree to continue."
+    )
+    await expect(page).not.toHaveURL(/inquiry-received$/)
     await consent.check()
     await expect(send).toBeEnabled()
     await form.getByRole("button", { name: "Back", exact: true }).click()

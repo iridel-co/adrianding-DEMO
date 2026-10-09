@@ -94,7 +94,6 @@ export function CorporateInquiryForm() {
   })
 
   const primary = watch("program")
-  const consent = watch("consent")
   const also = watch("alsoInterested") ?? []
 
   const toggleAlso = (title: string) => {
@@ -541,7 +540,7 @@ export function CorporateInquiryForm() {
               key="submit"
               type="submit"
               variant="brand"
-              disabled={submitting || !consent}
+              disabled={pending || submitting}
               className="min-w-0 flex-1 sm:flex-none"
             >
               {submitting ? "Sending…" : "Send inquiry"}

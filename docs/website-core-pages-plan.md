@@ -1071,3 +1071,19 @@ PR04 tablet screenshot evidence, 2026-10-09: three visually inspected 768px
 Chromium captures supplement the phone and desktop timer, sticky registration
 and filter screenshots. PR dropdowns label each viewport explicitly. Local
 production preview and the same demo clock were used; application code unchanged.
+
+### PR04 review follow-up — 2026-10-10
+
+Address four review comments: retain dialog-owned initial focus and move heading
+focus only on step changes; let both forms surface Zod consent errors on submit;
+remove customer-facing demo wording; restore numeric catalogue seat counts while
+retaining invalid-data guards. No server integration or payment-policy change.
+Update existing regressions and validate the integrated changes before reporting
+completion. The 48-hour hold policy still requires confirmation.
+
+PR04 review follow-up validation: full `quality:ci` passed formatting, source
+size, lint/CSS, types, 19 tooling/lifecycle checks, production build, nine OG
+checks and all 176 Playwright cases. Existing tests verify mount/step focus and
+accessible Zod consent errors without navigation; malformed numeric capacity
+fixtures retain unavailable handling. Reviewer reply posted with local validation results; publication authorized.
+Native-device, hosted and remote-CI evidence remain separate.

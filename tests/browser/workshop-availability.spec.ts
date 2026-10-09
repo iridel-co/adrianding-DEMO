@@ -3,7 +3,7 @@ import { execFileSync } from "node:child_process"
 import path from "node:path"
 
 type Fixture = {
-  seatsLeft: number | null
+  seatsLeft: number
   trigger: string
   confirmation: string | null
   metadata: { title: string }

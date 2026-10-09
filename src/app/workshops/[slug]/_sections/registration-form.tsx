@@ -50,13 +50,13 @@ export function RegistrationForm({
   } = useStepNavigation(STEPS.length, submitting)
   const paneRef = useRef<HTMLDivElement>(null)
   const headingRef = useRef<HTMLHeadingElement>(null)
+  const previousStep = useRef(step)
 
   const {
     register,
     handleSubmit,
     trigger,
     getValues,
-    watch,
     reset,
     formState: { errors },
   } = useForm<FormValues>({
@@ -64,8 +64,9 @@ export function RegistrationForm({
     mode: "onTouched",
   })
 
-  const consent = watch("consent") === true
   useEffect(() => {
+    if (previousStep.current === step) return
+    previousStep.current = step
     headingRef.current?.focus({ preventScroll: true })
     headingRef.current
       ?.closest("[role=dialog]")
@@ -351,7 +352,7 @@ export function RegistrationForm({
               key="submit"
               type="submit"
               variant="brand"
-              disabled={submitting || !consent || !availability.canRegister}
+              disabled={pending || submitting || !availability.canRegister}
             >
               {submitting ? "Submitting…" : "Finish"}
               <Check className="size-4 shrink-0" aria-hidden />

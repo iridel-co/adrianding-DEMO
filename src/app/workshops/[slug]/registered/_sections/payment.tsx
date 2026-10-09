@@ -27,8 +27,7 @@ export function RegisteredPayment({ workshop }: { workshop: Workshop }) {
               Your seat is held for 48 hours.
             </h2>
             <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/80 lg:text-lg">
-              The demo illustrates the proposed payment window. Send payment and
-              reply with the proof to make it permanent.
+              Send payment and reply with the proof to confirm your seat.
             </p>
 
             <div className="mt-8 flex flex-wrap items-center gap-x-10 gap-y-4">
