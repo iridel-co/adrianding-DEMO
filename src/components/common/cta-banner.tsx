@@ -39,7 +39,7 @@ export interface CtaBannerProps
   /** Main CTA heading */
   heading: string
   /** Supporting subtext */
-  subtext?: string
+  subtext?: React.ReactNode
   /** CTA buttons */
   actions?: React.ReactNode
 }

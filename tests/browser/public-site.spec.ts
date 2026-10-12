@@ -136,6 +136,11 @@ test("calendar changes months and opens a workshop by keyboard", async ({
   const date = page.getByRole("button", { name: "9", exact: true })
   await date.focus()
   await page.keyboard.press("Enter")
+  const preview = page.getByRole("dialog", { name: "Workshop preview" })
+  await expect(preview).toBeVisible()
+  await preview
+    .getByRole("link", { name: /View workshop.*Exceptional Salesmanship/ })
+    .click()
   await expect(page).toHaveURL(workshop)
 })
 
@@ -167,7 +172,7 @@ for (const blocked of [false, true]) {
     await dialog.getByRole("button", { name: "Continue", exact: true }).click()
     await expect(dialog.getByText(/Step 3 of 3/)).toBeVisible()
     await expect(page).toHaveURL(workshop)
-    await dialog.getByRole("button", { name: "Complete registration" }).click()
+    await dialog.getByRole("button", { name: "Finish" }).click()
     await expect(page).toHaveURL(`${workshop}/registered`)
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
       blocked ? "You're on the list." : "You're on the list, Juan."

@@ -2,10 +2,7 @@
 
 import { useEffect, useState } from "react"
 import NumberFlow from "@number-flow/react"
-import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
-
-const MotionNumberFlow = motion.create(NumberFlow)
 
 type CountdownProps = {
   /** Event start — ISO string or Date. */
@@ -31,7 +28,7 @@ function breakdown(ms: number) {
 }
 
 /**
- * Live countdown to an event. Renders em-dashes until mounted so server and
+ * Live countdown to an event. Renders zeros until mounted so server and
  * client markup match, then ticks once a second with animated digit flips.
  */
 export function Countdown({ target, className }: CountdownProps) {
@@ -56,32 +53,36 @@ export function Countdown({ target, className }: CountdownProps) {
     )
   }
 
-  /**
-   * Sized to fit the workshop page's narrow register rail (a `max-w-xs` card,
-   * ~272px of content once its padding is off). Four 2-digit figures plus three
-   * separators at the old `text-4xl`/`text-5xl` overflowed it — the digits ran
-   * past the card's right edge. `min-w-0` on the row lets it shrink inside a
-   * flex/grid parent rather than forcing the parent wider.
-   */
+  // Size digits from the card width: the desktop rail is narrower than tablet.
   return (
-    <div className={cn("flex min-w-0 items-start gap-2", className)}>
+    <div
+      className={cn("@container grid w-full min-w-0 grid-cols-4", className)}
+    >
       {UNITS.map(({ key, label }, i) => (
-        <div key={key} className="flex min-w-0 items-start gap-2">
-          <div className="flex flex-col items-center">
-            <MotionNumberFlow
+        <div
+          key={key}
+          role="group"
+          aria-label={label}
+          className="flex min-w-0 flex-col items-center"
+        >
+          <div className="relative flex w-full items-center justify-center">
+            <NumberFlow
               value={parts ? parts[key] : 0}
-              format={{ minimumIntegerDigits: 2 }}
-              className="text-[1.75rem] leading-none font-semibold tracking-tighter tabular-nums sm:text-[2rem]"
+              format={{ minimumIntegerDigits: 2, useGrouping: false }}
+              className="text-[clamp(1.25rem,9cqw,3rem)] leading-none font-semibold tracking-tighter tabular-nums"
             />
-            <span className="text-muted-foreground mt-1.5 text-[0.5625rem] font-medium tracking-[0.12em] uppercase">
-              {label}
-            </span>
+            {i < UNITS.length - 1 && (
+              <span
+                aria-hidden
+                className="text-muted-foreground/40 absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 text-[clamp(1rem,6cqw,2rem)] leading-none font-medium"
+              >
+                :
+              </span>
+            )}
           </div>
-          {i < UNITS.length - 1 && (
-            <span className="text-muted-foreground/40 text-lg leading-none font-semibold">
-              :
-            </span>
-          )}
+          <span className="text-muted-foreground mt-2 text-[0.5625rem] font-medium tracking-[0.08em] uppercase">
+            {label}
+          </span>
         </div>
       ))}
     </div>

@@ -1,6 +1,7 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useRef } from "react"
+import { useHorizontalOverflow } from "@/app/_lib/use-horizontal-overflow"
 import { ScrollArrows } from "@/app/_components/scroll-arrows"
 import { useReducedMotionSafe } from "@/app/_lib/use-reduced-motion-safe"
 import { SplitReveal } from "@/app/_components/split-reveal"
@@ -45,30 +46,14 @@ const CARDS: SpecCard[] = CORPORATE_PROGRAMMES.map((spec) => ({
 }))
 
 export function LandingSpecializations() {
-  const railContainer = useRef<HTMLDivElement>(null)
+  const railRef = useRef<HTMLDivElement>(null)
   const reduced = useReducedMotionSafe()
-  const [ends, setEnds] = useState({ start: true, end: false })
-
-  useEffect(() => {
-    const rail = railContainer.current?.firstElementChild
-    if (!(rail instanceof HTMLElement)) return
-    const measure = () =>
-      setEnds({
-        start: rail.scrollLeft <= 1,
-        end: rail.scrollLeft + rail.clientWidth >= rail.scrollWidth - 1,
-      })
-    measure()
-    rail.addEventListener("scroll", measure, { passive: true })
-    const observer = new ResizeObserver(measure)
-    observer.observe(rail)
-    return () => {
-      rail.removeEventListener("scroll", measure)
-      observer.disconnect()
-    }
-  }, [])
+  const { edges } = useHorizontalOverflow(railRef, {
+    resetKey: CARDS.map((card) => card.key).join("|"),
+  })
 
   const move = (direction: number) => {
-    const rail = railContainer.current?.firstElementChild
+    const rail = railRef.current
     if (!(rail instanceof HTMLElement)) return
     const card = rail.firstElementChild
     if (!(card instanceof HTMLElement)) return
@@ -82,16 +67,15 @@ export function LandingSpecializations() {
   return (
     <section className="bg-muted/40 py-24 lg:py-36">
       <div className="mx-auto w-full max-w-7xl px-6 sm:px-8">
-        <div className="lg:grid lg:grid-cols-[minmax(0,19rem)_minmax(0,1fr)] lg:gap-16 xl:gap-20">
-          {/* Left rail — heading + framing line, held in view while the
-              card stack on the right scrolls past. */}
-          <div className="lg:sticky lg:top-28 lg:self-start">
-            <SplitReveal className="font-serif text-[2.5rem] leading-[1.05] tracking-[-0.02em] lg:text-[3rem]">
+        <div>
+          {/* Full-width introduction keeps the heading readable above cards. */}
+          <div>
+            <SplitReveal className="font-serif text-[2.75rem] leading-[1.05] tracking-[-0.02em] lg:text-[3.75rem]">
               In-house programs,
               <br />
               <span className="text-brand">two decades</span> deep
             </SplitReveal>
-            <p className="text-muted-foreground mt-6 text-lg leading-relaxed">
+            <p className="text-muted-foreground mt-6 max-w-3xl text-lg leading-relaxed">
               Coach Adrian&rsquo;s corporate training programmes, run in-house
               for companies and their teams — at your office or offsite, and
               shaped around your people and goals.
@@ -107,10 +91,11 @@ export function LandingSpecializations() {
               vertical expand-on-hover stack from `lg` up. `-mx-6`/`px-6`
               lets the rail bleed to the viewport edges while its first card
               still lines up with the section gutter. */}
-          <div ref={railContainer} className="min-w-0">
+          <div className="min-w-0">
             <Reveal
+              ref={railRef}
               stagger={0.08}
-              className="no-scrollbar -mx-6 mt-12 flex snap-x snap-mandatory scroll-px-6 gap-3 overflow-x-auto px-6 pb-1 sm:-mx-8 sm:scroll-px-8 sm:px-8 lg:mx-0 lg:mt-0 lg:snap-none lg:flex-col lg:overflow-visible lg:px-0 lg:pb-0"
+              className="no-scrollbar -mx-6 mt-12 flex snap-x snap-mandatory scroll-px-6 gap-3 overflow-x-auto px-6 pb-1 sm:-mx-8 sm:scroll-px-8 sm:px-8 lg:mx-0 lg:snap-none lg:flex-col lg:overflow-visible lg:px-0 lg:pb-0"
             >
               <SpecRevealCards items={CARDS} />
             </Reveal>
@@ -120,7 +105,7 @@ export function LandingSpecializations() {
               </span>
               <ScrollArrows
                 className="flex"
-                edges={{ left: !ends.start, right: !ends.end }}
+                edges={edges}
                 onNudge={move}
                 previousLabel="Previous programs"
                 nextLabel="Next programs"

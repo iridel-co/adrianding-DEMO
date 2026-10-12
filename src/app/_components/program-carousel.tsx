@@ -9,7 +9,10 @@ import {
   type ReactNode,
 } from "react"
 import Image from "next/image"
-import { ArrowLeft, ArrowRight, Check } from "lucide-react"
+import { ArrowRight, Check } from "lucide-react"
+import { dispatchProgramInquiry } from "@/app/_lib/program-inquiry"
+import { useHorizontalOverflow } from "@/app/_lib/use-horizontal-overflow"
+import { ScrollArrows } from "@/app/_components/scroll-arrows"
 import { Reveal } from "@/app/_components/reveal"
 import { useReducedMotionSafe } from "@/app/_lib/use-reduced-motion-safe"
 import { useIsTouch } from "@/app/_lib/use-is-touch"
@@ -53,8 +56,7 @@ import { smoothScrollToElement } from "@/app/_lib/smooth-scroll-to"
  * window CustomEvent with `{ key }` (so a second click on the same programme,
  * after the visitor changed the form's select by hand, re-applies — a URL
  * that didn't change can't do that). `inquiry-form.tsx` (task C) listens for
- * both. The event name string is duplicated as a local constant in both
- * files on purpose, so neither task depends on the other to compile.
+ * both through the shared programme inquiry event contract.
  *
  * The landing page keeps `SpecRevealCards` unchanged — do not merge these two
  * components, they solve different layouts (vertical expand-in-place stack
@@ -86,7 +88,6 @@ const ACTIVE_REM = 34 // hovered / focused / tapped card
 const SIBLING_REM = (n: number) => (n * REST_REM - ACTIVE_REM) / (n - 1) // 20.67rem for n=10 (19.6 for n=6)
 const EASE = "cubic-bezier(0.33, 1, 0.68, 1)" // = SpecRevealCards' [0.33,1,0.68,1]
 const DURATION_MS = 420 // = SpecRevealCards' 0.42s
-const PROGRAM_INQUIRE_EVENT = "ad:program-inquire" // Must match the constant in corporate-training/_sections/inquiry-form.tsx — see docs/feedback-passes/PLAN-feedback-2.md.
 
 const RAIL =
   "no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-6 px-6 pb-1 sm:scroll-px-8 sm:px-8 lg:snap-none lg:gap-5 lg:scroll-px-0 lg:pr-0 lg:pb-0 lg:pl-10"
@@ -119,9 +120,6 @@ const TITLE_STATIC =
 const REGISTER_PILL =
   "group/reg text-brand-foreground bg-brand before:bg-background hover:text-foreground relative isolate inline-flex shrink-0 items-center gap-2 overflow-hidden rounded-full px-5 py-2.5 text-sm font-semibold shadow-lg shadow-black/25 transition-[color,transform,box-shadow] duration-300 before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:transition-transform before:duration-300 before:content-[''] hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/40 hover:before:scale-x-100"
 
-const ARROW_BTN =
-  "border-border/80 text-foreground flex size-11 items-center justify-center rounded-full border transition-colors hover:border-foreground hover:bg-foreground hover:text-background disabled:cursor-default disabled:opacity-25 disabled:hover:border-border/80 disabled:hover:bg-transparent disabled:hover:text-foreground"
-
 /** Grid-rows collapse, shared by the blurb (open at rest) and the detail
  *  panel (open on expand). Literal classes only. */
 function Collapse({
@@ -146,37 +144,6 @@ function Collapse({
   )
 }
 
-function CarouselArrows({
-  edges,
-  onNudge,
-}: {
-  edges: { left: boolean; right: boolean }
-  onNudge: (dir: 1 | -1) => void
-}) {
-  return (
-    <div className="hidden items-center gap-2.5 lg:flex">
-      <button
-        type="button"
-        aria-label="Previous programmes"
-        onClick={() => onNudge(-1)}
-        disabled={!edges.left}
-        className={ARROW_BTN}
-      >
-        <ArrowLeft className="size-5" />
-      </button>
-      <button
-        type="button"
-        aria-label="Next programmes"
-        onClick={() => onNudge(1)}
-        disabled={!edges.right}
-        className={ARROW_BTN}
-      >
-        <ArrowRight className="size-5" />
-      </button>
-    </div>
-  )
-}
-
 /** Replaces the URL, fires the B<->C event, then scrolls the form into view
  *  — the scroll and prefill signal are separate on purpose (see file doc
  *  comment). */
@@ -186,9 +153,7 @@ function inquire(key: string, reduce: boolean) {
     "",
     `/corporate-training?program=${encodeURIComponent(key)}#inquiry`
   )
-  window.dispatchEvent(
-    new CustomEvent(PROGRAM_INQUIRE_EVENT, { detail: { key } })
-  )
+  dispatchProgramInquiry(key)
   const target = document.getElementById("inquiry")
   if (!target) return
   if (reduce) target.scrollIntoView({ block: "start", behavior: "instant" })
@@ -211,7 +176,7 @@ export function ProgramCarousel({
   // Hover take-over only with a real pointer on a desktop-width screen
   // (RULES §14). Both start `false`, so SSR and first paint are the static
   // layout — the rule's "touch control is the default".
-  const interactive = desktop && !touch
+  const interactive = desktop && !touch && items.length > 1
   useEffect(() => {
     const mqDesktop = window.matchMedia("(min-width: 1024px)")
     const sync = () => setDesktop(mqDesktop.matches)
@@ -230,36 +195,9 @@ export function ProgramCarousel({
   }, [interactive])
 
   const railRef = useRef<HTMLDivElement>(null)
-  const [edges, setEdges] = useState({ left: false, right: false })
-
-  useEffect(() => {
-    const el = railRef.current
-    if (!el) return
-    let raf = 0
-    const sync = () => {
-      raf = 0
-      const { scrollWidth: sw, clientWidth: cw, scrollLeft } = el
-      const overflow = sw - cw > 1
-      setEdges({
-        left: overflow && scrollLeft > 1,
-        right: overflow && scrollLeft < sw - cw - 1,
-      })
-    }
-    const queue = () => {
-      if (!raf) raf = requestAnimationFrame(sync)
-    }
-    sync()
-    el.addEventListener("scroll", queue, { passive: true })
-    el.addEventListener("transitionend", queue)
-    const ro = new ResizeObserver(queue)
-    ro.observe(el)
-    return () => {
-      el.removeEventListener("scroll", queue)
-      el.removeEventListener("transitionend", queue)
-      ro.disconnect()
-      if (raf) cancelAnimationFrame(raf)
-    }
-  }, [items.length])
+  const { edges } = useHorizontalOverflow(railRef, {
+    resetKey: items.map((item) => item.key).join("|"),
+  })
 
   const nudge = (dir: 1 | -1) => {
     const el = railRef.current
@@ -394,7 +332,14 @@ export function ProgramCarousel({
               React warns "each child in a list should have a unique key". */}
           <Fragment key="heading">{heading}</Fragment>
           {hasOverflow && (
-            <CarouselArrows key="arrows" edges={edges} onNudge={nudge} />
+            <ScrollArrows
+              key="arrows"
+              edges={edges}
+              onNudge={nudge}
+              previousLabel="Previous programmes"
+              nextLabel="Next programmes"
+              className="flex self-end"
+            />
           )}
         </div>
       </div>

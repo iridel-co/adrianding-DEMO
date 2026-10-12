@@ -17,12 +17,14 @@ test("repository mapping covers CSS, source, tooling, and fresh build plus OG", 
   assert.deepEqual(ids(["docs/index.md"], "handoff"), ["format"])
   assert.deepEqual(ids(["src/app/globals.css"], "handoff"), [
     "format",
+    "source-size",
     "css",
     "build-and-og",
     "browser",
   ])
   assert.deepEqual(ids(["src/app/page.tsx"], "checkpoint"), [
     "format",
+    "source-size",
     "lint",
     "types",
   ])
@@ -52,4 +54,17 @@ test("repository mapping covers CSS, source, tooling, and fresh build plus OG", 
     assert.equal(ids([file], "handoff").length, config.checks.length, file)
   }
   assert.ok(!config.checks.some((c) => c.script === "test:unit"))
+  assert.deepEqual(ids(["source-size.config.json"], "checkpoint"), [
+    "format",
+    "source-size",
+    "harness",
+  ])
+})
+
+test("step navigation selects its isolated lifecycle regressions", () => {
+  assert.ok(
+    ids(["src/app/_lib/use-step-navigation.ts"], "checkpoint").includes(
+      "harness"
+    )
+  )
 })

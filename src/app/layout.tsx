@@ -3,6 +3,7 @@ import { Red_Hat_Display, Geist_Mono } from "next/font/google"
 import localFont from "next/font/local"
 import "./globals.css"
 import { ScrollRefresh } from "./_components/scroll-refresh"
+import { SamePageAnchors } from "./_components/same-page-anchors"
 
 const redHatDisplay = Red_Hat_Display({
   variable: "--font-red-hat",
@@ -96,6 +97,7 @@ export default function RootLayout({
           Skip to content
         </a>
         {children}
+        <SamePageAnchors />
         {/* Recomputes ScrollTrigger positions once fonts/images settle — see
             the component for why every reveal fires late without it. */}
         <ScrollRefresh />

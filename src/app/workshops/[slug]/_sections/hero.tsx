@@ -1,3 +1,4 @@
+import { WorkshopAvailabilityText } from "@/app/_components/workshop-availability-text"
 import Image from "next/image"
 import Link from "next/link"
 import { CalendarDays, MapPin } from "lucide-react"
@@ -73,11 +74,11 @@ export function WorkshopHero({ workshop }: { workshop: Workshop }) {
           <Chip icon={MapPin}>
             {workshop.venue}, {workshop.city}
           </Chip>
-          {workshop.status === "open" && workshop.seatsLeft > 0 && (
+          {
             <span className="bg-brand/90 inline-flex min-h-11 items-center rounded-full px-4 py-2 text-sm font-medium text-white">
-              {workshop.seatsLeft} of {workshop.seatsTotal} seats left
+              <WorkshopAvailabilityText workshop={workshop} onDark />
             </span>
-          )}
+          }
           <ShareButton />
         </Reveal>
       </div>
@@ -93,7 +94,7 @@ function Chip({
   children: React.ReactNode
 }) {
   return (
-    <span className="inline-flex min-h-11 items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm text-white/90 ring-1 ring-white/15 backdrop-blur-sm">
+    <span className="inline-flex min-h-11 max-w-full items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm text-white/90 ring-1 ring-white/15 backdrop-blur-sm">
       <Icon className="size-3.5 shrink-0" />
       {children}
     </span>

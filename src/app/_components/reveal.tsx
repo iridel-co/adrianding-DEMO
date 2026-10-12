@@ -1,9 +1,10 @@
 "use client"
 
-import { useRef, type ReactNode } from "react"
+import { useRef, type ReactNode, type Ref } from "react"
 import { gsap, useGSAP, EASE, DUR, RISE } from "@/app/_lib/gsap"
 
 type RevealProps = {
+  ref?: Ref<HTMLDivElement>
   children: ReactNode
   className?: string
   /** Seconds to wait after the trigger fires. */
@@ -25,6 +26,7 @@ type RevealProps = {
  * wrapper. Honours `prefers-reduced-motion` by snapping straight to rest.
  */
 export function Reveal({
+  ref,
   children,
   className,
   delay = 0,
@@ -62,7 +64,14 @@ export function Reveal({
   )
 
   return (
-    <div ref={scope} className={className}>
+    <div
+      ref={(element) => {
+        scope.current = element
+        if (typeof ref === "function") return ref(element)
+        if (ref) ref.current = element
+      }}
+      className={className}
+    >
       {children}
     </div>
   )

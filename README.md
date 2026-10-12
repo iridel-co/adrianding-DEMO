@@ -123,6 +123,25 @@ In short:
   - Pipeline: `CONTACTED` → `PROPOSAL_SENT` → `WON`/`LOST` (proposed).
 - **In the demo today:** both forms only write to `sessionStorage` and route to their confirmation page. No record, reference ID, email or staff dashboard exists. E1–E3 are static previews at `/email-templates`.
 
+Workshop availability is derived consistently from catalogue status and capacity.
+Open dates with valid positive capacity allow registration; fully booked,
+past/closed, and unknown or invalid capacity do not. Capacity fields may be `null`
+when unavailable. The static catalogue's status is authoritative in this demo;
+there is no live capacity refresh or server seat enforcement. An unavailable
+confirmation route shows an explanatory state rather than payment/booking success.
+If a future data adapter changes availability while the dialog is open, entered
+fields remain and final submission is blocked. Real service rejection and seat
+holds still require the Phase 2 booking contract.
+
+Calendar dates open a preview containing explicit workshop links, usable by touch
+and keyboard. Shared arrows appear on overflowing workshop/programme/filter rails,
+and mobile form actions fill the available width. Both final submit actions stay
+visible but disabled until consent is checked.
+
+Workshop seat labels share `src/app/_components/workshop-availability-text.tsx`
+for number emphasis and dark-surface contrast. `src/lib/workshop-availability.ts`
+owns concise wording and unavailable states; page containers own placement/size.
+
 ---
 
 ## Decisions pending (client / Chan)
@@ -756,3 +775,6 @@ platform-specific config exists in the repo.
 5. Remove the [temporary review tool](#temporary-review-tools) once its decision lands.
 6. Run mobile QA on real hardware (currently headless-only) before final delivery.
    </content>
+
+Shared public-site form and rail contracts, including configurable source-size
+review thresholds, are documented in [code conventions](docs/development/code-conventions.md).

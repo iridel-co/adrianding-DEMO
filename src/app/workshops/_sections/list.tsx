@@ -1,6 +1,7 @@
 import { WorkshopsCalendar } from "@/app/_components/workshops-calendar"
 import { WorkshopTagFilter } from "@/app/_components/workshop-tag-filter"
-import { OPEN_WORKSHOPS } from "@/lib/workshops"
+import Link from "next/link"
+import { OPEN_WORKSHOPS, PAST_WORKSHOPS, WORKSHOPS } from "@/lib/workshops"
 
 /**
  * Workshops parent — open dates as a static 2-column card grid (no hover
@@ -22,13 +23,46 @@ export function WorkshopsList() {
   return (
     <>
       <section className="mx-auto max-w-7xl px-6 pt-8 pb-16 sm:px-8 lg:pt-10 lg:pb-20">
-        <WorkshopsCalendar workshops={OPEN_WORKSHOPS} className="w-full" />
+        <WorkshopsCalendar workshops={WORKSHOPS} className="w-full" />
       </section>
 
       <section className="pb-20 lg:pb-32">
         {/* Full-bleed row. */}
         <WorkshopTagFilter workshops={OPEN_WORKSHOPS} />
       </section>
+      {PAST_WORKSHOPS.length > 0 && (
+        <section
+          className="mx-auto max-w-7xl px-6 pb-20 sm:px-8 lg:pb-32"
+          aria-labelledby="past-workshops-heading"
+        >
+          <h2 id="past-workshops-heading" className="font-serif text-3xl">
+            Past workshops
+          </h2>
+          <p className="text-muted-foreground mt-3">
+            Explore previous programmes. Registration for these dates is closed.
+          </p>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2">
+            {PAST_WORKSHOPS.map((workshop) => (
+              <Link
+                key={workshop.slug}
+                href={`/workshops/${workshop.slug}`}
+                className="border-border focus-visible:ring-ring rounded-lg border p-6 focus-visible:ring-2"
+              >
+                <p className="text-muted-foreground text-sm">
+                  Past workshop · {workshop.schedule}
+                </p>
+                <h3 className="mt-2 text-xl font-semibold">{workshop.title}</h3>
+                <p className="text-muted-foreground mt-2 text-sm">
+                  {workshop.venue}, {workshop.city}
+                </p>
+                <span className="text-brand mt-4 inline-block text-sm font-medium">
+                  View workshop →
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
     </>
   )
 }

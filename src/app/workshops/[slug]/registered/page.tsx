@@ -1,9 +1,11 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
+import Link from "next/link"
 import { SiteNavbar } from "@/app/_components/site-navbar"
 import { SiteFooter } from "@/app/_components/site-footer"
 import { SupportBand } from "@/app/_components/support-band"
 import { WORKSHOPS, getWorkshop } from "@/lib/workshops"
+import { getWorkshopAvailability } from "@/lib/workshop-availability"
 import { RegisteredConfirmed } from "./_sections/confirmed"
 import { RegisteredPayment } from "./_sections/payment"
 import { RegisteredPrimer } from "./_sections/primer"
@@ -35,7 +37,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
       robots: { index: false, follow: false },
     }
   return {
-    title: `You're registered — ${w.title} · Coach Adrian Ding`,
+    title: `${getWorkshopAvailability(w).canRegister ? "You're registered" : "Registration unavailable"} — ${w.title} · Coach Adrian Ding`,
     description: `Next steps for your seat at ${w.title}, ${w.schedule}.`,
     robots: { index: false, follow: false },
   }
@@ -45,6 +47,33 @@ export default async function WorkshopRegisteredPage({ params }: Params) {
   const { slug } = await params
   const workshop = getWorkshop(slug)
   if (!workshop) notFound()
+  const availability = getWorkshopAvailability(workshop)
+
+  if (!availability.canRegister) {
+    return (
+      <>
+        <SiteNavbar />
+        <main>
+          <section className="mx-auto max-w-5xl px-6 py-24 sm:px-8">
+            <h1 className="font-serif text-4xl">{availability.label}</h1>
+            <p className="text-muted-foreground mt-6 text-lg">
+              Registration cannot be completed for {workshop.title}. If you
+              already registered, contact the team to check your existing
+              registration.
+            </p>
+            <Link
+              className="text-brand mt-6 inline-flex min-h-11 items-center font-semibold underline"
+              href="/workshops"
+            >
+              Browse workshops
+            </Link>
+          </section>
+          <SupportBand />
+        </main>
+        <SiteFooter />
+      </>
+    )
+  }
 
   return (
     <>

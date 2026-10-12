@@ -4,6 +4,15 @@
 
 > **Functional spec for Phase 2 handoff — only acted on at handoff:** [`FSD.md`](FSD.md) (flows, data model, state machines, emails, open decisions).
 
+> **PR04 frontend behavior, 2026-10-06:** Workshop and Corporate responsiveness
+> ship together. Calendar dates preview events before explicit navigation; rails
+> show shared controls when overflowing; mobile form actions share the available
+> width. Final submission requires checked consent. Registration is blocked for
+> fully booked, past/closed, and unknown capacity using the static catalogue;
+> frontend checks do not enforce live seats or send records/emails. See the
+> [delivery plan](../website-core-pages-plan.md#pr04-workshop-responsiveness) for
+> evidence and the remaining backend/device/design dependencies.
+
 ---
 
 ## Client
