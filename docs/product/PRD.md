@@ -1,6 +1,6 @@
 # Coach Adrian Ding (adrianding.com) — Demo PRD
 
-> Frontend-only demo. Represents the full quote scope (QUO-2026-0002-v5) visually — CMS, CRM, auth, and payment tracking are shown as UI/forms, not wired to a real backend. Full build happens after demo approval. Organized by page, section-by-section, in build order: Landing → About → Gallery → Workshops → Corporate Training → global (Navbar/Footer) → Email Templates.
+> Frontend-only demo. Represents the full quote scope (QUO-2026-0002-v5) visually — CMS, CRM, auth, and payment tracking are shown as UI/forms, not wired to a real backend. Full build happens after demo approval. Organized by page, section-by-section, in build order: Landing → About → Workshops → Corporate Training → global (Navbar/Footer) → Email Templates.
 
 > **Functional spec for Phase 2 handoff — only acted on at handoff:** [`FSD.md`](FSD.md) (flows, data model, state machines, emails, open decisions).
 
@@ -88,7 +88,7 @@ Companies Served (marquee) + Statistics (one credibility block, shared `bg-backg
 ground, no divider) → **Which path is yours?** (`#which-path` — workshops vs corporate
 training, the page's only CTA, both pills carry a one-shot attention beat on scroll-in) →
 Workshops open for registration → Areas of Specialization → Testimonials →
-Gallery preview → Footer
+Footer
 
 Specializations moved below the fork: it previously sat between the roster and the
 decision point, pushing the page's only CTA down past three full sections. Proof now runs
@@ -111,7 +111,7 @@ straight into the fork.
 
 ## Auth
 
-Google login/signup is **staff-only**, for CRM/CMS access (managing form submissions, marking workshops as paid, publishing new workshops/gallery events). No public-facing user accounts in this phase. Represented in the demo as a static staff login screen — not functional.
+Google login/signup is **staff-only**, for CRM/CMS access (managing form submissions, marking workshops as paid, publishing new workshops). No public-facing user accounts in this phase. Represented in the demo as a static staff login screen — not functional.
 
 ---
 
@@ -119,7 +119,7 @@ Google login/signup is **staff-only**, for CRM/CMS access (managing form submiss
 
 1. Landing Page
 2. About Page
-3. Gallery Page (parent + child)
+3. Gallery removed by the confirmed 2026-10-05 scope decision
 4. Workshops Page (parent + child)
 5. Corporate Training Page
 6. Global components (Navbar, Footer) — build alongside Landing, reused everywhere
@@ -129,11 +129,11 @@ Google login/signup is **staff-only**, for CRM/CMS access (managing form submiss
 
 ## Page 1: Landing Page
 
-**Navbar** (global, not a numbered beat) — Logo (AD/Adrian Ding), links: About, Gallery, Workshops, Corporate Training, Contact. The editorial hero renders its own split nav (minimal top row that scrolls away + main link bar that pins to top for the rest of the page); no separate `<SiteNavbar>` on this page.
+**Navbar** (global, not a numbered beat) — Logo (AD/Adrian Ding), links: About, Workshops, Corporate Training, Contact. The editorial hero renders its own split nav (minimal top row that scrolls away + main link bar that pins to top for the rest of the page); no separate `<SiteNavbar>` on this page.
 
 Build top to bottom (matches `page.tsx` as of the 2026-09-01 funnel rework):
 
-1. **Hero** — Editorial GQ-cover (`_sections/hero-editorial.tsx`). One full-screen `bg-[#141414]` frame: mono background plate + light scrim/vignette, cut-out portrait right-of-centre, giant Prata "Adrian Ding" wordmark parked across the vertical middle with a slow role marquee under it (Leadership Development Coach · Corporate Trainer · Keynote Speaker · Inspirational Writer; sized from the wordmark: ~89% of its width, 7% fades both sides, snug under the baseline — tuned 2026-09-30 after the Prata switch) and social icons below. GSAP intro timeline (plate scale-in, portrait rise, wordmark rise, chrome stagger), then static; cursor parallax on bg/portrait (pointer-fine only). No scroll pin. The hero renders its **own** pinned link bar (About · Workshops · Corporate Training · Gallery + one "Train with Me" CTA that scrolls to `#which-path`); mobile collapses the links into a right-side Sheet. Reduced motion → composition painted immediately. Mobile still owed a dedicated pass (wordmark can kiss the right edge at ≤402px).
+1. **Hero** — Editorial GQ-cover (`_sections/hero-editorial.tsx`). One full-screen `bg-[#141414]` frame: mono background plate + light scrim/vignette, cut-out portrait right-of-centre, giant Prata "Adrian Ding" wordmark parked across the vertical middle with a slow role marquee under it (Leadership Development Coach · Corporate Trainer · Keynote Speaker · Inspirational Writer; sized from the wordmark: ~89% of its width, 7% fades both sides, snug under the baseline — tuned 2026-09-30 after the Prata switch) and social icons below. GSAP intro timeline (plate scale-in, portrait rise, wordmark rise, chrome stagger), then static; cursor parallax on bg/portrait (pointer-fine only). No scroll pin. The hero renders its **own** pinned link bar (About · Workshops · Corporate Training + one "Train with Me" CTA that scrolls to `#which-path`); mobile collapses the links into a right-side Sheet. Reduced motion → composition painted immediately. Mobile still owed a dedicated pass (wordmark can kiss the right edge at ≤402px).
 2. **Quote** — video-transition beat (`_sections/quote-reveal.tsx`). An opaque cream sheet rides UP over the held (sticky) hero, pins for ~35vh of scroll, and writes the belief line word by word — accent words blooming into brand red — then releases. Line: "Better people, lead to better companies. And better companies contribute to a better country." Pure CSS sticky + scroll-linked per-word opacity, no JS pin. Reduced motion → static centred quote.
 3. **About teaser** — the face-forward beat: portrait (`ad-photo-1.png`), the deck line "Two things I love: coffee, and developing people.", two lines on who he is (CEO Maximum Impact PH, 20+ years), link → `/about`. The belief ladder itself is **not** repeated here — the Quote section immediately above just wrote it.
 4. **Companies Served** ("You're in great company") — filterable moving marquee (`_components/companies-marquee.tsx`). Category pills filter the wall; "All industries" resets. Row count adapts (3 / 2 / 1). Logos render as full-colour marks; clients without artwork render as a name chip with a footnote count. One Pause/Play control stops every row (WCAG 2.2.2); no per-logo tooltips. Full roster in **Companies Served — Roster** below.
@@ -142,7 +142,7 @@ Build top to bottom (matches `page.tsx` as of the 2026-09-01 funnel rework):
 7. **Which path is yours?** (`_sections/paths.tsx`, `id="which-path"`) — the fork and the page's **only** CTA target. Two full-bleed photo cards: workshops (individuals) / corporate training (companies), with a hover take-over on desktop. The hero's "Train with Me" button scrolls here.
 8. **Workshops open for registration** — the concrete next step for the individual lane, straight after the fork. Cards for each open workshop → detail page.
 9. **Testimonials** — carousel/slider, all 8 (Wipro, Global Payments, Rose Pharmacy, Knowles, Global Pacific, HSBC, PETDA, Rotary International). Full quotes in Coach_Adrian_Ding_Website_2025.pdf — copy verbatim from source, don't paraphrase. Carousel has a visible Pause/Play control.
-10. **Gallery preview** — three recent events, link → `/gallery`.
+10. Gallery preview removed.
 11. **Footer** (global) — see Global Components below.
 
 > **Section grounds** alternate `bg-background` / `bg-muted/40` (no `border-t` dividers between sections) except Companies + Stats, which deliberately share one `bg-background` ground.
@@ -181,7 +181,10 @@ Client-supplied roster, used by the filterable marquee on the Landing page and r
 
 ---
 
-## Page 3: Gallery Page
+## Page 3: Gallery Page (superseded)
+
+> Removed by the confirmed 2026-10-05 scope decision. The requirements below
+> are historical and do not describe current routes or delivery scope.
 
 ### Parent (`/gallery`)
 
@@ -377,7 +380,7 @@ venue (plus any "also interested in" programmes), a credibility block, and the s
 
 ### Navbar
 
-Logo, links to About / Gallery / Workshops / Corporate Training / Contact. Sticky, smooth-scroll anchors where applicable.
+Logo, links to About / Workshops / Corporate Training / Contact. Sticky, smooth-scroll anchors where applicable.
 
 ### Footer
 
@@ -442,7 +445,6 @@ Images live flat in `public/images/` (no subfolders — per Iridel template conv
 | `insead-logo.png` / `genos-logo.png` / `trainer-logo.png`                                             | Hero stage 2 — dated timeline badges. Transparent now. `insead` silhouettes clean; **`genos` is a certification badge graphic and `trainer` is a full certificate scan — they silhouette to white blobs.** Need real vector logos.                                                                                                                                                                                          | ⚠️ transparent; genos/trainer unusable as marks                                                                                                                                        |
 | `images/co-*.{svg,png,jpg}`                                                                           | Companies Served marquee                                                                                                                                                                                                                                                                                                                                                                                                    | ⚠️ 93 company artwork references resolve locally; identity, artwork variants, quality, and approval still need review — see Companies Served — Roster                                  |
 | bio-coffee-shot                                                                                       | About                                                                                                                                                                                                                                                                                                                                                                                                                       | [ ] pending                                                                                                                                                                            |
-| event-gallery-\*                                                                                      | Gallery                                                                                                                                                                                                                                                                                                                                                                                                                     | [ ] pending                                                                                                                                                                            |
 
 ### Fonts (installed — `src/app/fonts/`, wired in `src/app/layout.tsx`)
 

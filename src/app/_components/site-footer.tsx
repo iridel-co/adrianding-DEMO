@@ -17,7 +17,6 @@ const NAV = [
   { href: "/workshops", label: "Workshops" },
   { href: "/corporate-training", label: "Corporate Training" },
   { href: "/about", label: "About" },
-  { href: "/gallery", label: "Gallery" },
   // Demo-review route: the three transactional email templates, for the client
   // to sign off on before the send wiring is built in phase 2.
   { href: "/email-templates", label: "Email templates" },

@@ -6,7 +6,6 @@ import { LandingSpecializations } from "./_sections/specializations"
 import { LandingPaths } from "./_sections/paths"
 import { LandingWorkshopsOpen } from "./_sections/workshops-open"
 import { LandingTestimonials } from "./_sections/testimonials"
-import { LandingGalleryPreview } from "./_sections/gallery-preview"
 import { SiteFooter } from "./_components/site-footer"
 
 /**
@@ -16,7 +15,7 @@ import { SiteFooter } from "./_components/site-footer"
  *   Paths (#which-path — pick a lane: workshops vs corporate; the hero's
  *   only CTA scrolls here) →
  *   Workshops open (the individual lane's concrete next step) →
- *   Specializations → Testimonials → Gallery → Footer.
+ *   Specializations → Testimonials → Footer.
  *
  * Reordered 2026-09-06 on client feedback. Specializations used to sit between
  * the roster and the fork, which pushed the page's only decision point below
@@ -54,7 +53,6 @@ export default function Page() {
             didn't convert at the fork above. */}
         <LandingSpecializations />
         <LandingTestimonials />
-        <LandingGalleryPreview />
         <SiteFooter />
       </div>
     </main>

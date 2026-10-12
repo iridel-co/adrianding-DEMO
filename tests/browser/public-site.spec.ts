@@ -2,6 +2,26 @@ import { expect, test, type Page } from "@playwright/test"
 
 const workshop = "/workshops/exceptional-salesmanship"
 
+test("gallery removal preserves public journeys @layout", async ({ page }) => {
+  for (const route of ["/", "/workshops", "/corporate-training", workshop]) {
+    await page.goto(route)
+    await expect(page.locator('a[href^="/gallery"]')).toHaveCount(0)
+    await expect(
+      page.getByText("Inside the room", { exact: true })
+    ).toHaveCount(0)
+    await expect(page.getByText("Past events", { exact: true })).toHaveCount(0)
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth
+      )
+    ).toBe(true)
+  }
+  for (const route of ["/gallery", "/gallery/evercare"]) {
+    const response = await page.goto(route)
+    expect(response?.status()).toBe(404)
+  }
+})
+
 test.beforeEach(async ({ page }) => {
   // Keep demo dates deterministic while Date.now advances for GSAP's scroll timing.
   await page.clock.install({ time: new Date("2026-10-04T04:00:00Z") })
