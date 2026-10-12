@@ -22,6 +22,75 @@ test("gallery removal preserves public journeys @layout", async ({ page }) => {
   }
 })
 
+test("motion controls persist pause and exclude duplicate focus stops @layout", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" })
+  await page.goto("/corporate-training")
+  for (const label of ["company logos", "testimonials"]) {
+    const control = page.getByRole("button", {
+      name: `Pause ${label}`,
+      exact: true,
+    })
+    await control.scrollIntoViewIfNeeded()
+    await control.click()
+    const resume = page.getByRole("button", {
+      name: `Resume ${label}`,
+      exact: true,
+    })
+    await expect(resume).toHaveAttribute("aria-pressed", "true")
+    const section = page.locator("section").filter({
+      has: page.getByRole("button", {
+        name: new RegExp(`^(Pause|Resume) ${label}$`),
+      }),
+    })
+    const track = section
+      .locator(".will-change-transform:visible, .flex.w-max.flex-none:visible")
+      .first()
+    const transform = () =>
+      track.evaluate((el) => getComputedStyle(el).transform)
+    const pausedPosition = await transform()
+    await section.hover()
+    await page.mouse.move(0, 0)
+    if (label === "company logos") {
+      await section
+        .getByRole("button", { name: "All industries", exact: true })
+        .focus()
+    } else {
+      await section.locator("figure:visible").first().focus()
+    }
+    await resume.focus()
+    await page.clock.runFor(400)
+    expect(await transform()).toBe(pausedPosition)
+    const clone = section.locator("[aria-hidden][inert]:visible figure").first()
+    if (await clone.count()) {
+      await clone.evaluate((el) => (el as HTMLElement).focus())
+      await expect(clone).not.toBeFocused()
+    }
+    await resume.click()
+    await page.mouse.move(0, 0)
+    await expect.poll(transform).not.toBe(pausedPosition)
+    if (label === "company logos") {
+      await page
+        .getByRole("button", { name: "Pause company logos", exact: true })
+        .click()
+      await section
+        .getByRole("button", { name: "All industries", exact: true })
+        .click()
+      await expect(
+        page.getByRole("button", { name: "Resume company logos", exact: true })
+      ).toHaveAttribute("aria-pressed", "true")
+    }
+  }
+  await page.emulateMedia({ reducedMotion: "reduce" })
+  await expect(
+    page.getByRole("button", {
+      name: /(?:Pause|Resume) (?:testimonials|company logos)/,
+    })
+  ).toHaveCount(0)
+  await expect(page.locator("figure:visible").first()).toBeVisible()
+})
+
 test.beforeEach(async ({ page }) => {
   // Keep demo dates deterministic while Date.now advances for GSAP's scroll timing.
   await page.clock.install({ time: new Date("2026-10-04T04:00:00Z") })

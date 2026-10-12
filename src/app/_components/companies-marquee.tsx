@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react"
 import { Marquee } from "@/app/_components/marquee"
 import { COMPANY_GROUPS, type CompanyLogo } from "@/lib/companies"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 
 /**
  * Companies-served marquee — category pills that filter the wall, over one to
@@ -69,14 +70,21 @@ function LogoRow({
   companies,
   direction,
   speed,
+  paused,
 }: {
   companies: CompanyLogo[]
   direction: "left" | "right"
   speed: number
+  paused: boolean
 }) {
   if (companies.length === 0) return null
   return (
-    <Marquee direction={direction} speed={speed} className="py-2">
+    <Marquee
+      direction={direction}
+      speed={speed}
+      paused={paused}
+      className="py-2"
+    >
       {companies.map((c) => (
         <CompanyMark key={c.name} company={c} />
       ))}
@@ -113,6 +121,7 @@ function Pill({
 const FADE_MS = 300
 
 export function CompaniesMarquee() {
+  const [paused, setPaused] = useState(false)
   const [selected, setSelected] = useState<string[]>([])
   // The wall lags the pills by one fade: `shown` only catches up once the old
   // set has faded out, so switching tags cross-fades instead of popping.
@@ -158,6 +167,15 @@ export function CompaniesMarquee() {
   return (
     <>
       <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-2 px-5 sm:px-8">
+        <Button
+          type="button"
+          variant="outline"
+          aria-pressed={paused}
+          onClick={() => setPaused((value) => !value)}
+          className="motion-reduce:hidden"
+        >
+          {paused ? "Resume company logos" : "Pause company logos"}
+        </Button>
         <Pill
           label="All industries"
           active={selected.length === 0}
@@ -191,6 +209,7 @@ export function CompaniesMarquee() {
               companies={companies}
               direction={ROW_DIRS[i]}
               speed={ROW_SPEEDS[i]}
+              paused={paused}
             />
           ))}
         </div>

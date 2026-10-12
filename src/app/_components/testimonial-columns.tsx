@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react"
 import { Quote, User } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { Testimonial } from "@/lib/testimonials"
+import { Button } from "@/components/ui/button"
 
 type ColumnsProps = {
   testimonials: Testimonial[]
@@ -23,20 +24,34 @@ type ColumnsProps = {
  * wrap. Reduced motion drops the animation and the mask for a plain scroll strip.
  */
 export function TestimonialColumns({ testimonials, className }: ColumnsProps) {
+  const [paused, setPaused] = useState(false)
   const columnA = testimonials.filter((_, i) => i % 2 === 0)
   const columnB = testimonials.filter((_, i) => i % 2 === 1)
 
   return (
     <div className={className}>
+      <Button
+        type="button"
+        variant="outline"
+        aria-pressed={paused}
+        onClick={() => setPaused((value) => !value)}
+        className="mb-5 motion-reduce:hidden"
+      >
+        {paused ? "Resume testimonials" : "Pause testimonials"}
+      </Button>
       {/* Mobile: a single column carrying every quote. */}
       <div className="md:hidden">
-        <TestimonialColumn testimonials={testimonials} speed={24} />
+        <TestimonialColumn
+          testimonials={testimonials}
+          speed={24}
+          paused={paused}
+        />
       </div>
       {/* Desktop: two interleaved columns at slightly different speeds so they
           never march in lockstep. */}
       <div className="hidden gap-5 md:grid md:grid-cols-2">
-        <TestimonialColumn testimonials={columnA} speed={22} />
-        <TestimonialColumn testimonials={columnB} speed={30} />
+        <TestimonialColumn testimonials={columnA} speed={22} paused={paused} />
+        <TestimonialColumn testimonials={columnB} speed={30} paused={paused} />
       </div>
     </div>
   )
@@ -46,15 +61,19 @@ type ColumnProps = {
   testimonials: Testimonial[]
   /** Upward drift in px/second. */
   speed: number
+  paused: boolean
 }
 
-function TestimonialColumn({ testimonials, speed }: ColumnProps) {
+function TestimonialColumn({ testimonials, speed, paused }: ColumnProps) {
   const trackRef = useRef<HTMLDivElement>(null)
   const copyRef = useRef<HTMLDivElement>(null)
   const offsetRef = useRef(0)
   const halfRef = useRef(0)
   const lastRef = useRef(0)
-  const pausedRef = useRef(false)
+  const hoveredRef = useRef(false)
+  const focusedRef = useRef(false)
+  const userPausedRef = useRef(paused)
+  userPausedRef.current = paused
   const [reduced, setReduced] = useState(false)
 
   useEffect(() => {
@@ -103,7 +122,9 @@ function TestimonialColumn({ testimonials, speed }: ColumnProps) {
       // (the hidden mobile/desktop variant) — keep the clock fresh so there's
       // no jump when it resumes or becomes visible.
       if (
-        pausedRef.current ||
+        hoveredRef.current ||
+        focusedRef.current ||
+        userPausedRef.current ||
         offscreenRef.current ||
         track.offsetParent === null
       )
@@ -126,6 +147,13 @@ function TestimonialColumn({ testimonials, speed }: ColumnProps) {
     }
   }, [reduced, speed])
 
+  useEffect(() => {
+    if (reduced && trackRef.current) {
+      trackRef.current.style.transform = ""
+      offsetRef.current = 0
+    }
+  }, [reduced])
+
   return (
     <div
       className={cn(
@@ -140,16 +168,16 @@ function TestimonialColumn({ testimonials, speed }: ColumnProps) {
           : "overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,#000_9%,#000_91%,transparent)] [-webkit-mask-image:linear-gradient(to_bottom,transparent,#000_9%,#000_91%,transparent)]"
       )}
       onMouseEnter={() => {
-        pausedRef.current = true
+        hoveredRef.current = true
       }}
       onMouseLeave={() => {
-        pausedRef.current = false
+        hoveredRef.current = false
       }}
       onFocusCapture={() => {
-        pausedRef.current = true
+        focusedRef.current = true
       }}
-      onBlurCapture={() => {
-        pausedRef.current = false
+      onBlurCapture={(event) => {
+        focusedRef.current = event.currentTarget.contains(event.relatedTarget)
       }}
     >
       <div ref={trackRef} className="will-change-transform">
@@ -159,7 +187,7 @@ function TestimonialColumn({ testimonials, speed }: ColumnProps) {
           ))}
         </div>
         {!reduced && (
-          <div aria-hidden className="flex flex-col gap-6 pb-6">
+          <div aria-hidden inert className="flex flex-col gap-6 pb-6">
             {testimonials.map((t, i) => (
               <ColumnCard key={`b-${t.org}-${i}`} testimonial={t} />
             ))}

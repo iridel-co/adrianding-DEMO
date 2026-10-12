@@ -413,17 +413,26 @@ these pending acceptance boundaries rather than indicating unimplemented layout.
 
 ## PR06 Marquee accessibility
 
+Local implementation completed 2026-10-12 on `fix/shared-public-presentation`,
+based on PR #4 at `5d0e8d9`: gallery removal, persistent motion controls and inert
+clones. Full `quality:ci` passed: 180 browser cases, 19 tooling checks, formatting,
+source size, lint/CSS, types, build and nine OG cards. Two new scenarios add four
+layout cases. Six local UI frames at 320/768/1440px were visually inspected with
+verified fonts and no page overflow; existing docs were corrected, with no new
+tracked documents. Existing media is preserved; replacement logos/portraits await
+approval. Native-device, hosted and remote-CI evidence remain pending.
+
 Branch: `fix/shared-public-presentation`
 PR title: `fix: shared public presentation`
 Dependencies: PR02 and any shared UI changes touching these components.
 Owner: main executor for testimonial/company shared components.
-PR: pending. Evidence: pending. Merge status: not started.
+PR: not opened. Evidence: local gate and UI review above. Merge status: unmerged.
 
-- [ ] Remove hidden duplicate testimonial cards from keyboard navigation.
-- [ ] Provide persistent, accessible pause/resume controls for moving testimonials
+- [x] Remove hidden duplicate testimonial cards from keyboard navigation.
+- [x] Provide persistent, accessible pause/resume controls for moving testimonials
       and company content, preserving reduced-motion and touch behavior.
-- [ ] Keep clone-focus correction and motion-control behavior identifiable in commits.
-- [ ] Acceptance: focus cannot enter hidden duplicates; controls expose their names
+- [x] Keep clone-focus correction and motion-control behavior identifiable in commits.
+- [x] Acceptance: focus cannot enter hidden duplicates; controls expose their names
       and state; user-requested pause is not undone by hover/focus transitions.
 
 ## PR07 Company logo presentation (included in PR06)
@@ -843,10 +852,10 @@ The user reports confirmation to remove all gallery mentions and pages. Record
 this as approved implementation scope for the PR worker, not a pending designer
 question. This intake edits the plan only; removal is not yet implemented.
 
-- [ ] Deliver gallery removal as a coherent commit in consolidated PR06 before
+- [x] Deliver gallery removal as a coherent commit in consolidated PR06 before
       final PR12 polish; coordinate with PR03 navigation and PR04 workshop media.
       A separate removal PR is only needed if the actual scope warrants a split.
-- [ ] Remove `/gallery` and `/gallery/[slug]` pages and gallery-specific metadata.
+- [x] Remove `/gallery` and `/gallery/[slug]` pages and gallery-specific metadata.
       Remove links from desktop/mobile navigation, footer, CTAs, and other public
       consumers; remove Home's Inside the room and Workshops' Past events previews
       and any other gallery sections or mentions discovered during the source audit.
@@ -854,11 +863,11 @@ question. This intake edits the plan only; removal is not yet implemented.
       checking their consumers. Preserve shared workshop, corporate, portrait,
       testimonial, and footer assets/behavior. Do not delete media just because
       it also appears in the gallery.
-- [ ] Update active repository scope documentation, route maps, sitemap entries,
+- [x] Update active repository scope documentation, route maps, sitemap entries,
       and tests as applicable so they do not advertise gallery delivery or routes.
       Historical review notes/screenshots may remain explicitly superseded; the
       source DOCX is not to be silently rewritten.
-- [ ] Verify removed routes produce the expected not-found response, no public
+- [x] Verify removed routes produce the expected not-found response, no public
       gallery links/sections remain, adjacent layouts close cleanly at all reviewed
       widths, and existing workshop/inquiry journeys still work. Run scoped quality
       checks and required public-site browser regressions at package handoff.

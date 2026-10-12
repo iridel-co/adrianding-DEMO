@@ -55,6 +55,13 @@ export function Marquee({
   // override an explicit external/user pause, and an external resume can't
   // override being off-screen.
   const offscreenRef = useRef(false)
+  const hoveredRef = useRef(false)
+  const focusedRef = useRef(false)
+  const held = () =>
+    pausedRef.current ||
+    offscreenRef.current ||
+    hoveredRef.current ||
+    focusedRef.current
 
   useGSAP(
     () => {
@@ -111,7 +118,7 @@ export function Marquee({
               repeat: -1,
             }
           )
-          if (pausedRef.current || offscreenRef.current) tween.current.pause()
+          if (held()) tween.current.pause()
         }
 
         // Coalesce the burst of triggers (fonts + dozens of image loads +
@@ -157,7 +164,7 @@ export function Marquee({
 
   useEffect(() => {
     if (!tween.current) return
-    if (paused || offscreenRef.current) tween.current.pause()
+    if (held()) tween.current.pause()
     else tween.current.resume()
   }, [paused])
 
@@ -171,8 +178,8 @@ export function Marquee({
       ([entry]) => {
         offscreenRef.current = !entry.isIntersecting
         if (!tween.current) return
-        if (offscreenRef.current) tween.current.pause()
-        else if (!pausedRef.current) tween.current.resume()
+        if (held()) tween.current.pause()
+        else tween.current.resume()
       },
       { rootMargin: "200px" }
     )
@@ -180,9 +187,9 @@ export function Marquee({
     return () => io.disconnect()
   }, [])
 
-  const pause = () => tween.current?.pause()
-  const resume = () => {
-    if (!pausedRef.current && !offscreenRef.current) tween.current?.resume()
+  const syncPause = () => {
+    if (held()) tween.current?.pause()
+    else tween.current?.resume()
   }
 
   const cloneCount = Math.max(0, copies - 1)
@@ -197,10 +204,22 @@ export function Marquee({
         "motion-reduce:[mask-image:none] motion-reduce:[-webkit-mask-image:none]",
         className
       )}
-      onMouseEnter={pause}
-      onMouseLeave={resume}
-      onFocusCapture={pause}
-      onBlurCapture={resume}
+      onMouseEnter={() => {
+        hoveredRef.current = true
+        syncPause()
+      }}
+      onMouseLeave={() => {
+        hoveredRef.current = false
+        syncPause()
+      }}
+      onFocusCapture={() => {
+        focusedRef.current = true
+        syncPause()
+      }}
+      onBlurCapture={(event) => {
+        focusedRef.current = event.currentTarget.contains(event.relatedTarget)
+        syncPause()
+      }}
     >
       <div ref={track} className="flex w-max flex-none">
         <div
@@ -214,6 +233,7 @@ export function Marquee({
           <div
             key={i}
             aria-hidden
+            inert
             className="flex flex-none items-center motion-reduce:hidden"
             style={{ gap, paddingRight: gap }}
           >
