@@ -48,7 +48,7 @@ export default async function WorkshopPage({ params, searchParams }: Params) {
     getPublicFaqs(),
     getPublicProfile(),
   ])
-  const config = await getIntakeConfig("registration")
+  const config = getIntakeConfig()
   const workshop = workshopView(
     content,
     profile.phone,

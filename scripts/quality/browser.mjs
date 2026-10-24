@@ -18,8 +18,7 @@ await once(fixture, "listening")
 const env = {
   ...process.env,
   PORTAL_API_URL: `http://127.0.0.1:${fixture.address().port}`,
-  WORKSHOP_INTAKE_ENABLED: "false",
-  CORPORATE_INTAKE_ENABLED: "false",
+  NEXT_PUBLIC_TURNSTILE_SITE_KEY: "",
   TEST_INTAKE_ENABLED: "0",
 }
 
@@ -43,8 +42,6 @@ try {
   if (enabledOnly || args.length === 0) {
     const enabledEnv = {
       ...env,
-      WORKSHOP_INTAKE_ENABLED: "true",
-      CORPORATE_INTAKE_ENABLED: "true",
       NEXT_PUBLIC_TURNSTILE_SITE_KEY: "local-fixture-key",
       TEST_INTAKE_ENABLED: "1",
     }

@@ -573,7 +573,10 @@ answers/key across dialog remount and tab recovery; definite rejections allow
 correction. Accepted receipts retain a returned reference/initial Unpaid state,
 or generic acceptance without inventing a seat/reference/email. Missing receipts
 are neutral. Removed fabricated payment accounts/QR, 48-hour expiry and reply SLA.
-Both intake switches remain off by default; corporate remains disabled locally.
+Both forms activate automatically with a valid API origin and public Turnstile
+site key; separate intake-enable flags have been removed. The site key is not yet
+available, so local forms remain previews until it is configured. Portal origins
+and real verification/submission delivery still need live validation.
 The live OpenAPI read advertised corporate intake but not registrations yet.
 No live POST, provider/email proof, activation, commit or publication is claimed.
 CRM validation: full `quality:ci` passed 122 default-path cases plus six isolated

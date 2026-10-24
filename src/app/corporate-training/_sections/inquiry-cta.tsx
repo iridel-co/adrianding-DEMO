@@ -12,7 +12,7 @@ import { CorporateInquiryForm } from "./inquiry-form"
  * ground for contrast — see `inquiry-form.tsx` for the card treatment.
  */
 export async function CorporateInquiryCta() {
-  const intake = await getIntakeConfig("corporate")
+  const intake = getIntakeConfig()
   const [programs, profile] = await Promise.all([
     getPublicPrograms(),
     getPublicProfile(),
