@@ -30,6 +30,7 @@ for (const width of [360, 768]) {
 
     for (const [nextName, previousName] of [
       ["Next programs", "Previous programs"],
+      ["Scroll to more workshops", "Scroll to previous workshops"],
     ]) {
       const next = page.getByRole("button", { name: nextName, exact: true })
       const previous = page.getByRole("button", {

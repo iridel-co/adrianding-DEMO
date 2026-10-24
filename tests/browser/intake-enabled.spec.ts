@@ -60,6 +60,25 @@ test.describe("@policy local enabled intake", () => {
         })
       })
       const form = await registration(page)
+      if (full) {
+        const consent = form.getByRole("checkbox")
+        await consent.uncheck()
+        await form.getByRole("button", { name: "Finish", exact: true }).click()
+        await expect(consent).toBeFocused()
+        await expect(consent).toHaveAttribute("aria-invalid", "true")
+        await expect(consent).toHaveAccessibleDescription(
+          "You need to agree to continue."
+        )
+        expect(posted).toHaveLength(0)
+        await form.getByRole("button", { name: "Back", exact: true }).click()
+        await expect(form.locator('input[name="occupation"]')).toHaveValue(
+          "Insurance advisor"
+        )
+        await form
+          .getByRole("button", { name: "Continue", exact: true })
+          .click()
+        await consent.check()
+      }
       await form.getByRole("button", { name: "Finish", exact: true }).click()
       await expect(page).toHaveURL(/\/registered$/)
       await expect(
@@ -184,6 +203,8 @@ test.describe("@policy local enabled intake", () => {
     test(`corporate ${mode} dates submit titles and accepted-only receipt`, async ({
       page,
     }) => {
+      if (mode === "pick")
+        await page.setViewportSize({ width: 360, height: 800 })
       let body: Record<string, unknown> | undefined
       await page.route("**/api/corporate-inquiries", async (route) => {
         if (route.request().method() !== "POST")
@@ -204,8 +225,14 @@ test.describe("@policy local enabled intake", () => {
         name: "Continue",
         exact: true,
       })
+      if (mode === "pick")
+        await form.locator('input[name="fullName"]').fill("Alex".repeat(40))
       await forward.click()
+      if (mode === "pick")
+        await form.locator('input[name="company"]').fill("Company".repeat(25))
       await forward.click()
+      if (mode === "pick")
+        await form.locator('input[name="venue"]').fill("Venue".repeat(50))
       if (mode === "text") {
         await form
           .getByRole("tab", { name: "Not fixed yet", exact: true })
@@ -218,11 +245,32 @@ test.describe("@policy local enabled intake", () => {
       await expect(
         form.getByRole("button", { name: "Send inquiry" })
       ).toBeEnabled()
+      if (mode === "pick") {
+        const consent = form.getByRole("checkbox", { name: /I agree/ })
+        await consent.uncheck()
+        await form.getByRole("button", { name: "Send inquiry" }).click()
+        await expect(consent).toBeFocused()
+        await expect(consent).toHaveAttribute("aria-invalid", "true")
+        expect(body).toBeUndefined()
+        await consent.check()
+      }
       await form.getByRole("button", { name: "Send inquiry" }).click()
       await expect(page).toHaveURL(/inquiry-received$/)
       await expect(
         page.getByRole("heading", { name: /got your inquiry/ })
       ).toBeVisible()
+      if (mode === "pick") {
+        await expect(page.getByRole("heading", { level: 1 })).toContainText(
+          "Alex".repeat(40)
+        )
+        await expect(
+          page.getByText("Venue".repeat(50), { exact: true })
+        ).toBeVisible()
+        for (const element of await page.locator("h1, dd").all())
+          expect(
+            await element.evaluate((el) => el.scrollWidth <= el.clientWidth)
+          ).toBe(true)
+      }
       expect(body).toMatchObject({
         program: "Leadership Training & Development",
         consent: true,

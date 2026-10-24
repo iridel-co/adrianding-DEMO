@@ -1,4 +1,50 @@
 import { expect, test } from "@playwright/test"
+import { execFileSync } from "node:child_process"
+import path from "node:path"
+
+const rendered: {
+  emptyList: string
+  emptyCalendar: string
+  capacity: { trigger: string; label: string; enabled: boolean }[]
+} = JSON.parse(
+  execFileSync(
+    process.execPath,
+    [path.resolve("scripts/quality/render-workshop-fixtures.cjs")],
+    { encoding: "utf8" }
+  )
+)
+
+test("@policy empty catalogue and event-free calendar retain useful states", async ({
+  page,
+}) => {
+  await page.setContent(rendered.emptyList)
+  await expect(page.getByText("No workshops scheduled yet.")).toBeVisible()
+  await expect(
+    page.getByRole("link", { name: "Ask about in-house training" })
+  ).toBeVisible()
+  await expect(
+    page.getByRole("button", { name: "Show all workshops" })
+  ).toHaveCount(0)
+  await page.setContent(rendered.emptyCalendar)
+  await expect(page.getByRole("status")).toHaveText(
+    "No workshops scheduled this month."
+  )
+})
+
+test("@policy CMS registration triggers respect full and closed sessions", async ({
+  page,
+}) => {
+  for (const fixture of rendered.capacity) {
+    await page.setContent(fixture.trigger)
+    const trigger = page.getByRole("button", {
+      name: fixture.label,
+      exact: true,
+    })
+    if (fixture.enabled) await expect(trigger).toBeEnabled()
+    else await expect(trigger).toBeDisabled()
+    await expect(page.getByRole("dialog")).toHaveCount(0)
+  }
+})
 
 // The public API publishes per-session capacity, remaining seats and open status.
 // Exercise the CMS-backed page instead of rendering the retired local catalogue.
@@ -44,6 +90,40 @@ test("unknown CMS workshop returns not found", async ({ page }) => {
   const response = await page.goto("/workshops/not-a-published-workshop")
   expect(response?.status()).toBe(404)
 })
+
+for (const storage of ["malformed", "invalid", "unavailable"] as const) {
+  test(`@policy confirmation pages stay neutral with ${storage} receipt storage`, async ({
+    page,
+  }) => {
+    await page.addInitScript((state) => {
+      if (state === "malformed")
+        sessionStorage.setItem("ad-portal-receipt-v1", "{broken")
+      else if (state === "invalid")
+        sessionStorage.setItem(
+          "ad-portal-receipt-v1",
+          JSON.stringify({ version: 1, receipt: { accepted: true } })
+        )
+      else
+        Object.defineProperty(window, "sessionStorage", {
+          get() {
+            throw new Error("Storage blocked")
+          },
+        })
+    }, storage)
+    await page.goto("/workshops/exceptional-salesmanship/registered")
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      "Workshop registration"
+    )
+    await expect(page.getByText("Unpaid", { exact: true })).toHaveCount(0)
+    await page.goto("/corporate-training/inquiry-received")
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      "Your corporate training inquiry"
+    )
+    await expect(
+      page.getByText("No accepted inquiry receipt", { exact: false })
+    ).toBeVisible()
+  })
+}
 
 test("retired local sample returns not found", async ({ page }) => {
   const response = await page.goto(

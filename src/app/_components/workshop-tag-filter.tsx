@@ -195,7 +195,11 @@ export function WorkshopTagFilter({ workshops }: { workshops: Workshop[] }) {
           </div>
         </div>
       ) : (
-        <EventCards workshops={filtered} variant="grid" />
+        <EventCards
+          key={filtered.map((workshop) => workshop.slug).join("|")}
+          workshops={filtered}
+          variant="grid"
+        />
       )}
     </>
   )

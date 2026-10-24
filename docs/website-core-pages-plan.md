@@ -480,8 +480,10 @@ branch `refactor/public-site-integration`, targeting `main`.
   Portal origins, real submission/email delivery and native devices are unverified.
 - Cleanup: retired demo submission/storage paths are removed. Contract tests use
   current request schemas; countdown, sticky registration and filter-edge UI
-  regressions are retained. Payment copy describes customer actions.
-- Validation: cleanup `quality:ci` passed 138 default-path cases plus six isolated
+  regressions are retained, alongside form focus/consent, confirmation storage,
+  empty/closed/full states and Home carousel controls. Filtering resets native
+  carousel scroll state. Payment copy describes customer actions.
+- Validation: `quality:ci` covers 148 default-path cases plus six isolated
   configured-intake cases. PR #5 includes four main/PR screenshot pairs with
   verified fonts; confirmation captures use synthetic receipts, without POSTs.
 - Current CMS draft content includes null images and a sample image returning 404.

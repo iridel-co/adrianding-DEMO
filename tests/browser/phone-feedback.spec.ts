@@ -16,6 +16,9 @@ for (const width of [360, 1024]) {
     await page.keyboard.press("Escape")
     await expect(preview).toBeHidden()
     await expect(date).toBeFocused()
+    await page.keyboard.press("Escape")
+    await expect(preview).toBeHidden()
+    await expect(date).toBeFocused()
   })
 }
 for (const width of [360, 1440]) {
