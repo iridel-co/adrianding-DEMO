@@ -470,7 +470,8 @@ branch `refactor/public-site-integration`, targeting `main`.
   layouts; metadata/OG use CMS content, missing images have neutral fallbacks,
   and failed reads offer retry. No local workshop samples or early-bird notes.
 - Availability: per-session `seatsLeft` appears on cards, calendar previews and
-  details. Closed sessions stay closed. Calendar circles fit 320px day cells.
+  details. Closed sessions stay closed. Original calendar circles have overflow
+  room at both edges at 320px.
 - CRM: workshop registrations and corporate inquiries use the supplied Portal
   contract: UUID retry keys, fresh Turnstile verification, omitted credentials,
   strict payloads and validated HTTP 202 acceptance. Confirmations require an

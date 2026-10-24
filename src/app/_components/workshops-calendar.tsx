@@ -213,7 +213,7 @@ export function WorkshopsCalendar({
         ))}
       </div>
 
-      <div className="overflow-hidden">
+      <div className="-mx-4 overflow-hidden px-4">
         <AnimatePresence mode="popLayout" initial={false} custom={direction}>
           <motion.div
             key={monthLabel}
@@ -269,7 +269,7 @@ export function WorkshopsCalendar({
                     >
                       <HandDrawnCircle
                         seed={cell.date.getDate()}
-                        className="text-brand/60 group-hover:text-brand group-focus-visible:text-brand top-1/2 left-1/2 aspect-square h-auto w-full max-w-12 -translate-x-1/2 -translate-y-1/2 transition-[color,scale] duration-200 group-hover:scale-110 group-focus-visible:scale-110 motion-reduce:transition-none sm:size-14 sm:max-w-none lg:size-16"
+                        className="text-brand/60 group-hover:text-brand group-focus-visible:text-brand top-1/2 left-1/2 size-12 -translate-x-1/2 -translate-y-1/2 transition-[color,scale] duration-200 group-hover:scale-110 group-focus-visible:scale-110 motion-reduce:transition-none sm:size-14 lg:size-16"
                       />
                       <span className="relative">{cell.date.getDate()}</span>
                     </button>

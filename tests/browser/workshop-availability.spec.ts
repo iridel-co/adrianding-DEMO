@@ -132,7 +132,7 @@ test("retired local sample returns not found", async ({ page }) => {
   expect(response?.status()).toBe(404)
 })
 
-test("@layout calendar circles fit their day cells at 320px", async ({
+test("@layout original calendar circles have room at both edges at 320px", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 320, height: 844 })
@@ -140,10 +140,19 @@ test("@layout calendar circles fit their day cells at 320px", async ({
   const date = page.getByRole("button", { name: "20", exact: true })
   await date.scrollIntoViewIfNeeded()
   const bounds = await date.evaluate((cell) => {
-    const box = cell.getBoundingClientRect()
     const circle = cell.querySelector("svg")!.getBoundingClientRect()
-    return { left: circle.left - box.left, right: box.right - circle.right }
+    const grid = cell.parentElement!
+    const clip = grid.parentElement!.getBoundingClientRect()
+    const first = grid.firstElementChild!.getBoundingClientRect()
+    const last = grid.lastElementChild!.getBoundingClientRect()
+    const radius = (circle.width * 1.1) / 2
+    return {
+      width: circle.width,
+      left: first.left + first.width / 2 - radius - clip.left,
+      right: clip.right - (last.left + last.width / 2 + radius),
+    }
   })
+  expect(bounds.width).toBeCloseTo(48, 0)
   expect(bounds.left).toBeGreaterThanOrEqual(-0.5)
   expect(bounds.right).toBeGreaterThanOrEqual(-0.5)
   expect(
