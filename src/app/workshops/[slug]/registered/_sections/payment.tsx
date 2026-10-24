@@ -34,7 +34,7 @@ export function RegisteredPayment({
               </div>
               <div>
                 <p className="text-xs tracking-[0.14em] text-white/60 uppercase">
-                  Initial response
+                  Payment at registration
                 </p>
                 <p className="mt-1.5 text-2xl font-semibold tracking-[-0.01em] lg:text-3xl">
                   Unpaid
@@ -60,16 +60,15 @@ export function RegisteredPayment({
               </div>
               <div className="flex flex-col items-center justify-center rounded-lg bg-black/15 p-6 text-center lg:p-8">
                 <p className="text-sm text-white/70">
-                  This is the initial accepted response, including on a retry.
-                  Contact the team for current payment status.
+                  Already paid? Contact the team to confirm your payment.
                 </p>
               </div>
             </div>
             <p className="mt-8 flex items-start gap-3 text-base leading-relaxed lg:text-lg">
               <Mail className="mt-1 size-5 shrink-0" />
               <span>
-                Reply to the monitored registration email with proof of payment.
-                The team confirms actual funds in the Portal.
+                Reply to your registration email with proof of payment. The team
+                will check your payment.
               </span>
             </p>
           </div>

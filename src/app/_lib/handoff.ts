@@ -2,24 +2,7 @@ import { z } from "zod"
 import { registrationAcceptedSchema } from "@/lib/registration"
 import { corporateInquiryAcceptedSchema } from "@/lib/corporate-inquiry"
 
-/**
- * Form → confirmation-page bridge.
- *
- * Both forms are frontend-only (no API, no CRM), but the confirmation pages
- * still have to read back what was submitted so they feel like a real
- * post-submit destination rather than a static page. `sessionStorage` carries
- * the payload across the `router.push` and dies with the tab — nothing is sent
- * anywhere, which is what the demo's own footnote promises.
- *
- * Every read/write is wrapped: private-mode Safari and "block site data"
- * settings throw on access, and a confirmation page that crashes is far worse
- * than one that falls back to generic copy. Every consumer must render
- * correctly when this returns `null`.
- */
-
-const KEY = "ad-demo-handoff"
-
-const handoffSchema = z.discriminatedUnion("kind", [
+const receiptFields = z.discriminatedUnion("kind", [
   z.object({
     kind: z.literal("workshop"),
     slug: z.string().min(1),
@@ -41,47 +24,6 @@ const handoffSchema = z.discriminatedUnion("kind", [
   }),
 ])
 
-export type Handoff = z.infer<typeof handoffSchema>
-export type WorkshopHandoff = Extract<Handoff, { kind: "workshop" }>
-export type CorporateHandoff = Extract<Handoff, { kind: "corporate" }>
-
-export function parseHandoff(input: unknown): Handoff | null {
-  const result = handoffSchema.safeParse(input)
-  return result.success ? result.data : null
-}
-
-export function saveHandoff(payload: Handoff): void {
-  try {
-    sessionStorage.setItem(KEY, JSON.stringify(payload))
-  } catch {
-    // Storage unavailable — the confirmation page falls back to generic copy.
-  }
-}
-
-export function readHandoff<K extends Handoff["kind"]>(
-  kind: K
-): Extract<Handoff, { kind: K }> | null {
-  try {
-    const raw = sessionStorage.getItem(KEY)
-    if (!raw) return null
-    const parsed = parseHandoff(JSON.parse(raw))
-    if (parsed?.kind === kind) {
-      return parsed as Extract<Handoff, { kind: K }>
-    }
-    return null
-  } catch {
-    return null
-  }
-}
-
-export function clearHandoff(): void {
-  try {
-    sessionStorage.removeItem(KEY)
-  } catch {
-    // Nothing to do — see above.
-  }
-}
-
 /** First name for a greeting, or `null` when there's nothing to greet with. */
 export function firstNameOf(fullName: string | undefined): string | null {
   const first = fullName?.trim().split(/\s+/)[0]
@@ -90,7 +32,7 @@ export function firstNameOf(fullName: string | undefined): string | null {
 
 // Only validated Portal acceptance can populate the current confirmation pages.
 const receiptSchema = z.discriminatedUnion("kind", [
-  handoffSchema.options[0].extend({
+  receiptFields.options[0].extend({
     accepted: z.literal(true),
     workshopSessionId: z.uuid(),
     workshopTitle: z.string(),
@@ -99,7 +41,7 @@ const receiptSchema = z.discriminatedUnion("kind", [
     price: z.string(),
     result: registrationAcceptedSchema,
   }),
-  handoffSchema.options[1].extend({
+  receiptFields.options[1].extend({
     accepted: z.literal(true),
     result: corporateInquiryAcceptedSchema,
   }),
