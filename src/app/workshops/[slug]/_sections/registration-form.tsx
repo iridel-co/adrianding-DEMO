@@ -1,8 +1,13 @@
 "use client"
 
 import { useEffect, useId, useRef, useState } from "react"
-import { RegistrationReview } from "./registration-review"
 import { useRouter } from "next/navigation"
+import { useIntake } from "@/app/_lib/use-intake"
+import { Turnstile } from "@/app/_components/turnstile"
+import { saveReceipt } from "@/app/_lib/handoff"
+import { registrationAcceptedSchema } from "@/lib/registration"
+import type { IntakeConfig } from "@/lib/intake"
+import { RegistrationReview } from "./registration-review"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
@@ -15,7 +20,6 @@ import { FormField as Field } from "@/app/_components/form-field"
 import { useStepNavigation } from "@/app/_lib/use-step-navigation"
 import { ArrowLeft, ArrowRight, ChevronDown, Phone, Check } from "lucide-react"
 import { gsap, useGSAP } from "@/app/_lib/gsap"
-import { saveHandoff } from "@/app/_lib/handoff"
 import { DemoFillButton } from "@/app/_components/demo-fill"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -26,28 +30,49 @@ import { cn } from "@/lib/utils"
 
 type Props = {
   slug: string
+  price: string
+  workshopSessionId?: string
+  intake?: IntakeConfig
   workshopTitle: string
   schedule: string
   venue: string
+  phone?: string
   availability: WorkshopAvailability
 }
 
 export function RegistrationForm({
   slug,
+  price,
+  workshopSessionId,
+  intake,
   workshopTitle,
   schedule,
   venue,
   availability,
+  phone,
 }: Props) {
-  const router = useRouter()
   const consentId = useId()
-  const [submitting, setSubmitting] = useState(false)
+  const router = useRouter()
+  const enabled = Boolean(
+    intake?.enabled && workshopSessionId && availability.canRegister
+  )
+  const config: IntakeConfig = {
+    origin: intake?.origin ?? "",
+    siteKey: intake?.siteKey ?? "",
+    enabled,
+  }
+  const attempt = useIntake("registration", config, workshopSessionId ?? slug)
+  const { submitting, locked } = attempt
+  const [token, setToken] = useState<string | null>(null)
+  const [resetKey, setResetKey] = useState(0)
+
   const {
-    step,
+    step: navigationStep,
     pending,
     next: advance,
     back,
   } = useStepNavigation(STEPS.length, submitting)
+  const step = locked && attempt.answers ? STEPS.length - 1 : navigationStep
   const paneRef = useRef<HTMLDivElement>(null)
   const headingRef = useRef<HTMLHeadingElement>(null)
   const previousStep = useRef(step)
@@ -58,6 +83,8 @@ export function RegistrationForm({
     trigger,
     getValues,
     reset,
+    setError,
+
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -73,6 +100,17 @@ export function RegistrationForm({
       ?.scrollTo({ top: 0, behavior: "instant" })
   }, [step])
 
+  useEffect(() => {
+    if (!attempt.answers) return
+    const values = Object.fromEntries(
+      Object.entries(attempt.answers).filter(
+        ([key]) => key !== "workshopSessionId"
+      )
+    )
+    const recovered = schema.safeParse(values)
+    if (recovered.success) reset(recovered.data)
+  }, [attempt.answers, reset])
+
   /**
    * Demo shortcut — see `_components/demo-fill.tsx`. `reset()` writes every
    * field at once and clears any errors already on screen, so the form lands in
@@ -81,6 +119,7 @@ export function RegistrationForm({
    * skipping to the end would hide it.
    */
   const fillSample = () => {
+    if (locked || submitting) return
     reset({
       fullName: "Juan Dela Cruz",
       email: "juan.delacruz@email.com",
@@ -114,19 +153,43 @@ export function RegistrationForm({
       trigger(STEPS[captured].fields, { shouldFocus: true })
     )
 
-  const onSubmit = (v: FormValues) => {
-    if (!availability.canRegister) return
-    setSubmitting(true)
-    saveHandoff({
-      kind: "workshop",
-      slug,
-      fullName: v.fullName,
-      email: v.email,
-      phone: v.phone,
-    })
-    router.push(`/workshops/${slug}/registered`)
+  const onSubmit = async (values: FormValues) => {
+    if (!enabled || !workshopSessionId) {
+      setError("root", {
+        message:
+          "Online registration is currently unavailable. Please contact the team directly.",
+      })
+      return
+    }
+    if (!token || submitting) return
+    try {
+      const result = await attempt.submit(
+        { ...values, workshopSessionId },
+        token,
+        ""
+      )
+      const accepted = registrationAcceptedSchema.safeParse(result)
+      if (!accepted.success) return
+      saveReceipt({
+        kind: "workshop",
+        accepted: true,
+        slug,
+        workshopSessionId,
+        workshopTitle,
+        schedule,
+        venue,
+        price,
+        fullName: values.fullName,
+        email: values.email,
+        phone: values.phone,
+        result: accepted.data,
+      })
+      router.push(`/workshops/${encodeURIComponent(slug)}/registered`)
+    } finally {
+      setToken(null)
+      setResetKey((value) => value + 1)
+    }
   }
-
   const current = STEPS[step]
 
   return (
@@ -159,133 +222,164 @@ export function RegistrationForm({
           Fields are required unless marked optional.
         </p>
       )}
-      <div ref={paneRef} className="mt-10 space-y-5">
-        {step === 0 && (
-          <>
-            <Field label="Full name" error={errors.fullName?.message}>
-              {(control) => (
-                <Input
-                  {...control}
-                  className="placeholder:text-muted-foreground/50 h-12 text-base"
-                  autoComplete="name"
-                  placeholder="Juan Dela Cruz"
-                  {...register("fullName")}
-                />
-              )}
-            </Field>
-            <Field label="Email" error={errors.email?.message}>
-              {(control) => (
-                <Input
-                  {...control}
-                  type="email"
-                  className="placeholder:text-muted-foreground/50 h-12 text-base"
-                  autoComplete="email"
-                  placeholder="juan@email.com"
-                  {...register("email")}
-                />
-              )}
-            </Field>
-            <Field label="Mobile number" error={errors.phone?.message}>
-              {(control) => (
-                <Input
-                  {...control}
-                  type="tel"
-                  className="placeholder:text-muted-foreground/50 h-12 text-base"
-                  autoComplete="tel"
-                  placeholder="0917 000 0000"
-                  {...register("phone")}
-                />
-              )}
-            </Field>
-          </>
-        )}
-
-        {step === 1 && (
-          <>
-            <Field label="Occupation / role" error={errors.occupation?.message}>
-              {(control) => (
-                <Input
-                  {...control}
-                  className="placeholder:text-muted-foreground/50 h-12 text-base"
-                  placeholder="e.g. Insurance advisor"
-                  {...register("occupation")}
-                />
-              )}
-            </Field>
-            <Field label="Salary range" error={errors.salaryRange?.message}>
-              {(control) => (
-                <div className="relative">
-                  <select
+      <fieldset
+        disabled={locked || submitting}
+        className="m-0 min-w-0 border-0 p-0"
+      >
+        <div ref={paneRef} className="mt-10 space-y-5">
+          {step === 0 && (
+            <>
+              <Field label="Full name" error={errors.fullName?.message}>
+                {(control) => (
+                  <Input
                     {...control}
-                    aria-label="Salary range (required)"
-                    className="border-input bg-background focus-visible:ring-ring h-12 w-full appearance-none rounded-md border py-3 pr-10 pl-3 text-base shadow-sm transition-colors focus-visible:ring-1 focus-visible:outline-none"
-                    defaultValue=""
-                    {...register("salaryRange")}
-                  >
-                    <option value="" disabled>
-                      Select a range
-                    </option>
-                    {SALARY_RANGES.map((r) => (
-                      <option key={r} value={r}>
-                        {r}
+                    className="placeholder:text-muted-foreground/50 h-12 text-base"
+                    autoComplete="name"
+                    placeholder="Juan Dela Cruz"
+                    {...register("fullName")}
+                  />
+                )}
+              </Field>
+              <Field label="Email" error={errors.email?.message}>
+                {(control) => (
+                  <Input
+                    {...control}
+                    type="email"
+                    className="placeholder:text-muted-foreground/50 h-12 text-base"
+                    autoComplete="email"
+                    placeholder="juan@email.com"
+                    {...register("email")}
+                  />
+                )}
+              </Field>
+              <Field label="Mobile number" error={errors.phone?.message}>
+                {(control) => (
+                  <Input
+                    {...control}
+                    type="tel"
+                    className="placeholder:text-muted-foreground/50 h-12 text-base"
+                    autoComplete="tel"
+                    placeholder="0917 000 0000"
+                    {...register("phone")}
+                  />
+                )}
+              </Field>
+            </>
+          )}
+
+          {step === 1 && (
+            <>
+              <Field
+                label="Occupation / role"
+                error={errors.occupation?.message}
+              >
+                {(control) => (
+                  <Input
+                    {...control}
+                    className="placeholder:text-muted-foreground/50 h-12 text-base"
+                    placeholder="e.g. Insurance advisor"
+                    {...register("occupation")}
+                  />
+                )}
+              </Field>
+              <Field label="Salary range" error={errors.salaryRange?.message}>
+                {(control) => (
+                  <div className="relative">
+                    <select
+                      {...control}
+                      aria-label="Salary range (required)"
+                      className="border-input bg-background focus-visible:ring-ring h-12 w-full appearance-none rounded-md border py-3 pr-10 pl-3 text-base shadow-sm transition-colors focus-visible:ring-1 focus-visible:outline-none"
+                      defaultValue=""
+                      {...register("salaryRange")}
+                    >
+                      <option value="" disabled>
+                        Select a range
                       </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="text-muted-foreground pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2" />
-                </div>
-              )}
-            </Field>
-            <Field label="City (optional)" error={errors.city?.message}>
-              {(control) => (
-                <Input
-                  {...control}
-                  className="placeholder:text-muted-foreground/50 h-12 text-base"
-                  autoComplete="address-level2"
-                  placeholder="Cebu City"
-                  {...register("city")}
-                />
-              )}
-            </Field>
-          </>
-        )}
+                      {SALARY_RANGES.map((r) => (
+                        <option key={r} value={r}>
+                          {r}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="text-muted-foreground pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2" />
+                  </div>
+                )}
+              </Field>
+              <Field label="City (optional)" error={errors.city?.message}>
+                {(control) => (
+                  <Input
+                    {...control}
+                    className="placeholder:text-muted-foreground/50 h-12 text-base"
+                    autoComplete="address-level2"
+                    placeholder="Cebu City"
+                    {...register("city")}
+                  />
+                )}
+              </Field>
+            </>
+          )}
 
-        {step === 2 && (
-          <>
-            <RegistrationReview
-              values={getValues}
-              workshopTitle={workshopTitle}
-              schedule={schedule}
-              venue={venue}
-            />
-            <label className="flex items-start gap-3">
-              <input
-                type="checkbox"
-                id={consentId}
-                aria-invalid={Boolean(errors.consent)}
-                aria-describedby={
-                  errors.consent ? `${consentId}-error` : undefined
-                }
-                className="accent-brand mt-1 size-4 shrink-0"
-                {...register("consent")}
+          {step === 2 && (
+            <>
+              <RegistrationReview
+                values={getValues}
+                workshopTitle={workshopTitle}
+                schedule={schedule}
+                venue={venue}
               />
-              <span className="text-muted-foreground text-sm leading-relaxed">
-                I agree to Maximum Impact PH collecting and processing the
-                information above to manage my workshop registration, in line
-                with the Philippine Data Privacy Act.
-              </span>
-            </label>
-            {/* Reserve error space so checkbox blur cannot move Back during a click. */}
-            <p
-              id={`${consentId}-error`}
-              aria-live="polite"
-              className="text-destructive -mt-3 min-h-5 text-sm"
-            >
-              {errors.consent?.message}
-            </p>
-          </>
-        )}
-      </div>
-
+              <label className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  id={consentId}
+                  aria-invalid={Boolean(errors.consent)}
+                  aria-describedby={
+                    errors.consent ? `${consentId}-error` : undefined
+                  }
+                  className="accent-brand mt-1 size-4 shrink-0"
+                  {...register("consent")}
+                />
+                <span className="text-muted-foreground text-sm leading-relaxed">
+                  I agree to Maximum Impact PH collecting and processing the
+                  information above to manage my workshop registration, in line
+                  with the Philippine Data Privacy Act.
+                </span>
+              </label>
+              {/* Reserve error space so checkbox blur cannot move Back during a click. */}
+              <p
+                id={`${consentId}-error`}
+                aria-live="polite"
+                className="text-destructive -mt-3 min-h-5 text-sm"
+              >
+                {errors.consent?.message}
+              </p>
+            </>
+          )}
+        </div>
+      </fieldset>
+      {step === 2 && enabled && intake?.siteKey && (
+        <Turnstile
+          siteKey={intake.siteKey}
+          action="workshop-registration"
+          onToken={setToken}
+          resetKey={resetKey}
+        />
+      )}
+      {attempt.error && (
+        <p role="alert" className="text-destructive mt-6 text-sm">
+          {attempt.error}
+        </p>
+      )}
+      {locked && (
+        <p className="text-muted-foreground mt-3 text-sm">
+          Your submitted answers are kept for a safe retry. Complete
+          verification again to retry this attempt.
+        </p>
+      )}
+      {errors.root?.message && (
+        <p role="alert" className="text-destructive mt-6 text-sm">
+          {errors.root.message}
+        </p>
+      )}
       {!availability.canRegister && (
         <p role="alert" className="text-destructive mt-6 text-sm">
           {availability.label}. Your entered details have been kept;
@@ -297,13 +391,16 @@ export function RegistrationForm({
         <p className="text-muted-foreground/70 flex items-center gap-2 text-xs">
           <Phone className="size-3.5 shrink-0" />
           <span>
-            Rather ask first? Call or text{" "}
-            <a
-              href="tel:+639209007709"
-              className="hover:text-foreground font-medium whitespace-nowrap underline"
-            >
-              0920 900 7709
-            </a>
+            Rather ask first?{" "}
+            {phone ? "Call or text " : "See the contact details below."}
+            {phone && (
+              <a
+                href={`tel:${phone.replace(/[^+\d]/g, "")}`}
+                className="hover:text-foreground font-medium whitespace-nowrap underline"
+              >
+                {phone}
+              </a>
+            )}
           </span>
         </p>
 
@@ -314,7 +411,7 @@ export function RegistrationForm({
               type="button"
               variant="ghost"
               onClick={back}
-              disabled={pending || submitting}
+              disabled={pending || submitting || locked}
             >
               <ArrowLeft className="size-4" />
               Back
@@ -340,7 +437,7 @@ export function RegistrationForm({
               onClick={(event) => {
                 if (event.detail < 2) void next()
               }}
-              disabled={pending || submitting}
+              disabled={pending || submitting || locked}
               aria-busy={pending}
             >
               Continue
@@ -352,7 +449,7 @@ export function RegistrationForm({
               key="submit"
               type="submit"
               variant="brand"
-              disabled={pending || submitting || !availability.canRegister}
+              disabled={!enabled || !token || submitting}
             >
               {submitting ? "Submitting…" : "Finish"}
               <Check className="size-4 shrink-0" aria-hidden />

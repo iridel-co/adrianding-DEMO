@@ -1,26 +1,21 @@
 import Link from "next/link"
-import Image from "next/image"
+import { CmsImage as Image } from "@/app/_components/cms-image"
+import { getPublicProfile } from "@/lib/public-api"
 import { ArrowRight } from "lucide-react"
 import { SplitReveal } from "@/app/_components/split-reveal"
 import { Reveal } from "@/app/_components/reveal"
 import { Button } from "@/components/ui/button"
 
-/**
- * Corporate Training — opening banner. Full-bleed shot over the page's h1,
- * same treatment as `about/_sections/hero.tsx` and
- * `workshops/_sections/hero.tsx`. The follow-through copy + CTAs that used to
- * live in a separate `<CorporateIntro>` section below the fold now sit here,
- * to the header's right, so the pitch and the ask land in the same frame.
- */
-export function CorporateTrainingHero() {
+export async function CorporateTrainingHero() {
+  const profile = await getPublicProfile()
   return (
     <section
       data-navbar-theme="dark"
       className="relative flex h-auto min-h-120 w-full items-end overflow-hidden bg-neutral-950 lg:h-[64svh]"
     >
       <Image
-        src="/images/hero/corporate-training-hero.webp"
-        alt="Adrian Ding leading a corporate training session"
+        src={profile.portrait?.url}
+        alt={profile.portrait?.alt ?? ""}
         fill
         priority
         sizes="100vw"
@@ -38,9 +33,7 @@ export function CorporateTrainingHero() {
 
         <Reveal className="flex max-w-md flex-col gap-6 lg:max-w-lg lg:pb-2">
           <p className="text-lg leading-relaxed text-white/80 lg:text-xl">
-            Most of Adrian&rsquo;s work is custom corporate programs — designed
-            with your L&amp;D team around the outcome you need, delivered
-            on-site or off, and reinforced after the room clears.
+            {profile.shortBio}
           </p>
           <div className="flex flex-row flex-wrap items-center gap-3">
             <Button

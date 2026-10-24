@@ -13,7 +13,7 @@ import { useReducedMotionSafe } from "@/app/_lib/use-reduced-motion-safe"
 import { AnimatePresence, motion } from "framer-motion"
 import { ArrowLeft, ArrowRight } from "lucide-react"
 import { cn } from "@/lib/utils"
-import type { Workshop } from "@/lib/workshops"
+import type { PublicWorkshop as Workshop } from "@/lib/public-content"
 
 /**
  * Wobbly marker-circle strokes. Each is an off-round loop that overshoots
@@ -128,14 +128,20 @@ export function WorkshopsCalendar({
   const byDay = useMemo(() => {
     const map = new Map<string, Workshop[]>()
     for (const w of workshops) {
-      const key = dateKey(new Date(w.start))
+      if (!w.nextSession) continue
+      const [year, month, day] = w.nextSession.date.split("-").map(Number)
+      const key = dateKey(new Date(year, month - 1, day))
       map.set(key, [...(map.get(key) ?? []), w])
     }
     return map
   }, [workshops])
 
-  const initial =
-    workshops.length > 0 ? new Date(workshops[0].start) : new Date()
+  const firstSession = workshops.find(
+    (workshop) => workshop.nextSession
+  )?.nextSession
+  const initial = firstSession
+    ? new Date(`${firstSession.date}T12:00:00`)
+    : new Date()
   const [cursor, setCursor] = useState(
     new Date(initial.getFullYear(), initial.getMonth(), 1)
   )
@@ -263,7 +269,7 @@ export function WorkshopsCalendar({
                     >
                       <HandDrawnCircle
                         seed={cell.date.getDate()}
-                        className="text-brand/60 group-hover:text-brand group-focus-visible:text-brand top-1/2 left-1/2 size-12 -translate-x-1/2 -translate-y-1/2 transition-[color,scale] duration-200 group-hover:scale-110 group-focus-visible:scale-110 motion-reduce:transition-none sm:size-14 lg:size-16"
+                        className="text-brand/60 group-hover:text-brand group-focus-visible:text-brand top-1/2 left-1/2 aspect-square h-auto w-full max-w-12 -translate-x-1/2 -translate-y-1/2 transition-[color,scale] duration-200 group-hover:scale-110 group-focus-visible:scale-110 motion-reduce:transition-none sm:size-14 sm:max-w-none lg:size-16"
                       />
                       <span className="relative">{cell.date.getDate()}</span>
                     </button>

@@ -4,18 +4,7 @@ import { useEffect, useState } from "react"
 import { Building2, CalendarDays, Layers, MapPin, Users } from "lucide-react"
 import { Reveal } from "@/app/_components/reveal"
 import { SplitReveal } from "@/app/_components/split-reveal"
-import { readHandoff, type CorporateHandoff } from "@/app/_lib/handoff"
-
-/**
- * Plays the submitted inquiry back. A corporate sender fires off a form and
- * immediately wonders whether the date and headcount landed — showing them
- * verbatim removes the doubt, and gives them the exact wording to correct if
- * anything is wrong.
- *
- * On a direct visit (no handoff, e.g. the link was shared or the tab is new)
- * the same block explains what an inquiry captures instead of collapsing to
- * nothing — the page must never look broken or half-built.
- */
+import { readReceipt, type CorporateReceipt } from "@/app/_lib/handoff"
 
 const FIELDS = [
   {
@@ -45,10 +34,10 @@ const FIELDS = [
 ]
 
 export function InquirySummary() {
-  const [handoff, setHandoff] = useState<CorporateHandoff | null>(null)
+  const [handoff, setHandoff] = useState<CorporateReceipt | null>(null)
 
   useEffect(() => {
-    setHandoff(readHandoff("corporate"))
+    setHandoff(readReceipt("corporate"))
   }, [])
 
   return (
@@ -59,7 +48,7 @@ export function InquirySummary() {
         </SplitReveal>
         <p className="text-muted-foreground mt-5 max-w-2xl leading-relaxed">
           {handoff
-            ? "This is what came through. If anything needs correcting, reply to the email confirmation or call us — nothing is locked in yet."
+            ? "These are the details saved with your accepted inquiry. Contact the team if anything needs correcting."
             : "These are the four things we ask for up front. They are enough to prepare properly for the call, and none of them are commitments."}
         </p>
 

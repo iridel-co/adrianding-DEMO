@@ -90,9 +90,21 @@ export async function ogPhotoForPath(
     return treatOgPhoto(await readFile(FALLBACK_PATH))
   }
   try {
-    const buf = await readFile(
-      join(process.cwd(), "public", publicRelativePath)
-    )
+    let buf: Buffer
+    if (publicRelativePath.startsWith("https://")) {
+      const url = new URL(publicRelativePath)
+      if (url.hostname !== "adrian-ding-assets.iridel.com")
+        throw new Error("Unsupported CMS image host")
+      const response = await fetch(url, {
+        next: { revalidate: 60 },
+        signal: AbortSignal.timeout(10000),
+      })
+      if (!response.ok)
+        throw new Error(`Image request failed (${response.status})`)
+      buf = Buffer.from(await response.arrayBuffer())
+    } else {
+      buf = await readFile(join(process.cwd(), "public", publicRelativePath))
+    }
     return await treatOgPhoto(buf)
   } catch (err) {
     console.warn(

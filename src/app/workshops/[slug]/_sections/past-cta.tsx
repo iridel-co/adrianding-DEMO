@@ -2,7 +2,9 @@ import Link from "next/link"
 import { ArrowRight, CalendarDays, MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Reveal } from "@/app/_components/reveal"
-import { NEXT_WORKSHOP, type Workshop } from "@/lib/workshops"
+import type { Workshop } from "@/lib/workshops"
+import { getPublicWorkshops } from "@/lib/public-api"
+import { sessionSchedule } from "@/lib/public-workshops"
 
 /**
  * Closer for a workshop that has already run. Without this the page is a dead
@@ -13,8 +15,18 @@ import { NEXT_WORKSHOP, type Workshop } from "@/lib/workshops"
  * catalogue has no open dates left, so the fallback sends them to the full
  * listing instead of rendering a broken link.
  */
-export function PastCta({ workshop }: { workshop: Workshop }) {
-  const next = NEXT_WORKSHOP
+export async function PastCta({ workshop }: { workshop: Workshop }) {
+  const upcoming = (await getPublicWorkshops()).find(
+    (item) => item.nextSession?.isRegistrationOpen
+  )
+  const next = upcoming
+    ? {
+        ...upcoming,
+        schedule: sessionSchedule(upcoming.nextSession),
+        venue: upcoming.nextSession?.venueName,
+        city: upcoming.nextSession?.city,
+      }
+    : null
 
   return (
     <section className="bg-background py-16 lg:py-24">
@@ -26,7 +38,7 @@ export function PastCta({ workshop }: { workshop: Workshop }) {
           <p className="text-muted-foreground mx-auto mt-5 max-w-xl text-lg leading-relaxed">
             {workshop.title} was held on {workshop.schedule.split(" · ")[0]}.
             {next
-              ? " The next open workshop is below — same room, same format, same day-long intensive."
+              ? " Explore the next open workshop below."
               : " New dates are announced a few weeks ahead — the full calendar has what is currently open."}
           </p>
         </Reveal>

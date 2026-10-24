@@ -6,7 +6,7 @@ import { useHorizontalOverflow } from "@/app/_lib/use-horizontal-overflow"
 
 import { useEffect, useRef, useState } from "react"
 import { Reveal } from "@/app/_components/reveal"
-import { type Workshop } from "@/lib/workshops"
+import { type PublicWorkshop as Workshop } from "@/lib/public-content"
 
 /**
  * Shared event grid — one rounded, image-filled card per workshop, with a

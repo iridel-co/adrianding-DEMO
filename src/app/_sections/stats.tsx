@@ -1,4 +1,5 @@
-import { Counter } from "@/app/_components/counter"
+import { CmsCounter } from "@/app/_components/cms-counter"
+import { getPublicProfile } from "@/lib/public-api"
 import { Reveal } from "@/app/_components/reveal"
 
 /**
@@ -11,15 +12,10 @@ import { Reveal } from "@/app/_components/reveal"
  * hands the visitor straight to the fork below.
  */
 
-const STATS = [
-  { value: 20, suffix: "+", label: "Years in the training circuit" },
-  { value: 20000, suffix: "+", label: "Professionals trained" },
-  { value: 500, prefix: "Top ", label: "PH companies trained" },
-  // TODO: confirm industry count with the client (PRD marks this a placeholder).
-  { value: 9, suffix: "+", label: "Industries served" },
-]
-
-export function LandingStats() {
+export async function LandingStats() {
+  const profile = await getPublicProfile()
+  const STATS = profile.stats.filter((stat) => stat.pages.includes("home"))
+  if (!STATS.length) return null
   return (
     <section className="bg-background text-foreground">
       <div className="mx-auto max-w-7xl px-6 pt-4 pb-12 sm:px-8 lg:pt-6 lg:pb-16">
@@ -27,19 +23,14 @@ export function LandingStats() {
           By the numbers
         </h2>
 
-        {/* Figures never wrap (`whitespace-nowrap`) so a mid-count value can't
-            stack onto a second line and shove its caption down out of step with
-            the others. The 4-up track is uneven — the wide "Top 500" and
-            "20,000+" columns get extra width so the longest figure clears its
-            cell at every size the count-up passes through. */}
         <Reveal
           stagger={0.12}
           className="mt-8 grid grid-cols-2 gap-x-8 gap-y-14 sm:gap-x-16 sm:gap-y-16 lg:mt-12 lg:grid-cols-[1fr_1.2fr_1.35fr_1fr] lg:gap-x-12 lg:gap-y-0 xl:gap-x-16"
         >
           {STATS.map((s) => (
-            <div key={s.label}>
-              <p className="text-foreground text-[2rem] leading-none font-bold tracking-[-0.03em] whitespace-nowrap tabular-nums sm:text-5xl lg:text-6xl xl:text-7xl">
-                <Counter to={s.value} prefix={s.prefix} suffix={s.suffix} />
+            <div key={s.label} className="min-w-0">
+              <p className="text-foreground text-[2rem] leading-none font-bold tracking-[-0.03em] break-words tabular-nums sm:text-5xl lg:text-6xl xl:text-7xl">
+                <CmsCounter value={s.value} />
               </p>
               <p className="text-muted-foreground mt-6 max-w-[24ch] text-sm leading-snug text-pretty lg:mt-8 lg:text-base">
                 {s.label}

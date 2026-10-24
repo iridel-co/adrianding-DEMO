@@ -5,10 +5,8 @@
  * The site-wide card prerenders to `opengraph-image.body` at the app root; each
  * workshop's card prerenders to the same filename one directory down, one per
  * slug in `generateStaticParams` (`src/app/workshops/[slug]/opengraph-image.tsx`).
- * That route builds its param list from every entry in `WORKSHOPS` with no
- * status filter, so the expected slug list here is read the same way — off
- * `src/lib/workshops.ts` — rather than hardcoded, so a workshop added or
- * removed there is reflected here automatically.
+ * Expected workshop slugs come from the built page manifest, populated by the
+ * CMS. No local catalogue or second network snapshot is used.
  *
  * For every card, asserts: file exists, decodes as JPEG or PNG, is exactly
  * 1200×630, and is under 300 KB — WhatsApp's link-preview fetcher silently
@@ -28,7 +26,7 @@ import sharp from "sharp"
 
 const ROOT = process.cwd()
 const APP_DIR = join(ROOT, ".next/server/app")
-const WORKSHOPS_SRC = join(ROOT, "src/lib/workshops.ts")
+const PRERENDER_MANIFEST = join(ROOT, ".next/prerender-manifest.json")
 
 // Hard ceiling so a corrupt file or a sharp hang can never leave this process
 // running unattended — every check below is local disk + in-memory decode and
@@ -45,26 +43,20 @@ const EXPECTED_WIDTH = 1200
 const EXPECTED_HEIGHT = 630
 
 /**
- * Mirrors `generateStaticParams` in the workshop OG route: every slug in
- * `WORKSHOPS`, no filtering. Regex over the source file rather than importing
- * it — this script runs as plain Node with no TS loader, and the data file is
- * a flat array literal, so this is a faithful read, not a guess.
+ * Workshop pages may render a selected session dynamically; their cards remain prerendered.
  */
 function readWorkshopSlugs() {
-  if (!existsSync(WORKSHOPS_SRC)) {
-    throw new Error(`source of truth missing: ${WORKSHOPS_SRC}`)
-  }
-  const src = readFileSync(WORKSHOPS_SRC, "utf8")
-  const arrayStart = src.indexOf("export const WORKSHOPS")
-  if (arrayStart === -1) {
-    throw new Error("could not find `export const WORKSHOPS` in workshops.ts")
-  }
-  const body = src.slice(arrayStart)
-  const slugs = [...body.matchAll(/slug:\s*"([^"]+)"/g)].map((m) => m[1])
-  if (slugs.length === 0) {
-    throw new Error("parsed zero workshop slugs — regex or source drifted")
-  }
-  return slugs
+  const manifest = JSON.parse(readFileSync(PRERENDER_MANIFEST, "utf8"))
+  return [
+    ...new Set(
+      Object.keys(manifest.routes).flatMap((route) => {
+        const match = route.match(
+          /^\/workshops\/([^/]+)(?:\/opengraph-image)?$/
+        )
+        return match ? [match[1]] : []
+      })
+    ),
+  ]
 }
 
 async function checkCard(route, filePath) {

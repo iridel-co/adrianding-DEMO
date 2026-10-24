@@ -47,7 +47,7 @@ const SITE_URL =
       : "http://localhost:3000")
 const TITLE = "Coach Adrian Ding — Leadership Development & Corporate Training"
 const DESCRIPTION =
-  "20+ years, 20,000+ leaders trained across HSBC, Wipro, Petron and more. Corporate training and public workshops from the CEO of Maximum Impact PH."
+  "Public workshops and corporate training with Coach Adrian Ding."
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

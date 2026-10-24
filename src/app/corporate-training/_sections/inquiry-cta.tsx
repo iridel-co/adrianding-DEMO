@@ -1,3 +1,5 @@
+import { getPublicPrograms, getPublicProfile } from "@/lib/public-api"
+import { getIntakeConfig } from "@/lib/intake-config"
 import { Reveal } from "@/app/_components/reveal"
 import { BloomFieldBackground } from "@/app/_components/bloom-field-background"
 import { CorporateInquiryForm } from "./inquiry-form"
@@ -9,7 +11,12 @@ import { CorporateInquiryForm } from "./inquiry-form"
  * vertically centered against the form's height. Card floats on the red
  * ground for contrast — see `inquiry-form.tsx` for the card treatment.
  */
-export function CorporateInquiryCta() {
+export async function CorporateInquiryCta() {
+  const intake = await getIntakeConfig("corporate")
+  const [programs, profile] = await Promise.all([
+    getPublicPrograms(),
+    getPublicProfile(),
+  ])
   return (
     <section
       id="inquiry"
@@ -24,13 +31,18 @@ export function CorporateInquiryCta() {
                 Ready to build a program for your team?
               </h2>
               <p className="text-brand-foreground/80 mx-auto mt-6 max-w-md text-lg leading-relaxed lg:mx-0 lg:text-xl">
-                A few quick questions about your team and what you need. We
-                &rsquo;ll reply within 2 business days with a proposal.
+                Explore the programmes for your team and contact us directly to
+                discuss what you need.
               </p>
             </div>
           </Reveal>
           <Reveal delay={0.1}>
-            <CorporateInquiryForm />
+            <CorporateInquiryForm
+              intake={intake}
+              programs={programs}
+              phone={profile.phone}
+              email={profile.emails[0]}
+            />
           </Reveal>
         </div>
       </div>

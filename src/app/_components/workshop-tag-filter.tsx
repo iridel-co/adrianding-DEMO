@@ -7,7 +7,9 @@ import { useHorizontalOverflow } from "@/app/_lib/use-horizontal-overflow"
 import { ScrollArrows } from "@/app/_components/scroll-arrows"
 import { EventCards } from "@/app/_components/event-cards"
 import { WORKSHOP_TAG_ICONS } from "@/app/_components/workshop-tags"
-import { WORKSHOP_TAGS, type Workshop, type WorkshopTag } from "@/lib/workshops"
+import { Tag } from "lucide-react"
+import type { PublicWorkshop as Workshop } from "@/lib/public-content"
+type WorkshopTag = string
 import { cn } from "@/lib/utils"
 
 /**
@@ -53,10 +55,7 @@ export function WorkshopTagFilter({ workshops }: { workshops: Workshop[] }) {
   const [selected, setSelected] = useState<WorkshopTag[]>([])
 
   const chips = useMemo(
-    () =>
-      WORKSHOP_TAGS.filter((tag) =>
-        workshops.some((w) => w.tags.includes(tag))
-      ),
+    () => [...new Set(workshops.flatMap((workshop) => workshop.tags))],
     [workshops]
   )
 
@@ -129,7 +128,7 @@ export function WorkshopTagFilter({ workshops }: { workshops: Workshop[] }) {
               </span>
             </button>
             {chips.map((tag) => {
-              const Icon = WORKSHOP_TAG_ICONS[tag]
+              const Icon = WORKSHOP_TAG_ICONS[tag] ?? Tag
               const on = selected.includes(tag)
               return (
                 <button

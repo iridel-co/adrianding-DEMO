@@ -21,6 +21,11 @@ const nextConfig: NextConfig = {
   },
   images: {
     remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "adrian-ding-assets.iridel.com",
+        pathname: "/**",
+      },
       /**
        * Nano Banana CDN
        * Replace "assets.nanobanana.io" with the actual domain once confirmed.

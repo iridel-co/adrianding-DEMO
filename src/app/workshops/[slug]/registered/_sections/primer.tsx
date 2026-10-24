@@ -9,7 +9,11 @@ import type { Workshop } from "@/lib/workshops"
  * watched before the day, is the cheapest way to do that.
  */
 
-export function RegisteredPrimer({ workshop }: { workshop: Workshop }) {
+export function RegisteredPrimer({
+  workshop,
+}: {
+  workshop: Workshop & { primerVideoUrl?: string | null }
+}) {
   return (
     <section className="bg-muted/40 py-16 lg:py-24">
       <div className="mx-auto max-w-3xl px-6 sm:px-8">
@@ -17,13 +21,15 @@ export function RegisteredPrimer({ workshop }: { workshop: Workshop }) {
           Start before the day starts.
         </SplitReveal>
         <p className="text-muted-foreground mt-5 leading-relaxed">
-          Five minutes now makes the room worth more on the day. Watch this
-          while the details are fresh — the rest of the prep arrives in your
-          primer email a week out.
+          Review the workshop primer and preparation details before the day.
         </p>
 
         <Reveal className="mt-10">
-          <PrimerPlayer title={workshop.title} blurb={workshop.primerBlurb} />
+          <PrimerPlayer
+            title={workshop.title}
+            blurb={workshop.primerBlurb}
+            videoUrl={workshop.primerVideoUrl}
+          />
         </Reveal>
       </div>
     </section>

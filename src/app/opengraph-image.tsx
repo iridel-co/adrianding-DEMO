@@ -1,10 +1,9 @@
-import { readFile } from "node:fs/promises"
-import { join } from "node:path"
 import { ImageResponse } from "next/og"
 import { ogJpeg } from "@/lib/og-jpeg"
 import { ogPhotoForPath } from "@/lib/og-photo"
 import { OG_SANS, OG_SERIF, loadOgFonts } from "@/lib/og-fonts"
 import { OG_INK, ogScrim } from "@/lib/og-card"
+import { getPublicProfile } from "@/lib/public-api"
 
 export const runtime = "nodejs"
 export const alt =
@@ -54,10 +53,24 @@ const PORTRAIT_W = 383
 const PORTRAIT_H = 610
 
 async function loadPortraitDataUri() {
-  const buf = await readFile(
-    join(process.cwd(), "src/app/og-assets/ad-hero-portrait.png")
-  )
-  return `data:image/png;base64,${buf.toString("base64")}`
+  const profile = await getPublicProfile()
+  if (!profile.portrait) return null
+  try {
+    const url = new URL(profile.portrait.url)
+    if (
+      url.protocol !== "https:" ||
+      url.hostname !== "adrian-ding-assets.iridel.com"
+    )
+      return null
+    const response = await fetch(url, {
+      next: { revalidate: 60 },
+      signal: AbortSignal.timeout(10000),
+    })
+    if (!response.ok) return null
+    return `data:${response.headers.get("content-type") ?? "image/png"};base64,${Buffer.from(await response.arrayBuffer()).toString("base64")}`
+  } catch {
+    return null
+  }
 }
 
 export default async function OgImage() {
@@ -92,20 +105,22 @@ export default async function OgImage() {
         }}
       />
       {ogScrim()}
-      <img
-        src={portraitSrc}
-        alt=""
-        width={PORTRAIT_W}
-        height={PORTRAIT_H}
-        style={{
-          position: "absolute",
-          right: 0,
-          bottom: 0,
-          width: PORTRAIT_W,
-          height: PORTRAIT_H,
-          objectFit: "contain",
-        }}
-      />
+      {portraitSrc && (
+        <img
+          src={portraitSrc}
+          alt=""
+          width={PORTRAIT_W}
+          height={PORTRAIT_H}
+          style={{
+            position: "absolute",
+            right: 0,
+            bottom: 0,
+            width: PORTRAIT_W,
+            height: PORTRAIT_H,
+            objectFit: "contain",
+          }}
+        />
+      )}
       <div
         style={{
           position: "absolute",

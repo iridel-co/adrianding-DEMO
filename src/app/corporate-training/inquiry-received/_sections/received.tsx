@@ -5,33 +5,18 @@ import { Check } from "lucide-react"
 import { Reveal } from "@/app/_components/reveal"
 import {
   firstNameOf,
-  readHandoff,
-  type CorporateHandoff,
+  readReceipt,
+  type CorporateReceipt,
 } from "@/app/_lib/handoff"
-
-/**
- * Confirmation header and the three steps that follow an inquiry.
- *
- * The handoff is read in an effect, not during render — SSR has no
- * `sessionStorage`, and branching the first client render on it would
- * hydration-mismatch. Everything here reads correctly with no handoff at all;
- * only the greeting and the company name are personalised.
- *
- * The reply-window promise used to sit here as a coloured line; it now carries
- * the full brand-ground block in `commitment.tsx` directly below, matching the
- * workshop confirmation's payment block. A corporate enquirer's real question
- * after submitting is "when will I hear back", and it deserves the loudest
- * treatment on the page rather than a sentence in a paragraph stack.
- */
 
 const STEPS = [
   {
     title: "We review what you sent",
-    body: "Adrian reads every inquiry himself — the programme, the team size and the timing, against what has worked for teams in the same position.",
+    body: "The programme, team size and timing give the team context for reviewing your request.",
   },
   {
     title: "A call to understand the team",
-    body: "A short call, usually 30 minutes, with whoever owns the outcome. What is actually going wrong, what good looks like, and what the room can realistically absorb in a day.",
+    body: "A conversation with whoever owns the outcome. What is actually going wrong, what good looks like, and what the room can realistically absorb in a day.",
   },
   {
     title: "A proposal built around it",
@@ -40,10 +25,10 @@ const STEPS = [
 ]
 
 export function InquiryReceived() {
-  const [handoff, setHandoff] = useState<CorporateHandoff | null>(null)
+  const [handoff, setHandoff] = useState<CorporateReceipt | null>(null)
 
   useEffect(() => {
-    setHandoff(readHandoff("corporate"))
+    setHandoff(readReceipt("corporate"))
   }, [])
 
   const firstName = firstNameOf(handoff?.fullName)
@@ -56,26 +41,28 @@ export function InquiryReceived() {
             headline read as one confirmation mark on a shared axis. */}
         <Reveal className="mx-auto flex max-w-3xl flex-col items-center text-center [overflow-wrap:anywhere]">
           <span className="bg-brand text-brand-foreground flex size-12 items-center justify-center rounded-full">
-            <Check className="size-6" strokeWidth={2.5} />
+            {handoff ? <Check className="size-6" strokeWidth={2.5} /> : "?"}
           </span>
 
           <h1 className="mt-7 max-w-full font-serif text-[2.5rem] leading-[1.05] tracking-[-0.02em] sm:text-[3.25rem] lg:text-[4rem]">
-            {firstName
+            {handoff && firstName
               ? `Thanks, ${firstName}. We've got your inquiry.`
-              : "Thanks — we've got your inquiry."}
+              : handoff
+                ? "Thanks — we've got your inquiry."
+                : "Your corporate training inquiry"}
           </h1>
 
           <p className="text-muted-foreground mt-6 text-lg leading-relaxed lg:text-xl">
-            {company ? (
+            {handoff ? (
               <>
-                It is with Adrian and the team now, and we&rsquo;re already
-                looking at what has worked for teams the size of{" "}
-                <span className="text-foreground font-medium">{company}</span>.
+                Your inquiry was saved{company ? ` for ${company}` : ""}.
+                Requester and team email jobs were queued; delivery is not
+                confirmed here.
               </>
             ) : (
               <>
-                It is with Adrian and the team now, and we&rsquo;re already
-                looking at what has worked for teams in the same position.
+                No accepted inquiry receipt is available in this tab. Return to
+                the inquiry form to send your request.
               </>
             )}
           </p>

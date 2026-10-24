@@ -1,3 +1,4 @@
+import { getPublicProfile } from "@/lib/public-api"
 import Link from "next/link"
 import {
   Instagram,
@@ -22,30 +23,20 @@ const NAV = [
   { href: "/email-templates", label: "Email templates" },
 ]
 
-// Kept in step with the hero's own SOCIALS (hero-editorial.tsx) — same five
-// platforms in both places.
-const SOCIALS = [
-  {
-    href: "https://www.instagram.com/coachadrianding/?hl=en",
-    label: "Instagram",
-    Icon: Instagram,
-  },
-  {
-    href: "https://www.facebook.com/adrianding.mi/",
-    label: "Facebook",
-    Icon: Facebook,
-  },
-  {
-    href: "https://ph.linkedin.com/in/coachadrianding",
-    label: "LinkedIn",
-    Icon: Linkedin,
-  },
-  {
-    href: "https://www.youtube.com/channel/UCugWqssJknpyGE0k-jexhfA",
-    label: "YouTube",
-    Icon: Youtube,
-  },
-]
+const SOCIAL_ICONS = {
+  instagram: Instagram,
+  facebook: Facebook,
+  linkedin: Linkedin,
+  youtube: Youtube,
+  tiktok: TikTokIcon,
+}
+const SOCIAL_LABELS = {
+  instagram: "Instagram",
+  facebook: "Facebook",
+  linkedin: "LinkedIn",
+  youtube: "YouTube",
+  tiktok: "TikTok",
+}
 
 function TikTokIcon({ className }: { className?: string }) {
   return (
@@ -60,7 +51,11 @@ function TikTokIcon({ className }: { className?: string }) {
   )
 }
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const profile = await getPublicProfile()
+  const socials = profile.socialLinks.filter((link) =>
+    /^https?:\/\//i.test(link.url)
+  )
   return (
     <footer
       data-navbar-theme="dark"
@@ -71,31 +66,25 @@ export function SiteFooter() {
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <p className="max-w-sm leading-relaxed text-white/50">
-              Leadership development, corporate training and keynotes from the
-              CEO of Maximum Impact PH. 20+ years, 20,000+ leaders trained.
+              {profile.shortBio}
             </p>
             <div className="mt-5 flex items-center justify-center gap-3 md:justify-start">
-              {SOCIALS.map(({ href, label, Icon }) => (
-                <a
-                  key={label}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={label}
-                  className="hover:text-brand hover:border-brand/40 flex size-11 items-center justify-center rounded-full border border-white/15 text-white/50 transition-colors"
-                >
-                  <Icon className="size-4" />
-                </a>
-              ))}
-              <a
-                href="https://www.tiktok.com/@coachadrianding"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="TikTok"
-                className="hover:text-brand hover:border-brand/40 flex size-9 items-center justify-center rounded-full border border-white/15 text-white/50 transition-colors"
-              >
-                <TikTokIcon className="size-4" />
-              </a>
+              {socials.map(({ network, url }) => {
+                const Icon = SOCIAL_ICONS[network]
+                const label = SOCIAL_LABELS[network]
+                return (
+                  <a
+                    key={label}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={label}
+                    className={`hover:text-brand hover:border-brand/40 flex ${network === "tiktok" ? "size-9" : "size-11"} items-center justify-center rounded-full border border-white/15 text-white/50 transition-colors`}
+                  >
+                    <Icon className="size-4" />
+                  </a>
+                )
+              })}
             </div>
           </div>
 
@@ -120,39 +109,46 @@ export function SiteFooter() {
             <p className="text-xs font-semibold tracking-[0.14em] text-white/60 uppercase">
               Contact
             </p>
-            <a
-              href="mailto:coachadrianding@maximumimpact.online"
-              className="flex items-center gap-2.5 text-sm text-white/60 transition-colors hover:text-white sm:text-[0.9375rem]"
-            >
-              <Mail className="size-5 shrink-0" />
-              {/* Clean, natural breaks on mobile instead of `break-all`
-                  chopping mid-word wherever it happens to run out of room;
-                  `sm:` and up keep the original single unbroken line. */}
-              <span className="sm:hidden">
-                coachadrianding
-                <br />
-                @maximumimpact
-                <br />
-                .online
-              </span>
-              <span className="hidden break-all sm:inline">
-                coachadrianding@maximumimpact.online
-              </span>
-            </a>
-            <a
-              href="mailto:maximumimpactphilippines@yahoo.com"
-              className="flex items-center gap-2.5 text-sm break-all text-white/60 transition-colors hover:text-white sm:text-[0.9375rem]"
-            >
-              <Mail className="size-5 shrink-0" />
-              maximumimpactphilippines@yahoo.com
-            </a>
-            <a
-              href="tel:+639209007709"
-              className="flex items-center gap-2.5 text-sm text-white/60 transition-colors hover:text-white sm:text-lg"
-            >
-              <Phone className="size-5 shrink-0" />
-              0920 900 7709
-            </a>
+            {profile.emails.map((email) => {
+              const at = email.lastIndexOf("@")
+              const dot = email.lastIndexOf(".")
+              return (
+                <a
+                  key={email}
+                  href={`mailto:${email}`}
+                  className="flex items-center gap-2.5 text-sm text-white/60 transition-colors hover:text-white sm:text-[0.9375rem]"
+                >
+                  <Mail className="size-5 shrink-0" />
+                  <span className="sm:hidden">
+                    {at > 0 ? (
+                      <>
+                        {email.slice(0, at)}
+                        <br />
+                        {email.slice(at, dot > at ? dot : undefined)}
+                        {dot > at && (
+                          <>
+                            <br />
+                            {email.slice(dot)}
+                          </>
+                        )}
+                      </>
+                    ) : (
+                      email
+                    )}
+                  </span>
+                  <span className="hidden break-all sm:inline">{email}</span>
+                </a>
+              )
+            })}
+            {profile.phone && (
+              <a
+                href={`tel:${profile.phone.replace(/[^\d+]/g, "")}`}
+                className="flex items-center gap-2.5 text-sm text-white/60 transition-colors hover:text-white sm:text-lg"
+              >
+                <Phone className="size-5 shrink-0" />
+                {profile.phone}
+              </a>
+            )}
           </div>
         </div>
       </div>

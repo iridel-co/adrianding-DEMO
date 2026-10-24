@@ -1,98 +1,97 @@
 import { expect, test } from "@playwright/test"
 
 for (const width of [360, 768]) {
-  test(`@layout Corporate mobile actions and step navigation at ${width}px`, async ({
+  test(`@layout Corporate inquiry preview remains editable without submitting at ${width}px`, async ({
     page,
   }) => {
     await page.setViewportSize({ width, height: 844 })
-    await page.goto("/corporate-training?program=leadership#inquiry")
-    const form = page.locator("form")
-    await expect(form.getByText(/Enquiring about Leadership/)).toBeVisible()
-    const forward = form.getByRole("button", {
-      name: "Continue",
-      exact: true,
+    let posts = 0
+    page.on("request", (request) => {
+      if (request.method() === "POST") posts += 1
     })
+    await page.goto("/corporate-training?program=cms-program-2#inquiry")
+    const form = page.locator("form")
+    await expect(form.getByText(/Enquiring about CMS Program 2/)).toBeVisible()
+    await expect(form.getByRole("status")).toContainText(
+      "Online inquiries are currently unavailable"
+    )
+    const forward = form.getByRole("button", { name: "Continue", exact: true })
     await forward.click()
     await expect(form.getByText("Please enter your full name.")).toBeVisible()
-    await form
-      .getByRole("button", {
-        name: "Demo shortcut: fill this form with sample data",
-      })
-      .click()
-    for (const step of [2, 3, 4]) {
+    await form.getByRole("button", { name: /Demo shortcut/ }).click()
+    for (const step of [2, 3]) {
       await forward.click()
-      const heading = form.getByRole("heading", {
-        name: new RegExp(`Step ${step} of 4`),
-      })
-      await expect(heading).toBeFocused()
+      await expect(
+        form.getByRole("heading", { name: new RegExp(`Step ${step} of 4`) })
+      ).toBeFocused()
     }
+    await expect(
+      form.getByLabel("Preferred programme", { exact: true })
+    ).toHaveValue("leadership")
+    await form
+      .getByLabel("Preferred programme", { exact: true })
+      .selectOption("cms-program-2")
+    await form.getByLabel("To (optional)", { exact: true }).fill("2026-11-09")
+    await forward.click()
+    await expect(
+      form.getByText("End date cannot precede start date.")
+    ).toBeVisible()
+    await form.getByLabel("To (optional)", { exact: true }).fill("2026-11-12")
+    const context = form.getByRole("textbox", {
+      name: "Anything else we should know? (optional)",
+    })
+    await context.fill("x".repeat(5001))
+    await forward.click()
+    await expect(form.getByText("Use 5,000 characters or fewer.")).toBeVisible()
+    await context.fill("Developing a new team.")
+    await forward.click()
+    await expect(form.locator("dl")).toContainText("CMS Program 2")
     const consent = form.getByRole("checkbox")
-    const send = form.getByRole("button", { name: "Send inquiry" })
     await consent.uncheck()
-    await expect(send).toBeVisible()
-    await expect(send).toBeEnabled()
-    await send.click()
-    await expect(consent).toBeFocused()
-    await expect(consent).toHaveAttribute("aria-invalid", "true")
-    await expect(consent).toHaveAccessibleDescription(
-      "You need to agree to continue."
+    const send = form.getByRole("button", { name: "Send inquiry" })
+    await expect(send).toBeDisabled()
+    await consent.check()
+    await expect(send).toBeDisabled()
+    // Native/keyboard form submission must also stop before any save or redirect.
+    await form.evaluate((element) =>
+      (element as HTMLFormElement).requestSubmit()
+    )
+    await expect(form.getByRole("alert")).toContainText(
+      "Online inquiries are currently unavailable"
     )
     await expect(page).not.toHaveURL(/inquiry-received$/)
-    await consent.check()
-    await expect(send).toBeEnabled()
+    expect(posts).toBe(0)
+    expect(
+      await page.evaluate(() => sessionStorage.getItem("ad-demo-handoff"))
+    ).toBeNull()
     await form.getByRole("button", { name: "Back", exact: true }).click()
     await expect(
-      form.getByRole("heading", { name: /Step 3 of 4/ })
-    ).toBeFocused()
-    await expect(form.locator('select[name="program"]')).toHaveValue(
-      "Leadership Training & Development"
-    )
-    await expect(form.getByRole("checkbox", { checked: true })).toHaveCount(1)
-    await forward.click()
-    await send.click()
-    await expect(page).toHaveURL(/\/corporate-training\/inquiry-received$/)
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-      "Thanks, Maria. We've got your inquiry."
-    )
+      form.getByLabel("Preferred programme", { exact: true })
+    ).toHaveValue("cms-program-2")
   })
 }
 
-test("@layout Corporate review and confirmation wrap long submitted values", async ({
-  page,
-}) => {
+test("@layout Corporate inquiry review wraps long values", async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 844 })
   await page.goto("/corporate-training#inquiry")
   const form = page.locator("form")
+  await form.getByRole("button", { name: /Demo shortcut/ }).click()
+  await form.getByLabel("Full name", { exact: true }).fill("Alex".repeat(40))
+  await form.getByRole("button", { name: "Continue", exact: true }).click()
+  await form.getByLabel("Company", { exact: true }).fill("Company".repeat(28))
+  await form.getByRole("button", { name: "Continue", exact: true }).click()
   await form
-    .getByRole("button", {
-      name: "Demo shortcut: fill this form with sample data",
-    })
-    .click()
-  await form.locator('input[name="fullName"]').fill("Alex".repeat(40))
-  await form.getByRole("button", { name: "Continue", exact: true }).click()
-  await form.locator('input[name="company"]').fill("Company".repeat(40))
-  await form.getByRole("button", { name: "Continue", exact: true }).click()
-  await form.locator('input[name="venue"]').fill("Venue".repeat(50))
+    .getByLabel("Possible venue", { exact: true })
+    .fill("Venue".repeat(50))
   await form.getByRole("button", { name: "Continue", exact: true }).click()
   const review = form.locator("dl")
   expect(await review.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(
     true
   )
-  await form.getByRole("button", { name: "Send inquiry" }).click()
-  await expect(page).toHaveURL(/\/corporate-training\/inquiry-received$/)
-  await expect(page.getByRole("heading", { level: 1 })).toContainText(
-    "Alex".repeat(40)
-  )
   await expect(
-    page.getByText("Venue".repeat(50), { exact: true })
-  ).toBeVisible()
-  for (const element of await page.locator("h1, dd").all()) {
-    expect(
-      await element.evaluate((el) => el.scrollWidth <= el.clientWidth)
-    ).toBe(true)
-  }
+    form.getByRole("button", { name: "Send inquiry" })
+  ).toBeDisabled()
 })
-
 test("Corporate form labels, errors and overlapping Continue activations", async ({
   page,
 }) => {
@@ -120,7 +119,7 @@ test("Corporate form labels, errors and overlapping Continue activations", async
   await forward.click()
   await expect(
     form.getByLabel("Preferred programme", { exact: true })
-  ).toHaveValue("Leadership Training & Development")
+  ).toHaveValue("leadership")
   await expect(
     form.getByLabel("Number of attendees", { exact: true })
   ).toHaveValue("16 – 30")

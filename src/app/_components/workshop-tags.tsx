@@ -6,8 +6,8 @@ import {
   Sprout,
   TrendingUp,
   Users,
+  Tag,
 } from "lucide-react"
-import type { WorkshopTag } from "@/lib/workshops"
 
 /**
  * Focus-area pills for a workshop's `tags` (added 2026-09-19, client feedback).
@@ -20,7 +20,7 @@ import type { WorkshopTag } from "@/lib/workshops"
  * `workshop-tag-filter.tsx`, which reuses `WORKSHOP_TAG_ICONS` below to stay
  * in sync with this icon map.
  */
-export const WORKSHOP_TAG_ICONS: Record<WorkshopTag, typeof Compass> = {
+export const WORKSHOP_TAG_ICONS: Record<string, typeof Compass> = {
   Leadership: Compass,
   Sales: TrendingUp,
   Communication: MessagesSquare,
@@ -45,7 +45,7 @@ export function WorkshopTagPills({
   size = "sm",
   className = "",
 }: {
-  tags: WorkshopTag[]
+  tags: string[]
   size?: "sm" | "md"
   className?: string
 }) {
@@ -55,7 +55,7 @@ export function WorkshopTagPills({
       className={`flex flex-wrap gap-1.5 ${className}`}
     >
       {tags.map((tag) => {
-        const Icon = WORKSHOP_TAG_ICONS[tag]
+        const Icon = WORKSHOP_TAG_ICONS[tag] ?? Tag
         return (
           <li key={tag} className={SIZE_CLASS[size]}>
             <Icon className={ICON_SIZE_CLASS[size]} aria-hidden />

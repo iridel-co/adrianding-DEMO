@@ -41,14 +41,16 @@ export function RegisteredExpect({ workshop }: { workshop: Workshop }) {
               <Meta
                 icon={MapPin}
                 label="Where"
-                value={`${workshop.venue}, ${workshop.city}`}
+                value={[workshop.venue, workshop.city]
+                  .filter(Boolean)
+                  .join(", ")}
               />
               <Meta icon={Tag} label="Investment" value={workshop.price} />
             </dl>
 
             <div className="bg-muted/50 rounded-lg p-6">
               <p className="text-foreground text-sm font-semibold tracking-[0.08em] uppercase">
-                Your seat includes
+                Workshop includes
               </p>
               <ul className="mt-5 flex flex-col gap-3">
                 {workshop.inclusions.map((item) => (

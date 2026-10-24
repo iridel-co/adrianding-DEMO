@@ -1,5 +1,5 @@
 import { WorkshopAvailabilityText } from "@/app/_components/workshop-availability-text"
-import Image from "next/image"
+import { CmsImage as Image } from "@/app/_components/cms-image"
 import Link from "next/link"
 import { CalendarDays, MapPin } from "lucide-react"
 import { SplitReveal } from "@/app/_components/split-reveal"
@@ -61,6 +61,7 @@ export function WorkshopHero({ workshop }: { workshop: Workshop }) {
         >
           {workshop.title}
         </SplitReveal>
+        <p className="mt-4 text-xs text-white/75">API content</p>
 
         <Reveal className="mt-5">
           <WorkshopTagPills tags={workshop.tags} size="md" />

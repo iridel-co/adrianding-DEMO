@@ -15,15 +15,16 @@ import {
   ogTitle,
   ogWordmarkSpine,
 } from "@/lib/og-card"
-import { WORKSHOPS, getWorkshop } from "@/lib/workshops"
+import { getPublicWorkshop, getPublicWorkshops } from "@/lib/public-api"
+import { sessionSchedule } from "@/lib/public-workshops"
 
 export const runtime = "nodejs"
 export const alt = "Public workshop with Coach Adrian Ding"
 export const size = { width: 1200, height: 630 }
 export const contentType = "image/jpeg"
 
-export function generateStaticParams() {
-  return WORKSHOPS.map((w) => ({ slug: w.slug }))
+export async function generateStaticParams() {
+  return (await getPublicWorkshops()).map((w) => ({ slug: w.slug }))
 }
 
 /**
@@ -49,22 +50,25 @@ export default async function WorkshopOgImage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const workshop = getWorkshop(slug)
+  const workshop = await getPublicWorkshop(slug)
 
   const [photoSrc, fonts] = await Promise.all([
-    ogPhotoForPath(workshop?.image, slug),
+    ogPhotoForPath(workshop.heroImage?.url, slug),
     loadOgFonts(),
   ])
 
   // Drop the weekday and the time range — a social card has room for the date
   // and nothing else, and "Friday" is not what makes someone click.
-  const dateLine = workshop?.schedule
+  const dateLine = sessionSchedule(workshop.sessions[0] ?? null)
     .split("·")[0]
     ?.replace(/^\w+day,\s*/, "")
     .trim()
   const address = workshop
-    ? addressLine(workshop.venue, workshop.city)
-    : "SEDA Ayala Center Cebu, E-bloc"
+    ? addressLine(
+        workshop.sessions[0]?.venueName ?? workshop.defaultVenue.name,
+        workshop.sessions[0]?.city ?? workshop.defaultVenue.city
+      )
+    : ""
   const title = workshop?.title ?? "Workshop"
   const isLong = title.length > 28
 

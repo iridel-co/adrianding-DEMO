@@ -8,7 +8,7 @@ import {
   type CSSProperties,
   type ReactNode,
 } from "react"
-import Image from "next/image"
+import { CmsImage as Image } from "@/app/_components/cms-image"
 import { ArrowRight, Check } from "lucide-react"
 import { dispatchProgramInquiry } from "@/app/_lib/program-inquiry"
 import { useHorizontalOverflow } from "@/app/_lib/use-horizontal-overflow"
@@ -68,7 +68,7 @@ export type ProgramCard = {
   title: string
   blurb: string
   usefulFor: string[]
-  image: string
+  image: string | null
   imageAlt: string
   imagePosition?: string // CSS object-position, default "50% 50%"
 }

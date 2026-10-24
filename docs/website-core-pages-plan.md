@@ -75,13 +75,12 @@ The user requested fewer PRs to reduce review and workflow friction. Keep the ol
 package IDs as work-item references; they no longer each require a separate PR.
 PR01/PR02 stay merged and PR03 stays on its existing separate branch.
 
-| Delivery PR | Includes                                                                           | Branch and title                                                                                            |
-| ----------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| PR03        | Current core/shared responsiveness and browser repairs                             | Existing branch/title below                                                                                 |
-| PR04        | PR04 + PR05: Workshop and Corporate layouts and registration availability          | `fix/public-form-layouts`; `fix: public form layouts and workshop availability`                             |
-| PR06        | PR06 + PR07 + PR08 + approved gallery removal: shared motion, presentation, assets | `fix/shared-public-presentation`; `fix: shared public presentation`                                         |
-| PR09        | PR09 + PR10: typed content adapters, contracts, demo submission boundaries         | `refactor/frontend-integration-preparation`; `refactor: prepare frontend content and submission boundaries` |
-| PR12        | Final polish; PR11 performance work only if measurements justify it                | Existing PR12 branch/title below                                                                            |
+| Delivery PR | Includes                                                                         | Branch and title                                                                                  |
+| ----------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| PR03        | Current core/shared responsiveness and browser repairs                           | Existing branch/title below                                                                       |
+| PR04        | PR04 + PR05: Workshop and Corporate layouts and registration availability        | `fix/public-form-layouts`; `fix: public form layouts and workshop availability`                   |
+| PR06–PR10   | Shared presentation/gallery removal + CMS contracts + demo submission boundaries | `refactor/public-site-integration`; `refactor: prepare public site CMS and submission boundaries` |
+| PR12        | Final polish; PR11 performance work only if measurements justify it              | Existing PR12 branch/title below                                                                  |
 
 Use coherent commits within these groups. Pending portrait/logo approvals do not
 block ready accessibility or gallery work: defer those asset commits if approval
@@ -422,8 +421,8 @@ verified fonts and no page overflow; existing docs were corrected, with no new
 tracked documents. Existing media is preserved; replacement logos/portraits await
 approval. Native-device, hosted and remote-CI evidence remain pending.
 
-Branch: `fix/shared-public-presentation`
-PR title: `fix: shared public presentation`
+Branch: `refactor/public-site-integration` (combined PR06–PR10)
+PR title: `refactor: prepare public site CMS and submission boundaries`
 Dependencies: PR02 and any shared UI changes touching these components.
 Owner: main executor for testimonial/company shared components.
 PR: not opened. Evidence: local gate and UI review above. Merge status: unmerged.
@@ -463,8 +462,139 @@ PR: pending. Evidence: pending. Merge status: not started.
 
 ## PR09 Frontend integration contracts
 
-Branch: `refactor/frontend-integration-preparation`
-PR title: `refactor: prepare frontend content and submission boundaries`
+Combined PR06–PR10 execution, 2026-10-13: use `refactor/public-site-integration`;
+title `refactor: prepare public site CMS and submission boundaries`. Existing
+gallery/motion commits are retained. PR #4 is merged; the combined PR targets
+`main`. CMS preparation now follows [merged portal PR #2](https://github.com/iridel-co/adrian-ding-portal/pull/2)
+at portal `main` revision `898bcbe07f37d0a517ea5a672ce3463cd2c8dee4`.
+Cover profile, workshop list/detail, clients/industries, programmes, testimonials,
+FAQs and API errors with response schemas; keep the static catalogue active.
+No fetch activation, remote-image configuration, backend writes or CMS changes.
+
+Live-integration gaps: capacity is not seats remaining; past sessions are omitted;
+`nextSession` can have registration closed; programmes now provide `slug` and
+`summary`, but no local icon mapping; testimonials lack logos/Corporate selection. Preserve nullable
+media and links, string tags, session arrays and CMS IDs without title-based joins.
+Profile has no publish state and legitimately returns empty content before setup.
+Live cache behavior (including stale responses), image hosts and live submissions
+require separate acceptance. Complete validated payloads retain consent and all
+collected answers in memory; only confirmation-display fields enter session storage.
+Contract/form fixtures reuse the existing `@policy` selection and browser journeys.
+Implemented response validation and PHP/Manila formatters, complete demo payloads,
+duplicate-submit guards, retryable form errors, and stored-confirmation validation
+with workshop-slug matching. Full `quality:ci` passed: 189 browser/policy cases,
+19 tooling checks, formatting, source size, lint/CSS, types, build and nine OG cards.
+Five new policy fixtures run once; four malformed-storage layout cases reuse the
+existing matrix, and duplicate-submit coverage extends existing form journeys.
+No new dependencies or tracked documentation files. Changes are local/uncommitted;
+new branch publication, CMS activation, native-device and hosted/CI proof remain pending.
+
+### Remaining integration sequence — 2026-10-15
+
+| Package             | Next work and activation boundary                                                                                                                                                                                                                                                                                       |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Current PR06–PR10   | Refresh merged program fields and prepare corporate intake contracts; preserve demo operation.                                                                                                                                                                                                                          |
+| Shared CMS content  | Connect profile (including page-filtered stats, timeline, credentials, contacts and primer), clients/industries, programs, testimonials and FAQ consumers. Use validated server reads, explicit content mode, nullable media fallbacks and empty/error states; never substitute samples on CMS failure.                 |
+| Corporate intake    | Connect the form separately using dynamic program titles, raw picked dates or rough text, Turnstile and UUIDv4 submission keys. Retry uncertain saves with unchanged answers/key and a fresh token. Only validated HTTP 202 `{ accepted: true }` confirms a saved inquiry; it does not prove email delivery.            |
+| Workshops, deferred | Keep the current catalogue until the counterpart confirms registration, seat availability and calendar/history contracts. Earlier workshop CRM PRs are closed/unmerged; merged corporate intake does not provide workshop booking. Include list/detail/calendar, metadata/OG and registration consumers when unblocked. |
+| Final PR12          | Approved assets, supplied nitpicks and native-phone review; optional PR11 performance work only when measurements justify it.                                                                                                                                                                                           |
+
+Read preparation covers all eight original endpoints. The corporate request uses
+`targetDateFrom`/`targetDateTo` or `targetDateText`, includes consent, and has its own
+`{ error: string }` envelope. Local preparation validates portal field limits and
+date ordering before review. No backend writes are enabled. Separate CMS and intake
+activation requires confirmed API/media hosts, approved content, corporate origin
+allowlisting, Turnstile settings and authorized non-production save/readback proof.
+[Portal PR #12](https://github.com/iridel-co/adrian-ding-portal/pull/12) was open at the
+2026-10-15 inspection: program detail lookup, OpenAPI and ETags were provisional. Use the merged program
+list for slug prefill until then. Upstream stale-while-revalidate can serve stale
+content for 24 hours, so five-minute freshness is not guaranteed.
+
+Preparation validation, 2026-10-15: full `quality:ci` passed all 191 browser/policy
+cases, 19 tooling checks, formatting/source-size/lint/CSS/types, production builds
+and nine OG cards. Added two policy cases and extended existing corporate journeys
+for raw picked/rough dates, reversed-range recovery and oversized-context recovery.
+Static review caught the missing context step validation; the first full run also
+exposed an old 280-character company fixture, now 196 characters within the portal
+limit. Both corrections passed focused checks and the final full gate. Existing
+lint/CSS/source-size warnings remain visible. New preparation work is uncommitted
+and unpushed; live API/provider, hosted/CI and native-device checks remain pending.
+
+Live API smoke check, 2026-10-20: requests from this machine to
+`https://portal.adrianding.com` passed local response schemas for all content GET
+routes, including every returned program/workshop slug. Filters, missing-slug 404s
+and invalid-group 400s behaved as expected. Program detail, OpenAPI 3.1.1 and ETags
+are deployed; corporate request fields/limits match the published OpenAPI contract.
+Chromium on a temporary localhost origin can read ordinary GETs and ETags, but
+conditional GETs fail CORS: preflight is 204 with CORS headers while the subsequent
+304 omits them. Corporate preflight returns `403 origin_not_allowed` for
+`http://localhost:3000`, `http://127.0.0.1:3100`, the Vercel demo, and the apex/www
+public-site origins. One returned media URL, `/sample/hero.jpg`, returns 404 and is
+used for a client logo, profile portrait and credential logo; the other unique
+returned media URL is reachable. Evidence is ignored locally under
+`test-results/api-smoke/live-responses.json`. No inquiry POST, remote write or site
+activation was performed; real save/readback remains untested.
+
+CMS read integration, 2026-10-20: `PORTAL_API_URL` in ignored `.env.local` points
+to the live portal; tracked `.env.example` supplies the same public base URL.
+Server-only readers validate responses, time out after ten seconds and revalidate
+after sixty seconds. Home, About, Corporate and workshop list/detail/calendar
+consume CMS content, including profile/contact/stats, clients/industries, programs,
+testimonials, FAQs and media. Workshop metadata and social cards use CMS slugs.
+Missing/broken media gets a neutral fallback; read failures show a retryable error
+instead of sample content. Decorative brand artwork and navigation remain local.
+The corporate form uses CMS program slugs and is editable for preview, but Send
+and its handler cannot submit or simulate a saved inquiry. Workshop pages offer
+contact details; no remaining-seat counts or past sessions are invented. Legacy
+confirmation URLs redirect to the corresponding public page. The temporary local
+catalogue sample has been removed; cards, calendar and detail pages use CMS reads
+only. Calendar circles now fit narrow mobile day cells. Both live workshop GETs
+now expose per-session `seatsLeft`; cards, calendar previews and detail availability
+use that value, keep closed sessions closed, and hide counts when absent.
+Calendar preview counts retain the original red-number styling; live desktop and
+320px checks show “40 seats left”. The scoped handoff gate passed.
+Promotional
+pricing notes, including early-bird wording, remain hidden for now.
+Browser regression builds use a temporary local API fixture, isolated from normal
+development and live portal writes. Existing layout/navigation/motion checks are
+retained; simulated-booking/history acceptance remains retired.
+Layout restoration, 2026-10-21: original workshop hero chips, overview metadata/
+registration rail/countdown, sticky bar, closing CTA and instructor band are restored.
+A presentation adapter maps CMS content into the original workshop components.
+Original footer icons, programme tiles, primer frame and numeric animations return.
+Corporate Send remains disabled. Workshop forms are preview-only with Finish disabled;
+no registration write API is configured. Early-bird pricing notes remain hidden.
+CRM contract connection, 2026-10-21: follows `web-api-contract.md` for Portal
+main `775a13f`. Registration sends the selected session UUID and all answers;
+corporate intake sends CMS titles and only the active structured date mode.
+Shared transport requires validated HTTP 202, UUID-v4 retry keys, fresh Turnstile
+verification, omitted credentials and strict bodies. Ambiguous attempts retain
+answers/key across dialog remount and tab recovery; definite rejections allow
+correction. Accepted receipts retain a returned reference/initial Unpaid state,
+or generic acceptance without inventing a seat/reference/email. Missing receipts
+are neutral. Removed fabricated payment accounts/QR, 48-hour expiry and reply SLA.
+Both intake switches remain off by default; corporate remains disabled locally.
+The live OpenAPI read advertised corporate intake but not registrations yet.
+No live POST, provider/email proof, activation, commit or publication is claimed.
+CRM validation: full `quality:ci` passed 122 default-path cases plus six isolated
+enabled-intake cases, 19 tooling checks, types/lint/build and three live-build OG cards.
+The enabled cases mock Turnstile and HTTP acceptance/retry/storage failures; six
+enabled-only cases are intentionally skipped in the default-disabled pass.
+Sample removal and 320px calendar-circle containment passed browser regressions;
+live local screenshots confirm full first-column circles and a CMS-only listing.
+Current proposed review title: `feat: connect public site CMS content`.
+
+Validation: full `quality:ci` passed formatting, source-size, lint/CSS, types,
+19 tooling checks, live API production build, three OG cards and 115 browser cases.
+Additional local browser probes passed empty CMS pages at 320px, API failure and
+retry recovery and malformed responses after layout restoration. Eight original/
+restored captures with verified fonts are in ignored `test-results/layout-restoration/`.
+Live 320px checks also passed for Home, About, Corporate and workshop rail/dialog. The live
+portal still supplies sample content and a broken sample image; media fallback
+was verified. No corporate POST, commit, push or deployment was performed.
+
+Branch: `refactor/public-site-integration`
+PR title: `refactor: prepare public site CMS and submission boundaries`
 Dependencies: PR01 document organization; counterpart input for agreed contracts.
 Owner: main executor coordinates frontend and receiving-project boundaries.
 PR: pending. Evidence: pending. Merge status: not started.
@@ -481,7 +611,7 @@ PR: pending. Evidence: pending. Merge status: not started.
       No registrations yet means available capacity, not a fully booked workshop.
 - [ ] Inventory content and form fields, stable workshop/programme identifiers,
       media/OG requirements, frontend states, and receiving-project ownership.
-- [ ] Account for every collected submission field, including corporate phone,
+- [x] Account for every collected submission field, including corporate phone,
       role, context, and consent; distinguish payloads from confirmation-display data.
 - [ ] Record proposed versus agreed contracts and unresolved decisions. Do not
       invent API endpoints, providers, authentication, or response guarantees.
@@ -497,15 +627,15 @@ Dependencies: PR02, PR09's necessary data decisions, and relevant form layout wo
 Owner: main executor owns shared types/adapters; forms follow settled interfaces.
 PR: pending. Evidence: pending. Merge status: not started.
 
-- [ ] Separate complete validated form payloads from confirmation-display data.
-- [ ] Isolate small demo-local submission boundaries and validate stored confirmation
+- [x] Separate complete validated form payloads from confirmation-display data.
+- [x] Isolate small demo-local submission boundaries and validate stored confirmation
       data at runtime, with explicit submitting/result/error states.
-- [ ] Preserve demo behavior without network writes or claims that real leads exist.
-- [ ] Add focused behavior tests for invalid payloads, failures, and fallback states.
+- [x] Preserve demo behavior without network writes or claims that real leads exist.
+- [x] Add focused behavior tests for invalid payloads, failures, and fallback states.
 - [ ] Keep workshop/corporate migration in PR09 by default; split only if the
       actual diff warrants it. Shared contracts precede form adapters within the PR.
 - [ ] Introduce CMS/content adapters only where an agreed boundary justifies them.
-- [ ] Acceptance: both form journeys still work; confirmation data is not reused as
+- [x] Acceptance: both form journeys still work; confirmation data is not reused as
       an incomplete API payload; real integrations remain with their owning projects.
 
 ## PR11 Public page loading optional (included in PR12 if useful)
