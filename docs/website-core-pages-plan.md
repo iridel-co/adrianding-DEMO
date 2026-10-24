@@ -481,8 +481,9 @@ branch `refactor/public-site-integration`, targeting `main`.
 - Cleanup: retired demo submission/storage paths are removed. Contract tests use
   current request schemas; countdown, sticky registration and filter-edge UI
   regressions are retained. Payment copy describes customer actions.
-- Validation: local quality gates and live-data desktop/320px checks passed before
-  cleanup. Cleanup validation and PR screenshot evidence are recorded on PR #5.
+- Validation: cleanup `quality:ci` passed 138 default-path cases plus six isolated
+  configured-intake cases. PR #5 includes four main/PR screenshot pairs with
+  verified fonts; confirmation captures use synthetic receipts, without POSTs.
 - Current CMS draft content includes null images and a sample image returning 404.
   Decorative backgrounds remain website assets. No CMS writes or deployment.
 
