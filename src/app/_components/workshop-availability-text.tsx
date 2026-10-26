@@ -8,14 +8,19 @@ export function WorkshopAvailabilityText({
   onDark = false,
   className,
 }: {
-  workshop: Pick<Workshop, "status" | "seatsLeft" | "seatsTotal">
+  workshop: Pick<
+    Workshop,
+    "status" | "seatsLeft" | "seatsTotal" | "registrationOpen"
+  >
   onDark?: boolean
   className?: string
 }) {
   const availability = getWorkshopAvailability(workshop)
   return (
     <span className={cn("font-normal", className)}>
-      {availability.canRegister ? (
+      {availability.canRegister &&
+      workshop.seatsTotal > 0 &&
+      workshop.seatsLeft <= workshop.seatsTotal ? (
         <>
           <strong
             className={cn(

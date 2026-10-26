@@ -46,7 +46,7 @@ The demo shows every form and post-submit page as frontend-only UI. Nothing is s
 
 - Online payment gateways (card, GCash/Maya API, PayMongo, etc.). Payment is manual (§11.1).
 - Public user accounts. Only staff sign in (`PRD.md` → Auth).
-- **Gallery**, entirely: no CMS collection, no new work. Removed from this scope for budget (decided 2026-09-30). The gallery code stays in the demo so a later scope update can pick it up.
+- **Gallery**, entirely: no CMS collection, no new work. Removed from this scope for budget (decided 2026-09-30). The confirmed 2026-10-05 scope decision removes gallery routes and public previews.
 - Newsletter / mailing list. Nothing in the demo or docs asks for one (§12).
 - Official receipt (BIR) generation. It is issued outside the system; the spec only records it (§4.6, [OPEN-6]).
 
@@ -1033,7 +1033,7 @@ Candidates, not ranked:
 - Multi-seat or group booking in one registration. Groups of 10+ go to a corporate inquiry.
 - Newsletter / mailing list and marketing automation.
 - Early-bird or promo codes (depends on [OPEN-20]).
-- Gallery (CMS collection and any feature work). Out for budget; the code stays in the demo for a future scope update.
+- Gallery (CMS collection and any feature work). Removed from the demo under the confirmed 2026-10-05 scope decision.
 - `?tag=` URL sync on `/workshops` (`docs/feedback-passes/PLAN-feedback-2.md` → Out of scope).
 - Per-photo OG focal point field (`README.md` → Share images → Known limits).
 - Tickets beyond the reference ID: QR codes, door check-in app, ticketing service. Not in the client's quote (decided 2026-09-30).
@@ -1060,4 +1060,4 @@ Candidates, not ranked:
 | Payment / policy copy                | `lib/workshop-faq.ts`, `app/workshops/[slug]/registered/_sections/payment.tsx`                                                                                                       |
 | Corporate programmes (keys)          | `lib/specializations.ts` (`CORPORATE_PROGRAMMES`)                                                                                                                                    |
 | OG cards (derived)                   | `app/workshops/[slug]/opengraph-image.tsx`, `app/opengraph-image.tsx`, `lib/og-card.tsx`, `lib/og-photo.ts`, `lib/og-fonts.ts`, `lib/og-jpeg.ts`, `scripts/check-og.mjs` (repo root) |
-| Other CMS content contracts          | `lib/{testimonials,companies,timeline,certifications}.ts` (`lib/gallery.ts` stays as static demo data; out of scope)                                                                 |
+| Other CMS content contracts          | `lib/{testimonials,companies,timeline,certifications}.ts`                                                                                                                            |

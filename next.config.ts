@@ -1,4 +1,5 @@
 import type { NextConfig } from "next"
+import { CMS_MEDIA_HOST } from "./src/lib/cms-media"
 
 const nextConfig: NextConfig = {
   /**
@@ -21,6 +22,11 @@ const nextConfig: NextConfig = {
   },
   images: {
     remotePatterns: [
+      {
+        protocol: "https",
+        hostname: CMS_MEDIA_HOST,
+        pathname: "/**",
+      },
       /**
        * Nano Banana CDN
        * Replace "assets.nanobanana.io" with the actual domain once confirmed.

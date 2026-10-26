@@ -75,13 +75,12 @@ The user requested fewer PRs to reduce review and workflow friction. Keep the ol
 package IDs as work-item references; they no longer each require a separate PR.
 PR01/PR02 stay merged and PR03 stays on its existing separate branch.
 
-| Delivery PR | Includes                                                                           | Branch and title                                                                                            |
-| ----------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| PR03        | Current core/shared responsiveness and browser repairs                             | Existing branch/title below                                                                                 |
-| PR04        | PR04 + PR05: Workshop and Corporate layouts and registration availability          | `fix/public-form-layouts`; `fix: public form layouts and workshop availability`                             |
-| PR06        | PR06 + PR07 + PR08 + approved gallery removal: shared motion, presentation, assets | `fix/shared-public-presentation`; `fix: shared public presentation`                                         |
-| PR09        | PR09 + PR10: typed content adapters, contracts, demo submission boundaries         | `refactor/frontend-integration-preparation`; `refactor: prepare frontend content and submission boundaries` |
-| PR12        | Final polish; PR11 performance work only if measurements justify it                | Existing PR12 branch/title below                                                                            |
+| Delivery PR | Includes                                                                         | Branch and title                                                                                  |
+| ----------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| PR03        | Current core/shared responsiveness and browser repairs                           | Existing branch/title below                                                                       |
+| PR04        | PR04 + PR05: Workshop and Corporate layouts and registration availability        | `fix/public-form-layouts`; `fix: public form layouts and workshop availability`                   |
+| PR06–PR10   | Shared presentation/gallery removal + CMS contracts + demo submission boundaries | `refactor/public-site-integration`; `refactor: prepare public site CMS and submission boundaries` |
+| PR12        | Final polish; PR11 performance work only if measurements justify it              | Existing PR12 branch/title below                                                                  |
 
 Use coherent commits within these groups. Pending portrait/logo approvals do not
 block ready accessibility or gallery work: defer those asset commits if approval
@@ -413,17 +412,26 @@ these pending acceptance boundaries rather than indicating unimplemented layout.
 
 ## PR06 Marquee accessibility
 
-Branch: `fix/shared-public-presentation`
-PR title: `fix: shared public presentation`
+Local implementation completed 2026-10-12 on `fix/shared-public-presentation`,
+based on PR #4 at `5d0e8d9`: gallery removal, persistent motion controls and inert
+clones. Full `quality:ci` passed: 180 browser cases, 19 tooling checks, formatting,
+source size, lint/CSS, types, build and nine OG cards. Two new scenarios add four
+layout cases. Six local UI frames at 320/768/1440px were visually inspected with
+verified fonts and no page overflow; existing docs were corrected, with no new
+tracked documents. Existing media is preserved; replacement logos/portraits await
+approval. Native-device, hosted and remote-CI evidence remain pending.
+
+Branch: `refactor/public-site-integration` (combined PR06–PR10)
+PR title: `refactor: prepare public site CMS and submission boundaries`
 Dependencies: PR02 and any shared UI changes touching these components.
 Owner: main executor for testimonial/company shared components.
-PR: pending. Evidence: pending. Merge status: not started.
+PR: not opened. Evidence: local gate and UI review above. Merge status: unmerged.
 
-- [ ] Remove hidden duplicate testimonial cards from keyboard navigation.
-- [ ] Provide persistent, accessible pause/resume controls for moving testimonials
+- [x] Remove hidden duplicate testimonial cards from keyboard navigation.
+- [x] Provide persistent, accessible pause/resume controls for moving testimonials
       and company content, preserving reduced-motion and touch behavior.
-- [ ] Keep clone-focus correction and motion-control behavior identifiable in commits.
-- [ ] Acceptance: focus cannot enter hidden duplicates; controls expose their names
+- [x] Keep clone-focus correction and motion-control behavior identifiable in commits.
+- [x] Acceptance: focus cannot enter hidden duplicates; controls expose their names
       and state; user-requested pause is not undone by hover/focus transitions.
 
 ## PR07 Company logo presentation (included in PR06)
@@ -454,32 +462,35 @@ PR: pending. Evidence: pending. Merge status: not started.
 
 ## PR09 Frontend integration contracts
 
-Branch: `refactor/frontend-integration-preparation`
-PR title: `refactor: prepare frontend content and submission boundaries`
-Dependencies: PR01 document organization; counterpart input for agreed contracts.
-Owner: main executor coordinates frontend and receiving-project boundaries.
-PR: pending. Evidence: pending. Merge status: not started.
+Combined PR06–PR10 is in [draft PR #5](https://github.com/iridel-co/adrianding-DEMO/pull/5),
+branch `refactor/public-site-integration`, targeting `main`.
 
-- [x] Retain the workshop catalogue in `src/lib/workshops.ts`. The user reversed
-      the JSON migration on 2026-10-05; JSON fixtures and migration-only tooling
-      changes were removed. Keep TypeScript authoring checks and provenance comments.
-- [ ] Inventory programme, FAQ, testimonial, and company data consumers. Prepare
-      typed data adapters and runtime API-response validation where the agreed
-      receiving contract requires them; JSON extraction is no longer planned.
-- [ ] Define proposed availability and empty/loading/error contracts separately
-      from lifecycle and reservation status. Agree count validity, unknown counts,
-      authoritative capacity refresh/rejection, and any waitlist with API owners.
-      No registrations yet means available capacity, not a fully booked workshop.
-- [ ] Inventory content and form fields, stable workshop/programme identifiers,
-      media/OG requirements, frontend states, and receiving-project ownership.
-- [ ] Account for every collected submission field, including corporate phone,
-      role, context, and consent; distinguish payloads from confirmation-display data.
-- [ ] Record proposed versus agreed contracts and unresolved decisions. Do not
-      invent API endpoints, providers, authentication, or response guarantees.
-- [ ] Document the existing Phase 2 requirement: a failed CRM write cannot show real
-      success; email failure must not erase a successfully recorded lead.
-- [ ] Acceptance: owners can identify inputs, outputs, validation/error needs, and
-      responsibilities. Inventory can proceed now; agreement needs counterpart input.
+- CMS: validated profile, workshop list/detail, clients/industries, programmes,
+  testimonials and FAQ reads use `PORTAL_API_URL`. Pages retain their existing
+  layouts; metadata/OG use CMS content, missing images have neutral fallbacks,
+  and failed reads offer retry. No local workshop samples or early-bird notes.
+- Availability: per-session `seatsLeft` appears on cards, calendar previews and
+  details. Closed sessions stay closed. Original calendar circles have overflow
+  room at both edges at 320px.
+- Review nits: decorative CMS image fallbacks stay hidden from assistive technology;
+  image consumers share the media host, and refresh/reset run in one transition.
+- CRM: workshop registrations and corporate inquiries use the supplied Portal
+  contract: UUID retry keys, fresh Turnstile verification, omitted credentials,
+  strict payloads and validated HTTP 202 acceptance. Confirmations require an
+  accepted receipt; no fabricated reference, payment account, QR or expiry.
+- Configuration: both forms activate with the API origin and public Turnstile
+  site key, without separate enable flags. The real site key is still pending;
+  Portal origins, real submission/email delivery and native devices are unverified.
+- Cleanup: retired demo submission/storage paths are removed. Contract tests use
+  current request schemas; countdown, sticky registration and filter-edge UI
+  regressions are retained, alongside form focus/consent, confirmation storage,
+  empty/closed/full states and Home carousel controls. Filtering resets native
+  carousel scroll state. Payment copy describes customer actions.
+- Validation: `quality:ci` covers 148 default-path cases plus six isolated
+  configured-intake cases. PR #5 includes four main/PR screenshot pairs with
+  verified fonts; confirmation captures use synthetic receipts, without POSTs.
+- Current CMS draft content includes null images and a sample image returning 404.
+  Decorative backgrounds remain website assets. No CMS writes or deployment.
 
 ## PR10 Demo submission boundaries (included in PR09)
 
@@ -488,15 +499,15 @@ Dependencies: PR02, PR09's necessary data decisions, and relevant form layout wo
 Owner: main executor owns shared types/adapters; forms follow settled interfaces.
 PR: pending. Evidence: pending. Merge status: not started.
 
-- [ ] Separate complete validated form payloads from confirmation-display data.
-- [ ] Isolate small demo-local submission boundaries and validate stored confirmation
+- [x] Separate complete validated form payloads from confirmation-display data.
+- [x] Isolate small demo-local submission boundaries and validate stored confirmation
       data at runtime, with explicit submitting/result/error states.
-- [ ] Preserve demo behavior without network writes or claims that real leads exist.
-- [ ] Add focused behavior tests for invalid payloads, failures, and fallback states.
+- [x] Preserve demo behavior without network writes or claims that real leads exist.
+- [x] Add focused behavior tests for invalid payloads, failures, and fallback states.
 - [ ] Keep workshop/corporate migration in PR09 by default; split only if the
       actual diff warrants it. Shared contracts precede form adapters within the PR.
 - [ ] Introduce CMS/content adapters only where an agreed boundary justifies them.
-- [ ] Acceptance: both form journeys still work; confirmation data is not reused as
+- [x] Acceptance: both form journeys still work; confirmation data is not reused as
       an incomplete API payload; real integrations remain with their owning projects.
 
 ## PR11 Public page loading optional (included in PR12 if useful)
@@ -843,10 +854,10 @@ The user reports confirmation to remove all gallery mentions and pages. Record
 this as approved implementation scope for the PR worker, not a pending designer
 question. This intake edits the plan only; removal is not yet implemented.
 
-- [ ] Deliver gallery removal as a coherent commit in consolidated PR06 before
+- [x] Deliver gallery removal as a coherent commit in consolidated PR06 before
       final PR12 polish; coordinate with PR03 navigation and PR04 workshop media.
       A separate removal PR is only needed if the actual scope warrants a split.
-- [ ] Remove `/gallery` and `/gallery/[slug]` pages and gallery-specific metadata.
+- [x] Remove `/gallery` and `/gallery/[slug]` pages and gallery-specific metadata.
       Remove links from desktop/mobile navigation, footer, CTAs, and other public
       consumers; remove Home's Inside the room and Workshops' Past events previews
       and any other gallery sections or mentions discovered during the source audit.
@@ -854,11 +865,11 @@ question. This intake edits the plan only; removal is not yet implemented.
       checking their consumers. Preserve shared workshop, corporate, portrait,
       testimonial, and footer assets/behavior. Do not delete media just because
       it also appears in the gallery.
-- [ ] Update active repository scope documentation, route maps, sitemap entries,
+- [x] Update active repository scope documentation, route maps, sitemap entries,
       and tests as applicable so they do not advertise gallery delivery or routes.
       Historical review notes/screenshots may remain explicitly superseded; the
       source DOCX is not to be silently rewritten.
-- [ ] Verify removed routes produce the expected not-found response, no public
+- [x] Verify removed routes produce the expected not-found response, no public
       gallery links/sections remain, adjacent layouts close cleanly at all reviewed
       widths, and existing workshop/inquiry journeys still work. Run scoped quality
       checks and required public-site browser regressions at package handoff.

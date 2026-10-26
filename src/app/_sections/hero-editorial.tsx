@@ -1,77 +1,19 @@
 "use client"
 
-import Image from "next/image"
+import { CmsImage as Image } from "@/app/_components/cms-image"
+import type { PublicProfile } from "@/lib/public-content"
 import { Facebook, Instagram, Linkedin, Youtube } from "lucide-react"
 import { Marquee } from "@/app/_components/marquee"
 import { SiteNavbar } from "@/app/_components/site-navbar"
 import { gsap, useGSAP, EASE, DUR } from "@/app/_lib/gsap"
 
-/**
- * Hero option #7 — "Editorial cover".
- *
- * A single full-screen frame in the GQ / Architectural Digest register, modelled
- * on the Jasmine Star cover treatment:
- *
- *   - `ad-bg-2.webp` fills the frame (the file already carries a mono grade); a
- *     light scrim + vignette keep the white type legible.
- *   - The portrait cut-out sits right-of-centre, magazine-cover-subject style,
- *     with the wordmark's tail running over its shoulder.
- *   - "Adrian Ding" is set as one enormous serif line, left-aligned and parked
- *     on the page's y-axis (it runs across the vertical middle and into the
- *     portrait, cover-style), with a quiet static role line (coach / trainer /
- *     speaker / writer) under it; the social icons sit right under that group.
- *
- * Nav: no CTA floats over the hero itself — the shared <SiteNavbar> (same
- * component, same logo/links/CTA, as every other page) is pinned to the top
- * of the viewport from the first frame, same as every other page. It renders
- * as the *first* child, before the hero, so its own `position: sticky; top: 0`
- * engages immediately instead of waiting for the hero to scroll past; its
- * `z-50` keeps it painting above the hero's `z-0` regardless of DOM order.
- *
- * No scroll pin, no page-rise curtain, no scroll-snap. Reduced motion -> the
- * resolved composition, painted immediately.
- *
- * Assets: mascot/ad-bg-2.webp · mascot/ad-hero-portrait.webp ·
- * logos/ad-logo-white.svg · logos/ad-logo-black.svg
- * (both `.webp`s are `cwebp`-recompressed from the original `.png`s — 2.2MB →
- * 139KB and 2.3MB → 158KB — the PNGs stay on disk unreferenced since
- * `ad-bg-2.png` is still the `og:image` in `layout.tsx`, which wants a real
- * PNG/JPG for social-platform compatibility, not WebP.)
- */
-
-// Kept in step with SiteFooter's own SOCIALS — same five platforms in both
-// places (TikTok rendered from an inline glyph; lucide ships no TikTok icon).
-const SOCIALS: {
-  label: string
-  href: string
-  Icon: React.ComponentType<{ className?: string }>
-}[] = [
-  {
-    label: "Instagram",
-    href: "https://www.instagram.com/coachadrianding/?hl=en",
-    Icon: Instagram,
-  },
-  {
-    label: "Facebook",
-    href: "https://www.facebook.com/adrianding.mi/",
-    Icon: Facebook,
-  },
-  {
-    label: "LinkedIn",
-    href: "https://ph.linkedin.com/in/coachadrianding",
-    Icon: Linkedin,
-  },
-  {
-    label: "YouTube",
-    href: "https://www.youtube.com/channel/UCugWqssJknpyGE0k-jexhfA",
-    Icon: Youtube,
-  },
-  {
-    label: "TikTok",
-    href: "https://www.tiktok.com/@coachadrianding",
-    Icon: TikTokIcon,
-  },
-]
+const SOCIAL_ICONS = {
+  instagram: Instagram,
+  facebook: Facebook,
+  linkedin: Linkedin,
+  youtube: Youtube,
+  tiktok: TikTokIcon,
+}
 
 function TikTokIcon({ className }: { className?: string }) {
   return (
@@ -87,12 +29,6 @@ function TikTokIcon({ className }: { className?: string }) {
 }
 
 // His four hats, set as one quiet line under the wordmark, magazine-cover style.
-const ROLES = [
-  "Leadership Development Coach",
-  "Corporate Trainer",
-  "Keynote Speaker",
-  "Inspirational Writer",
-]
 
 // No clip mask around the wordmark (see the wrapper below), so leading is free —
 // it can't chop the caps height or the "g" tail whatever the size. Sizing
@@ -103,7 +39,7 @@ const ROLES = [
 const WORD =
   "block font-serif font-normal whitespace-nowrap leading-[0.95] tracking-[-0.03em] text-white text-[clamp(3.85rem,14vw,9.5rem)] sm:text-[clamp(2.75rem,10vw,9.5rem)] [text-shadow:0_12px_60px_rgba(0,0,0,0.6)]"
 
-export function HeroEditorial() {
+export function HeroEditorial({ profile }: { profile: PublicProfile }) {
   useGSAP(() => {
     const mm = gsap.matchMedia()
 
@@ -210,8 +146,8 @@ export function HeroEditorial() {
         <div className="pointer-events-none absolute inset-x-0 bottom-[calc(-4svh-var(--nav-h))] z-20 flex h-[76svh] justify-center sm:inset-x-auto sm:right-[2%] sm:bottom-[calc(-12svh-var(--nav-h))] sm:aspect-[1080/1720] sm:h-[112svh] lg:right-[7%] lg:bottom-[calc(-18svh-var(--nav-h))] lg:h-[124svh]">
           <div className="he-portrait relative aspect-[1080/1720] h-full shrink-0 will-change-transform select-none">
             <Image
-              src="/images/mascot/ad-hero-portrait.webp"
-              alt="Coach Adrian Ding"
+              src={profile.portrait?.url}
+              alt={profile.portrait?.alt ?? ""}
               fill
               priority
               sizes="(max-width: 640px) 70vw, (max-width: 1024px) 50vw, 42vw"
@@ -239,10 +175,7 @@ export function HeroEditorial() {
             <div className="w-max">
               <h1 className={`he-word ${WORD}`}>
                 Adrian Ding
-                <span className="sr-only">
-                  {" "}
-                  — leadership development and corporate training
-                </span>
+                <span className="sr-only"> — {profile.headline}</span>
               </h1>
             </div>
             {/* Roles — a slow, quiet marquee under the wordmark. Its width is
@@ -256,43 +189,42 @@ export function HeroEditorial() {
                 because Prata's line box leaves a tall empty band under the
                 baseline for the "g" tail; this keeps the gap proportional at
                 every size. Edge fades are the Marquee's default, 7% each side. */}
-            <div className="he-line mt-[calc(0.75rem-0.14*clamp(3.85rem,14vw,9.5rem))] flex items-center gap-2.5 sm:mt-[calc(0.75rem-0.14*clamp(2.75rem,10vw,9.5rem))]">
-              <Marquee
-                speed={22}
-                gap="2.75rem"
-                className="w-[calc(4.5*clamp(3.85rem,14vw,9.5rem))] text-[0.7rem] font-semibold tracking-[0.16em] text-white/80 uppercase [text-shadow:0_1px_8px_rgba(0,0,0,0.55)] sm:w-[calc(4.5*clamp(2.75rem,10vw,9.5rem))] sm:text-[0.72rem] sm:tracking-[0.2em]"
-              >
-                {ROLES.map((role) => (
-                  <span
-                    key={role}
-                    className="flex items-center gap-2.5 whitespace-nowrap"
-                  >
-                    {role}
-                  </span>
-                ))}
-              </Marquee>
-            </div>
+            {profile.roles.length > 0 && (
+              <div className="he-line mt-[calc(0.75rem-0.14*clamp(3.85rem,14vw,9.5rem))] flex items-center gap-2.5 sm:mt-[calc(0.75rem-0.14*clamp(2.75rem,10vw,9.5rem))]">
+                <Marquee
+                  speed={22}
+                  gap="2.75rem"
+                  className="w-[calc(4.5*clamp(3.85rem,14vw,9.5rem))] text-[0.7rem] font-semibold tracking-[0.16em] text-white/80 uppercase [text-shadow:0_1px_8px_rgba(0,0,0,0.55)] sm:w-[calc(4.5*clamp(2.75rem,10vw,9.5rem))] sm:text-[0.72rem] sm:tracking-[0.2em]"
+                >
+                  {profile.roles.map((role) => (
+                    <span
+                      key={role}
+                      className="flex items-center gap-2.5 whitespace-nowrap"
+                    >
+                      {role}
+                    </span>
+                  ))}
+                </Marquee>
+              </div>
+            )}
           </div>
-          {/* History: a problem-framing line briefly sat here (2026-09-06) in
-              response to "credibility but not yet trust". Removed 2026-09-07 —
-              it competed with the wordmark for the same band, which the cover
-              composition can't carry (cf. lessons 2026-08-06, "a giant
-              background wordmark and a headline cannot share the same band").
-              The problem framing now lives on each course page instead, where
-              the ad traffic that needs it actually lands. */}
+
           <div className="he-line pointer-events-auto mt-6 flex items-center justify-center gap-1.5 sm:-ml-2.5 sm:justify-start">
-            {SOCIALS.map(({ label, href, Icon }) => (
-              <a
-                key={label}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={label}
-                className="flex size-11 items-center justify-center text-white/80 transition-colors hover:text-white"
-              >
-                <Icon className="size-[1.1rem]" />
-              </a>
-            ))}
+            {profile.socialLinks.map(({ network, url }) => {
+              const Icon = SOCIAL_ICONS[network]
+              return (
+                <a
+                  key={network}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={network}
+                  className="flex size-11 items-center justify-center text-white/80 transition-colors hover:text-white"
+                >
+                  <Icon className="size-[1.1rem]" />
+                </a>
+              )
+            })}
           </div>
         </div>
       </div>

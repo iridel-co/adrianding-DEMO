@@ -1,6 +1,6 @@
 import { SplitReveal } from "@/app/_components/split-reveal"
 import { TestimonialColumns } from "@/app/_components/testimonial-columns"
-import { TESTIMONIALS } from "@/lib/testimonials"
+import type { PublicTestimonial } from "@/lib/public-content"
 
 /**
  * Social proof on the workshop detail page — the full testimonial set, not the
@@ -10,7 +10,12 @@ import { TESTIMONIALS } from "@/lib/testimonials"
  * Reuses the landing page's drifting-columns layout so the page feels part of
  * the site even when it is the only page someone ever sees.
  */
-export function WorkshopTestimonials() {
+export function WorkshopTestimonials({
+  testimonials,
+}: {
+  testimonials: PublicTestimonial[]
+}) {
+  if (!testimonials.length) return null
   return (
     <section className="bg-background py-16 lg:py-24">
       <div className="mx-auto grid max-w-7xl gap-12 px-6 sm:px-8 lg:grid-cols-[0.5fr_minmax(0,1fr)] lg:gap-20">
@@ -24,7 +29,7 @@ export function WorkshopTestimonials() {
             first.
           </p>
         </div>
-        <TestimonialColumns testimonials={TESTIMONIALS} />
+        <TestimonialColumns testimonials={testimonials} />
       </div>
     </section>
   )

@@ -8,8 +8,27 @@ export type WorkshopAvailability = {
 
 /** Derives display availability; the booking service must enforce live capacity. */
 export function getWorkshopAvailability(
-  workshop: Pick<Workshop, "status" | "seatsLeft" | "seatsTotal">
+  workshop: Pick<
+    Workshop,
+    "status" | "seatsLeft" | "seatsTotal" | "registrationOpen"
+  >
 ): WorkshopAvailability {
+  if (workshop.registrationOpen !== undefined) {
+    if (
+      workshop.registrationOpen &&
+      workshop.seatsTotal > 0 &&
+      workshop.seatsLeft === 0
+    ) {
+      return { state: "full", canRegister: false, label: "Fully booked" }
+    }
+    return {
+      state: workshop.registrationOpen ? "available" : "closed",
+      canRegister: workshop.registrationOpen,
+      label: workshop.registrationOpen
+        ? "Registration open"
+        : "Registration closed",
+    }
+  }
   if (workshop.status !== "open") {
     return { state: "closed", canRegister: false, label: "Registration closed" }
   }

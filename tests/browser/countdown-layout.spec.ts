@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test"
 
-const start = new Date("2026-10-09T09:00:00+08:00").getTime()
+const start = new Date("2026-11-20T09:00:00+08:00").getTime()
 for (const width of [360, 1440]) {
   test(`@layout countdown contains large day counts at ${width}px`, async ({
     page,
@@ -12,7 +12,7 @@ for (const width of [360, 1440]) {
     const errors: string[] = []
     page.on("pageerror", (error) => errors.push(error.message))
     await page.goto("/workshops/exceptional-salesmanship")
-    const rail = page.locator("aside")
+    const rail = page.locator("#workshop-registration-card")
     const units = rail.getByRole("group")
     await expect(units).toHaveCount(4)
     await rail.scrollIntoViewIfNeeded()
@@ -47,10 +47,16 @@ test("countdown rolls over to the workshop started message", async ({
 }) => {
   await page.clock.install({ time: new Date(start - 2000) })
   await page.goto("/workshops/exceptional-salesmanship")
-  await expect(page.locator("aside").getByRole("group")).toHaveCount(4)
+  await expect(
+    page.locator("#workshop-registration-card").getByRole("group")
+  ).toHaveCount(4)
   await page.clock.runFor(3000)
   await expect(
-    page.locator("aside").getByText("This workshop has started.")
+    page
+      .locator("#workshop-registration-card")
+      .getByText("This workshop has started.")
   ).toBeVisible()
-  await expect(page.locator("aside").getByRole("group")).toHaveCount(0)
+  await expect(
+    page.locator("#workshop-registration-card").getByRole("group")
+  ).toHaveCount(0)
 })

@@ -1,13 +1,14 @@
 "use client"
 
-import Image from "next/image"
+import { CmsImage as Image } from "@/app/_components/cms-image"
 import { useEffect, useRef, useState } from "react"
 import { Quote, User } from "lucide-react"
 import { cn } from "@/lib/utils"
-import type { Testimonial } from "@/lib/testimonials"
+import type { PublicTestimonial } from "@/lib/public-content"
+import { Button } from "@/components/ui/button"
 
 type ColumnsProps = {
-  testimonials: Testimonial[]
+  testimonials: PublicTestimonial[]
   className?: string
 }
 
@@ -23,38 +24,56 @@ type ColumnsProps = {
  * wrap. Reduced motion drops the animation and the mask for a plain scroll strip.
  */
 export function TestimonialColumns({ testimonials, className }: ColumnsProps) {
+  const [paused, setPaused] = useState(false)
   const columnA = testimonials.filter((_, i) => i % 2 === 0)
   const columnB = testimonials.filter((_, i) => i % 2 === 1)
 
   return (
     <div className={className}>
+      <Button
+        type="button"
+        variant="outline"
+        aria-pressed={paused}
+        onClick={() => setPaused((value) => !value)}
+        className="mb-5 motion-reduce:hidden"
+      >
+        {paused ? "Resume testimonials" : "Pause testimonials"}
+      </Button>
       {/* Mobile: a single column carrying every quote. */}
       <div className="md:hidden">
-        <TestimonialColumn testimonials={testimonials} speed={24} />
+        <TestimonialColumn
+          testimonials={testimonials}
+          speed={24}
+          paused={paused}
+        />
       </div>
       {/* Desktop: two interleaved columns at slightly different speeds so they
           never march in lockstep. */}
       <div className="hidden gap-5 md:grid md:grid-cols-2">
-        <TestimonialColumn testimonials={columnA} speed={22} />
-        <TestimonialColumn testimonials={columnB} speed={30} />
+        <TestimonialColumn testimonials={columnA} speed={22} paused={paused} />
+        <TestimonialColumn testimonials={columnB} speed={30} paused={paused} />
       </div>
     </div>
   )
 }
 
 type ColumnProps = {
-  testimonials: Testimonial[]
+  testimonials: PublicTestimonial[]
   /** Upward drift in px/second. */
   speed: number
+  paused: boolean
 }
 
-function TestimonialColumn({ testimonials, speed }: ColumnProps) {
+function TestimonialColumn({ testimonials, speed, paused }: ColumnProps) {
   const trackRef = useRef<HTMLDivElement>(null)
   const copyRef = useRef<HTMLDivElement>(null)
   const offsetRef = useRef(0)
   const halfRef = useRef(0)
   const lastRef = useRef(0)
-  const pausedRef = useRef(false)
+  const hoveredRef = useRef(false)
+  const focusedRef = useRef(false)
+  const userPausedRef = useRef(paused)
+  userPausedRef.current = paused
   const [reduced, setReduced] = useState(false)
 
   useEffect(() => {
@@ -103,7 +122,9 @@ function TestimonialColumn({ testimonials, speed }: ColumnProps) {
       // (the hidden mobile/desktop variant) — keep the clock fresh so there's
       // no jump when it resumes or becomes visible.
       if (
-        pausedRef.current ||
+        hoveredRef.current ||
+        focusedRef.current ||
+        userPausedRef.current ||
         offscreenRef.current ||
         track.offsetParent === null
       )
@@ -126,6 +147,13 @@ function TestimonialColumn({ testimonials, speed }: ColumnProps) {
     }
   }, [reduced, speed])
 
+  useEffect(() => {
+    if (reduced && trackRef.current) {
+      trackRef.current.style.transform = ""
+      offsetRef.current = 0
+    }
+  }, [reduced])
+
   return (
     <div
       className={cn(
@@ -140,28 +168,28 @@ function TestimonialColumn({ testimonials, speed }: ColumnProps) {
           : "overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,#000_9%,#000_91%,transparent)] [-webkit-mask-image:linear-gradient(to_bottom,transparent,#000_9%,#000_91%,transparent)]"
       )}
       onMouseEnter={() => {
-        pausedRef.current = true
+        hoveredRef.current = true
       }}
       onMouseLeave={() => {
-        pausedRef.current = false
+        hoveredRef.current = false
       }}
       onFocusCapture={() => {
-        pausedRef.current = true
+        focusedRef.current = true
       }}
-      onBlurCapture={() => {
-        pausedRef.current = false
+      onBlurCapture={(event) => {
+        focusedRef.current = event.currentTarget.contains(event.relatedTarget)
       }}
     >
       <div ref={trackRef} className="will-change-transform">
         <div ref={copyRef} className="flex flex-col gap-6 pb-6">
           {testimonials.map((t, i) => (
-            <ColumnCard key={`a-${t.org}-${i}`} testimonial={t} />
+            <ColumnCard key={`a-${t.id}-${i}`} testimonial={t} />
           ))}
         </div>
         {!reduced && (
-          <div aria-hidden className="flex flex-col gap-6 pb-6">
+          <div aria-hidden inert className="flex flex-col gap-6 pb-6">
             {testimonials.map((t, i) => (
-              <ColumnCard key={`b-${t.org}-${i}`} testimonial={t} />
+              <ColumnCard key={`b-${t.id}-${i}`} testimonial={t} />
             ))}
           </div>
         )}
@@ -170,7 +198,7 @@ function TestimonialColumn({ testimonials, speed }: ColumnProps) {
   )
 }
 
-function ColumnCard({ testimonial: t }: { testimonial: Testimonial }) {
+function ColumnCard({ testimonial: t }: { testimonial: PublicTestimonial }) {
   return (
     <figure
       tabIndex={0}
@@ -178,29 +206,10 @@ function ColumnCard({ testimonial: t }: { testimonial: Testimonial }) {
     >
       <div className="flex min-h-9 items-center justify-between gap-4">
         <Quote className="text-brand/25 size-7 shrink-0" aria-hidden />
-        {/* Client mark, sitting inside the card. Orgs without artwork
-            (Knowles, Rotary International) fall back to a name chip. */}
-        {t.logo ? (
-          <Image
-            src={t.logo}
-            alt=""
-            aria-hidden
-            width={200}
-            height={80}
-            loading="eager"
-            style={{ width: "auto" }}
-            className={cn(
-              "w-auto object-contain opacity-80",
-              t.logoShape === "square"
-                ? "h-9 max-w-[110px] lg:h-10"
-                : "h-7 max-w-40 lg:h-8"
-            )}
-          />
-        ) : (
-          <span className="text-foreground/65 text-sm font-semibold tracking-[-0.01em]">
-            {t.org}
-          </span>
-        )}
+
+        <span className="text-foreground/65 text-sm font-semibold tracking-[-0.01em]">
+          {t.company}
+        </span>
       </div>
       <blockquote
         className={cn(
@@ -224,8 +233,8 @@ function ColumnCard({ testimonial: t }: { testimonial: Testimonial }) {
         >
           {t.photo ? (
             <Image
-              src={t.photo}
-              alt={t.name}
+              src={t.photo?.url}
+              alt={t.personName}
               width={96}
               height={96}
               className="size-full object-cover"
@@ -235,8 +244,10 @@ function ColumnCard({ testimonial: t }: { testimonial: Testimonial }) {
           )}
         </span>
         <span className="text-muted-foreground text-sm tracking-[0.03em]">
-          <span className="text-foreground block font-semibold">{t.name}</span>
-          {t.role}, {t.org}
+          <span className="text-foreground block font-semibold">
+            {t.personName}
+          </span>
+          {t.role}, {t.company}
         </span>
       </figcaption>
     </figure>

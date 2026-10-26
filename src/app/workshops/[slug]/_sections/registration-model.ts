@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { registrationAnswersSchema } from "@/lib/registration"
 
 export const SALARY_RANGES = [
   "Under ₱30,000",
@@ -9,20 +10,11 @@ export const SALARY_RANGES = [
   "Prefer not to say",
 ] as const
 
-export const schema = z.object({
-  fullName: z.string().min(2, "Please enter your full name."),
-  email: z.string().email("Enter a valid email address."),
-  phone: z.string().min(7, "Enter a valid mobile number."),
-  occupation: z.string().min(2, "Tell us what you do."),
-  salaryRange: z.enum(SALARY_RANGES, {
-    message: "Select a range.",
-  }),
-  city: z.string().optional(),
-  consent: z.literal(true, {
-    message: "You need to agree to continue.",
-  }),
-})
-
+export const schema = registrationAnswersSchema
+  .omit({ workshopSessionId: true })
+  .extend({
+    salaryRange: z.enum(SALARY_RANGES, { message: "Select a range." }),
+  })
 export type FormValues = z.infer<typeof schema>
 
 export const STEPS: { title: string; fields: (keyof FormValues)[] }[] = [

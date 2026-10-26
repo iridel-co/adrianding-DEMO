@@ -23,9 +23,10 @@ function compile(module, filename) {
 }
 require.extensions[".ts"] = compile
 require.extensions[".tsx"] = compile
-const { Children, createElement } = require("react")
+const { createElement } = require("react")
 const { renderToStaticMarkup } = require("react-dom/server")
-const { WORKSHOPS } = require("../../src/lib/workshops.ts")
+const { CmsImage } = require("../../src/app/_components/cms-image.tsx")
+
 const {
   WorkshopTagFilter,
 } = require("../../src/app/_components/workshop-tag-filter.tsx")
@@ -35,49 +36,54 @@ const {
 const {
   RegistrationDialog,
 } = require("../../src/app/workshops/[slug]/_sections/registration-dialog.tsx")
-const {
-  default: RegisteredPage,
-  generateMetadata,
-} = require("../../src/app/workshops/[slug]/registered/page.tsx")
-async function main() {
-  const original = WORKSHOPS[0]
-  const result = []
-  for (const seatsLeft of [0, -1, 1]) {
-    WORKSHOPS[0] = { ...original, seatsLeft }
-    const trigger = renderToStaticMarkup(
-      createElement(RegistrationDialog, {
-        workshop: WORKSHOPS[0],
-        triggerLabel: "Register fixture",
-      })
-    )
-    const params = Promise.resolve({ slug: original.slug })
-    const page = seatsLeft === 1 ? null : await RegisteredPage({ params })
-    // Render the actual main branch without Next's navbar routing context.
-    const main =
-      page &&
-      Children.toArray(page.props.children).find(
-        (child) => child.type === "main"
-      )
-    result.push({
-      seatsLeft,
-      trigger,
-      confirmation: main ? renderToStaticMarkup(main) : null,
-      metadata: await generateMetadata({ params }),
+const capacity = [
+  {
+    seatsLeft: 0,
+    registrationOpen: true,
+    label: "Fully booked",
+    enabled: false,
+  },
+  {
+    seatsLeft: 9,
+    registrationOpen: false,
+    label: "Registration closed",
+    enabled: false,
+  },
+  {
+    seatsLeft: 1,
+    registrationOpen: true,
+    label: "Register fixture",
+    enabled: true,
+  },
+].map((fixture) => ({
+  ...fixture,
+  trigger: renderToStaticMarkup(
+    createElement(RegistrationDialog, {
+      workshop: {
+        slug: "fixture",
+        title: "Fixture",
+        status: "open",
+        seatsTotal: 40,
+        ...fixture,
+      },
+      triggerLabel: "Register fixture",
     })
-  }
-  process.stdout.write(
-    JSON.stringify({
-      capacity: result,
-      emptyList: renderToStaticMarkup(
-        createElement(WorkshopTagFilter, { workshops: [] })
-      ),
-      emptyCalendar: renderToStaticMarkup(
-        createElement(WorkshopsCalendar, { workshops: [] })
-      ),
-    })
-  )
-}
-main().catch((error) => {
-  console.error(error)
-  process.exitCode = 1
-})
+  ),
+}))
+process.stdout.write(
+  JSON.stringify({
+    decorativeImage: renderToStaticMarkup(
+      createElement(CmsImage, { src: null, alt: "" })
+    ),
+    informativeImage: renderToStaticMarkup(
+      createElement(CmsImage, { src: null, alt: "Coach portrait" })
+    ),
+    capacity,
+    emptyList: renderToStaticMarkup(
+      createElement(WorkshopTagFilter, { workshops: [] })
+    ),
+    emptyCalendar: renderToStaticMarkup(
+      createElement(WorkshopsCalendar, { workshops: [] })
+    ),
+  })
+)

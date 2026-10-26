@@ -1,22 +1,16 @@
 "use client"
 
 import type { CSSProperties } from "react"
-import Image from "next/image"
+import { CmsImage as Image } from "./cms-image"
 import Link from "next/link"
 import { ArrowRight, MapPin, Ticket } from "lucide-react"
-import { WorkshopAvailabilityText } from "@/app/_components/workshop-availability-text"
 import { WorkshopTagPills } from "@/app/_components/workshop-tags"
-import { type Workshop } from "@/lib/workshops"
-import { getWorkshopAvailability } from "@/lib/workshop-availability"
-
-function shortDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-PH", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "Asia/Manila",
-  })
-}
+import { type PublicWorkshop as Workshop } from "@/lib/public-content"
+import {
+  sessionSchedule,
+  sessionAvailability,
+  workshopPrice,
+} from "@/lib/public-workshops"
 
 export function EventCard({
   workshop,
@@ -35,7 +29,6 @@ export function EventCard({
   onActivate: () => void
   onDeactivate: () => void
 }) {
-  const availability = getWorkshopAvailability(workshop)
   return (
     <Link
       href={`/workshops/${workshop.slug}`}
@@ -46,7 +39,7 @@ export function EventCard({
       className={className}
     >
       <Image
-        src={workshop.image}
+        src={workshop.heroImage?.url}
         alt={`${workshop.title} — Coach Adrian Ding`}
         fill
         priority={priority}
@@ -61,9 +54,11 @@ export function EventCard({
       />
 
       <div className="relative flex h-full w-full flex-col justify-end gap-3 px-6 py-8 text-left text-white lg:px-8">
+        <span className="w-fit rounded-full bg-black/40 px-3 py-1 text-xs text-white/80">
+          API content
+        </span>
         <p className="text-xs font-semibold tracking-[0.22em] text-white/75 uppercase">
-          {workshop.status === "past" ? "Past workshop · " : ""}
-          {shortDate(workshop.start)}
+          {sessionSchedule(workshop.nextSession)}
         </p>
         <h3 className="text-[1.75rem] leading-[1.08] font-extrabold tracking-[-0.01em] text-balance lg:text-[2.125rem]">
           {workshop.title}
@@ -78,7 +73,7 @@ export function EventCard({
         >
           <div className="flex min-h-0 flex-col gap-4 overflow-hidden pt-3">
             <p className="text-sm font-semibold text-white">
-              <WorkshopAvailabilityText workshop={workshop} onDark />
+              {sessionAvailability(workshop.nextSession)}
             </p>
             <p className="max-w-md text-base leading-relaxed text-white/85">
               {workshop.summary}
@@ -90,12 +85,14 @@ export function EventCard({
               <dl className="flex flex-col gap-1.5 text-sm text-white/85">
                 <div className="flex items-center gap-1.5">
                   <MapPin className="size-4 shrink-0" />
-                  <span className="line-clamp-1">{workshop.venue}</span>
+                  <span className="line-clamp-1">
+                    {workshop.nextSession?.venueName}
+                  </span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Ticket className="size-4 shrink-0" />
                   <span className="font-semibold text-white">
-                    {workshop.price}
+                    {workshopPrice(workshop)}
                   </span>
                 </div>
               </dl>
@@ -111,7 +108,7 @@ export function EventCard({
                     that edge. Translate is safe since it only needs
                     headroom above. */}
               <span className="group/reg text-brand-foreground bg-brand before:bg-background hover:text-foreground relative isolate inline-flex shrink-0 items-center gap-2 overflow-hidden rounded-full px-5 py-2.5 text-sm font-semibold shadow-lg shadow-black/25 transition-[color,transform,box-shadow] duration-300 before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:transition-transform before:duration-300 before:content-[''] hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/40 hover:before:scale-x-100">
-                {availability.canRegister ? "Register" : "View details"}
+                View details
                 <ArrowRight className="size-4 transition-transform duration-300 group-hover/reg:translate-x-1" />
               </span>
             </div>

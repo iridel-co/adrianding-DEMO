@@ -1,3 +1,4 @@
+import type { IntakeConfig } from "./intake"
 /**
  * Public workshop catalogue — powers the workshops list, each workshop detail
  * page (with its countdown + registration form), and the landing-page preview.
@@ -50,6 +51,11 @@ export type Workshop = {
   /** Card fill — path under `public/images/`. */
   image: string
   status: "open" | "past" | "closed"
+  /** CMS availability; remaining-seat counts are not published. */
+  intake?: IntakeConfig
+  workshopSessionId?: string
+  registrationOpen?: boolean
+  contactPhone?: string
   /** One-line hook for cards. */
   summary: string
   /** Longer intro paragraph for the detail page. */

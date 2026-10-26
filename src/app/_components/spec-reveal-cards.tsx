@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Image from "next/image"
+import { CmsImage as Image } from "@/app/_components/cms-image"
 import { motion } from "framer-motion"
 import { ArrowRight, Check } from "lucide-react"
 import { useReducedMotionSafe } from "@/app/_lib/use-reduced-motion-safe"
@@ -52,7 +52,7 @@ export type SpecCard = {
   title: string
   blurb: string
   usefulFor: string[]
-  image: string
+  image: string | null
   imageAlt: string
   // Vertical focal point for the cropped photo, e.g. "50% 20%" to bias the
   // crop toward the top of the frame. Defaults to centered.

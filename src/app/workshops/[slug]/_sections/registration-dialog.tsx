@@ -51,16 +51,21 @@ export function RegistrationDialog({
             Reserve your seat
           </DialogTitle>
           <DialogDescription className="text-base">
-            Takes a minute. You&rsquo;ll get payment details by email right
-            after.
+            {workshop.intake?.enabled && workshop.workshopSessionId
+              ? "Complete your details and verification to submit your registration."
+              : "Preview the registration form. Online registration is currently unavailable."}
           </DialogDescription>
         </DialogHeader>
         <RegistrationForm
           slug={workshop.slug}
+          price={workshop.price}
+          workshopSessionId={workshop.workshopSessionId}
+          intake={workshop.intake}
           workshopTitle={workshop.title}
           schedule={workshop.schedule}
           venue={`${workshop.venue}, ${workshop.city}`}
           availability={availability}
+          phone={workshop.contactPhone}
         />
       </DialogContent>
     </Dialog>

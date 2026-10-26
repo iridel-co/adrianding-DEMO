@@ -1,7 +1,7 @@
 "use client"
 import { useId } from "react"
-import { Check } from "lucide-react"
-import { CORPORATE_PROGRAMMES } from "@/lib/specializations"
+import { BookOpen, Check } from "lucide-react"
+import type { PublicProgram } from "@/lib/public-content"
 import { cn } from "@/lib/utils"
 // "Also interested in" tiles (2026-09-24). Selected = filled brand + white
 // check badge + slight scale + brand glow. The border AND the glow change
@@ -22,10 +22,12 @@ const TILE_CHECK_OFF = "border-input border text-transparent"
 const TILE_CHECK_ON = "bg-background text-brand"
 
 export function AlsoInterested({
+  programs,
   primary,
   selected,
   onToggle,
 }: {
+  programs: PublicProgram[]
   primary: string
   selected: string[]
   onToggle: (title: string) => void
@@ -40,42 +42,43 @@ export function AlsoInterested({
         Tick any others you&rsquo;d like the proposal to cover.
       </p>
       <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-        {CORPORATE_PROGRAMMES.filter((p) => p.title !== primary).map((p) => {
-          const on = selected.includes(p.title)
-          const Icon = p.icon
-          return (
-            <label
-              key={p.key}
-              className={cn(TILE_BASE, on ? TILE_ON : TILE_OFF)}
-            >
-              <input
-                type="checkbox"
-                className="sr-only"
-                checked={on}
-                onChange={() => onToggle(p.title)}
-                aria-describedby={helpId}
-              />
-              <span
-                className={cn(
-                  TILE_ICON_BASE,
-                  on ? TILE_ICON_ON : TILE_ICON_OFF
-                )}
+        {programs
+          .filter((p) => p.slug !== primary)
+          .map((p) => {
+            const on = selected.includes(p.slug)
+            return (
+              <label
+                key={p.slug}
+                className={cn(TILE_BASE, on ? TILE_ON : TILE_OFF)}
               >
-                <Icon className="size-[1.125rem]" aria-hidden />
-              </span>
-              <span className="flex-1 leading-snug">{p.title}</span>
-              <span
-                aria-hidden
-                className={cn(
-                  TILE_CHECK_BASE,
-                  on ? TILE_CHECK_ON : TILE_CHECK_OFF
-                )}
-              >
-                <Check className="size-3.5" strokeWidth={3} />
-              </span>
-            </label>
-          )
-        })}
+                <input
+                  type="checkbox"
+                  className="sr-only"
+                  checked={on}
+                  onChange={() => onToggle(p.slug)}
+                  aria-describedby={helpId}
+                />
+                <span
+                  className={cn(
+                    TILE_ICON_BASE,
+                    on ? TILE_ICON_ON : TILE_ICON_OFF
+                  )}
+                >
+                  <BookOpen className="size-[1.125rem]" aria-hidden />
+                </span>
+                <span className="flex-1 leading-snug">{p.title}</span>
+                <span
+                  aria-hidden
+                  className={cn(
+                    TILE_CHECK_BASE,
+                    on ? TILE_CHECK_ON : TILE_CHECK_OFF
+                  )}
+                >
+                  <Check className="size-3.5" strokeWidth={3} />
+                </span>
+              </label>
+            )
+          })}
       </div>
     </fieldset>
   )

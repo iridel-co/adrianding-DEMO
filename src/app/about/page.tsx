@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { getPublicFaqs, getPublicPrograms } from "@/lib/public-api"
 import { SiteNavbar } from "@/app/_components/site-navbar"
 import { SiteFooter } from "@/app/_components/site-footer"
 import { SiteCta } from "@/app/_components/site-cta"
@@ -10,12 +11,14 @@ import { AboutCertifications } from "./_sections/certifications"
 import { AboutFaq } from "./_sections/faq"
 
 export const metadata: Metadata = {
-  title: "About Coach Adrian Ding — 20+ years in the training circuit",
+  title: "About Coach Adrian Ding",
   description:
     "Adrian Ding, CEO of Maximum Impact PH — corporate trainer, leadership coach and keynote speaker. His story, certifications and career milestones.",
 }
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const programs = await getPublicPrograms()
+  const faqs = (await getPublicFaqs()).filter((faq) => faq.group === "about")
   return (
     <>
       <SiteNavbar initialTheme="dark" />
@@ -25,8 +28,9 @@ export default function AboutPage() {
         <AboutNumbers />
         <AboutJourney />
         <AboutCertifications />
-        <AboutFaq />
+        <AboutFaq faqs={faqs} />
         <SiteCta
+          programs={programs}
           heading="Work with Adrian"
           subtext="Join a public workshop, or bring him in to train your team."
         />

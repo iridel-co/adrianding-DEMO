@@ -237,37 +237,6 @@
     animation: marquee-vertical var(--duration, 24s) linear infinite;
   }
 
-  /* Gallery wall tile intro — floating-wall.tsx and photo-wall.tsx.
-     Deliberately CSS, not JS: these walls reveal on mount (not on scroll or
-     interaction), so a JS-driven fade leaves every tile at `opacity: 0` until
-     framer-motion has downloaded, parsed and hydrated. Measured on /gallery
-     before this: first tile visible at 557ms, last at 1041ms, with nothing on
-     screen in between. A keyframe runs at first paint instead, so the wall is
-     never blank, and the tile stays visible if JS never arrives at all.
-     `both` holds the 0% state during the delay and the 100% state after. */
-  @keyframes wall-tile-in {
-    from {
-      opacity: 0;
-      transform: translateY(12px);
-    }
-
-    to {
-      opacity: 1;
-      transform: none;
-    }
-  }
-
-  .animate-wall-tile-in {
-    animation: wall-tile-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
-    animation-delay: calc(var(--tile-i, 0) * 60ms);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .animate-wall-tile-in {
-      animation: none;
-    }
-  }
-
   /* CTA attention beat — the landing fork's two path pills (`paths.tsx`).
      The client asked for these to "beat or vibrate so it entices"; scoped to
      a single pass when the card scrolls into view rather than a perpetual

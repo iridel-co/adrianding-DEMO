@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/accordion"
 import { Reveal } from "@/app/_components/reveal"
 import { useIsTouch } from "@/app/_lib/use-is-touch"
-import { WORKSHOP_FAQ } from "@/lib/workshop-faq"
+import type { PublicFaq } from "@/lib/public-content"
 
 /**
  * Objection handling, immediately before the registration CTA.
@@ -37,9 +37,10 @@ import { WORKSHOP_FAQ } from "@/lib/workshop-faq"
  * attached at all — a tap synthesises `mouseenter`, which would race the
  * trigger's own toggle and leave the item stuck (lessons 2026-09-03).
  */
-export function WorkshopFaq() {
+export function WorkshopFaq({ faqs }: { faqs: PublicFaq[] }) {
   const touch = useIsTouch()
   const [open, setOpen] = useState<string>("")
+  if (!faqs.length) return null
 
   return (
     <section className="bg-muted/40 py-16 lg:py-24">
@@ -63,20 +64,20 @@ export function WorkshopFaq() {
             onValueChange={setOpen}
             className="w-full"
           >
-            {WORKSHOP_FAQ.map((item, i) => {
+            {faqs.map((item, i) => {
               const value = `faq-${i}`
               return (
                 <AccordionItem
-                  key={item.q}
+                  key={item.id}
                   value={value}
                   className="border-border/70"
                   onMouseEnter={touch ? undefined : () => setOpen(value)}
                 >
                   <AccordionTrigger className="text-[1.0625rem]">
-                    {item.q}
+                    {item.question}
                   </AccordionTrigger>
                   <AccordionContent className="max-w-prose text-[0.9375rem] leading-relaxed">
-                    {item.a}
+                    {item.answer}
                   </AccordionContent>
                 </AccordionItem>
               )

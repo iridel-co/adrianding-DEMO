@@ -5,10 +5,11 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { SPECIALIZATIONS } from "@/lib/specializations"
+import type { PublicProgram } from "@/lib/public-content"
 import { BloomFieldBackground } from "./bloom-field-background"
 
 type SiteCtaProps = {
+  programs: PublicProgram[]
   heading?: string
   subtext?: string
   /** Primary button — defaults to the workshop-forward copy used
@@ -18,20 +19,6 @@ type SiteCtaProps = {
   secondaryLabel?: string
   secondaryHref?: string
 }
-
-// Short marquee labels for the six focus areas — the full SPECIALIZATIONS
-// titles are too long to read stacked in a narrow column, so each gets a
-// 1-3 word tag.
-const FOCUS_TAGS: Record<string, string> = {
-  leadership: "Leadership",
-  keynotes: "Keynotes",
-  culture: "Winning Culture",
-  communication: "Communication",
-  "train-the-trainer": "Train the Trainer",
-  "personal-branding": "Personal Branding",
-}
-
-const FOCUS_ITEMS = SPECIALIZATIONS.map((spec) => FOCUS_TAGS[spec.key])
 
 /**
  * Two stacked copies of the same list, shifted by exactly one copy's height
@@ -59,7 +46,7 @@ function VerticalMarqueeTrack({ children }: { children: ReactNode }) {
  * item's distance from the panel's vertical center, recomputed every frame)
  * so the centered item always reads as the focused one.
  */
-function FocusAreaMarquee() {
+function FocusAreaMarquee({ programs }: { programs: PublicProgram[] }) {
   const panelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -91,12 +78,12 @@ function FocusAreaMarquee() {
 
   const list = (
     <>
-      {FOCUS_ITEMS.map((label, i) => (
+      {programs.map((program) => (
         <div
-          key={i}
+          key={program.slug}
           className="cta-marquee-item shrink-0 text-2xl font-semibold tracking-[0.06em] uppercase lg:text-3xl xl:text-4xl"
         >
-          {label}
+          {program.title}
         </div>
       ))}
     </>
@@ -145,6 +132,7 @@ function FocusAreaMarquee() {
  * sit centered beside it instead of forcing the section shorter.
  */
 export function SiteCta({
+  programs,
   heading = "Ready to build a winning culture?",
   subtext = "Start with a workshop, or bring Adrian in to train your whole team.",
   primaryLabel = "Register for a workshop",
@@ -213,7 +201,7 @@ export function SiteCta({
             </div>
           </div>
 
-          <FocusAreaMarquee />
+          <FocusAreaMarquee programs={programs} />
         </div>
       </div>
     </section>

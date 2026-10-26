@@ -31,7 +31,7 @@ export default function StaffLoginPage() {
         </h1>
         <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
           Access to the CRM and CMS — managing registrations, marking workshops
-          as paid, and publishing workshops and gallery events.
+          as paid, and publishing workshops.
         </p>
 
         <button

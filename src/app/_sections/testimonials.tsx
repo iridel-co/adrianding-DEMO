@@ -1,6 +1,6 @@
 import { SplitReveal } from "@/app/_components/split-reveal"
 import { TestimonialColumns } from "@/app/_components/testimonial-columns"
-import { TESTIMONIALS } from "@/lib/testimonials"
+import { getPublicTestimonials } from "@/lib/public-api"
 
 /**
  * Landing — what clients say. A full-width heading introduces
@@ -10,7 +10,10 @@ import { TESTIMONIALS } from "@/lib/testimonials"
 // Header note: earlier copy ("booked him twice") implied repeat bookings we
 // can't substantiate; the headline leans on what the quotes say instead.
 
-export function LandingTestimonials() {
+export async function LandingTestimonials() {
+  const testimonials = (await getPublicTestimonials()).filter(
+    (item) => item.isFeatured
+  )
   return (
     <section className="bg-background py-12 lg:py-16">
       <div className="mx-auto grid max-w-7xl gap-14 px-6 sm:px-8 lg:gap-20">
@@ -21,7 +24,7 @@ export function LandingTestimonials() {
             outlasts the room
           </SplitReveal>
         </div>
-        <TestimonialColumns testimonials={TESTIMONIALS} />
+        <TestimonialColumns testimonials={testimonials} />
       </div>
     </section>
   )

@@ -4,7 +4,7 @@ import { Countdown } from "@/app/_components/countdown"
 import { PrimerPlayer } from "@/app/_components/primer-player"
 import { TrustLogos } from "@/app/_components/trust-logos"
 import { getWorkshopAvailability } from "@/lib/workshop-availability"
-import type { Workshop } from "@/lib/workshops"
+import type { workshopView } from "@/lib/workshop-view"
 import { RegistrationDialog } from "./registration-dialog"
 
 /**
@@ -16,7 +16,11 @@ import { RegistrationDialog } from "./registration-dialog"
  * the primer slot and the client-logo strip all sit here, so the page stands on
  * its own for a visitor who arrived from an ad and will never see another page.
  */
-export function WorkshopOverview({ workshop }: { workshop: Workshop }) {
+export function WorkshopOverview({
+  workshop,
+}: {
+  workshop: ReturnType<typeof workshopView>
+}) {
   const availability = getWorkshopAvailability(workshop)
 
   return (
@@ -78,8 +82,9 @@ export function WorkshopOverview({ workshop }: { workshop: Workshop }) {
 
             {availability.canRegister && (
               <p className="text-muted-foreground mt-4 text-xs leading-relaxed">
-                No payment now. We email payment details and hold your seat for
-                48 hours.
+                {workshop.intake?.enabled && workshop.workshopSessionId
+                  ? "Complete the form to request registration. The Portal confirms eligibility when you submit."
+                  : "Online registration is currently unavailable. Contact the team directly to register."}
               </p>
             )}
           </aside>
@@ -89,6 +94,7 @@ export function WorkshopOverview({ workshop }: { workshop: Workshop }) {
       <PrimerPlayer
         title={workshop.title}
         blurb={workshop.primerBlurb}
+        videoUrl={workshop.primerVideoUrl}
         className="mt-14"
       />
 

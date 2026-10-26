@@ -1,6 +1,6 @@
 "use client"
 
-import Image from "next/image"
+import { CmsImage as Image } from "./cms-image"
 import {
   motion,
   useScroll,

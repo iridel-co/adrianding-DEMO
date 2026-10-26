@@ -14,7 +14,7 @@ import { SupportBand } from "@/app/_components/support-band"
 export const metadata: Metadata = {
   title: "Corporate Training — Coach Adrian Ding",
   description:
-    "Custom corporate training on leadership, culture and communication. 20,000+ professionals trained across the Top 500 companies in the Philippines.",
+    "Corporate training programmes and inquiries with Coach Adrian Ding.",
 }
 
 export default function CorporateTrainingPage() {

@@ -30,7 +30,8 @@ test("repository mapping covers CSS, source, tooling, and fresh build plus OG", 
   ])
   assert.ok(ids(["scripts/check-og.mjs"], "handoff").includes("build-and-og"))
   assert.equal(pkg.scripts["check:build"], "npm run build && npm run check:og")
-  assert.equal(pkg.scripts["test:browser"], "npm run build && playwright test")
+  assert.equal(pkg.scripts["test:browser"], "node scripts/quality/browser.mjs")
+  assert.ok(ids(["tests/fixtures/cms.mjs"], "handoff").includes("browser"))
   for (const file of [
     "tests/browser/public-site.spec.ts",
     "playwright.config.ts",

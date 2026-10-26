@@ -6,8 +6,8 @@ import { LandingSpecializations } from "./_sections/specializations"
 import { LandingPaths } from "./_sections/paths"
 import { LandingWorkshopsOpen } from "./_sections/workshops-open"
 import { LandingTestimonials } from "./_sections/testimonials"
-import { LandingGalleryPreview } from "./_sections/gallery-preview"
 import { SiteFooter } from "./_components/site-footer"
+import { getPublicProfile, getPublicPrograms } from "@/lib/public-api"
 
 /**
  * Landing funnel, top to bottom:
@@ -16,7 +16,7 @@ import { SiteFooter } from "./_components/site-footer"
  *   Paths (#which-path — pick a lane: workshops vs corporate; the hero's
  *   only CTA scrolls here) →
  *   Workshops open (the individual lane's concrete next step) →
- *   Specializations → Testimonials → Gallery → Footer.
+ *   Specializations → Testimonials → Footer.
  *
  * Reordered 2026-09-06 on client feedback. Specializations used to sit between
  * the roster and the fork, which pushed the page's only decision point below
@@ -24,14 +24,18 @@ import { SiteFooter } from "./_components/site-footer"
  * into the fork, so a visitor reaches "which of these is me" early; the deeper
  * capability material sits after it for anyone still reading.
  */
-export default function Page() {
+export default async function Page() {
+  const [profile, programs] = await Promise.all([
+    getPublicProfile(),
+    getPublicPrograms(),
+  ])
   return (
     <main id="main-content">
       {/* Editorial-cover hero. Renders the same <SiteNavbar> every other page
           does, just started at the hero's bottom edge instead of the top
           (`startBelowHero`); its sticky containing block is this <main>, so
           it stays pinned through every section below. */}
-      <HeroEditorial />
+      <HeroEditorial profile={profile} />
       {/* Video-transition beat: an opaque cream sheet rides up over the held
           (sticky) hero, pins, and writes the belief line in word by word. */}
       <QuoteReveal />
@@ -52,9 +56,8 @@ export default function Page() {
         <LandingWorkshopsOpen />
         {/* The six areas every engagement is built from — depth for anyone who
             didn't convert at the fork above. */}
-        <LandingSpecializations />
+        <LandingSpecializations programs={programs} />
         <LandingTestimonials />
-        <LandingGalleryPreview />
         <SiteFooter />
       </div>
     </main>

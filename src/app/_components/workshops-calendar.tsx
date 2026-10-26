@@ -13,7 +13,7 @@ import { useReducedMotionSafe } from "@/app/_lib/use-reduced-motion-safe"
 import { AnimatePresence, motion } from "framer-motion"
 import { ArrowLeft, ArrowRight } from "lucide-react"
 import { cn } from "@/lib/utils"
-import type { Workshop } from "@/lib/workshops"
+import type { PublicWorkshop as Workshop } from "@/lib/public-content"
 
 /**
  * Wobbly marker-circle strokes. Each is an off-round loop that overshoots
@@ -128,14 +128,20 @@ export function WorkshopsCalendar({
   const byDay = useMemo(() => {
     const map = new Map<string, Workshop[]>()
     for (const w of workshops) {
-      const key = dateKey(new Date(w.start))
+      if (!w.nextSession) continue
+      const [year, month, day] = w.nextSession.date.split("-").map(Number)
+      const key = dateKey(new Date(year, month - 1, day))
       map.set(key, [...(map.get(key) ?? []), w])
     }
     return map
   }, [workshops])
 
-  const initial =
-    workshops.length > 0 ? new Date(workshops[0].start) : new Date()
+  const firstSession = workshops.find(
+    (workshop) => workshop.nextSession
+  )?.nextSession
+  const initial = firstSession
+    ? new Date(`${firstSession.date}T12:00:00`)
+    : new Date()
   const [cursor, setCursor] = useState(
     new Date(initial.getFullYear(), initial.getMonth(), 1)
   )
@@ -207,7 +213,7 @@ export function WorkshopsCalendar({
         ))}
       </div>
 
-      <div className="overflow-hidden">
+      <div className="-mx-4 overflow-hidden px-4">
         <AnimatePresence mode="popLayout" initial={false} custom={direction}>
           <motion.div
             key={monthLabel}

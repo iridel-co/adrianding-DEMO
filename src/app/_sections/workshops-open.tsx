@@ -2,7 +2,7 @@ import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 import { EventCards } from "@/app/_components/event-cards"
 import { SplitReveal } from "@/app/_components/split-reveal"
-import { OPEN_WORKSHOPS } from "@/lib/workshops"
+import { getPublicWorkshops } from "@/lib/public-api"
 
 /**
  * Landing — the open public workshops, listed right after the workshop/corporate
@@ -11,8 +11,11 @@ import { OPEN_WORKSHOPS } from "@/lib/workshops"
  * forward. Heading + "see all" link ride the top row; <EventCards> pins its
  * scroll arrows bottom-right under the carousel.
  */
-export function LandingWorkshopsOpen() {
-  if (OPEN_WORKSHOPS.length === 0) return null
+export async function LandingWorkshopsOpen() {
+  const workshops = (await getPublicWorkshops()).filter(
+    (workshop) => workshop.nextSession
+  )
+  if (workshops.length === 0) return null
 
   return (
     <section className="bg-background py-24 lg:py-36">
@@ -29,7 +32,7 @@ export function LandingWorkshopsOpen() {
         </Link>
       </div>
 
-      <EventCards workshops={OPEN_WORKSHOPS} />
+      <EventCards workshops={workshops} />
     </section>
   )
 }

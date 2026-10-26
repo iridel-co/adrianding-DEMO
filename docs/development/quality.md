@@ -42,7 +42,10 @@ it does not certify partially staged contents. No selected checks exits 2.
 Application browser coverage lives in `tests/browser/` with Playwright. Install
 the browsers after `npm ci` using `npx playwright install chromium firefox webkit`;
 on Linux CI add `--with-deps` for system dependencies too.
-Run `npm run test:browser` to build and test a fresh production server on port 3100. The port must be free; the runner never reuses another server. The handoff
+Run `npm run test:browser` to build and test a fresh production server on port 3100.
+The runner supplies a temporary local CMS API fixture for both build and server;
+normal development reads `PORTAL_API_URL` from `.env.local`. Browser checks never
+submit to the live portal. The port must be free; the runner never reuses another server. The handoff
 gate includes this command for application, browser setup, and dependency changes.
 1440px desktop projects cover Chromium, Firefox, and WebKit; 390px mobile projects
 cover Chromium and WebKit. They use reduced motion, an explicit Asia/Manila
@@ -130,3 +133,7 @@ During edits use the scoped edit/checkpoint gate and a focused Playwright file o
 `--grep` selection. At integrated handoff and on PRs, `quality:ci` still runs the
 entire maintained suite, production build and OG validation. No path-based CI
 exemptions are introduced. Device and hosted review remain separate evidence.
+
+The browser runner also runs an isolated enabled-intake pass with mocked POST
+responses and Turnstile. Both intake switches stay off in normal validation and
+development; this pass does not establish deployed origins, verification or email delivery.

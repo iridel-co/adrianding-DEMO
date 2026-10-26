@@ -1,40 +1,17 @@
 import { SplitReveal } from "@/app/_components/split-reveal"
-import {
-  ProgramCarousel,
-  type ProgramCard,
-} from "@/app/_components/program-carousel"
-import {
-  CORPORATE_PROGRAMMES,
-  SPECIALIZATION_IMAGES,
-  SPECIALIZATION_IMAGE_ALTS,
-  SPECIALIZATION_IMAGE_POSITIONS,
-} from "@/lib/specializations"
+import { ProgramCarousel } from "@/app/_components/program-carousel"
+import { getPublicPrograms } from "@/lib/public-api"
 
-/**
- * Corporate Training — "Programs we run in-house": a horizontal,
- * constant-width carousel (see `program-carousel.tsx`), not the landing
- * page's reveal-card stack. Ten cards from `CORPORATE_PROGRAMMES` — Adrian's
- * six real programmes plus four 2026-09-24 placeholders, shown here (and on
- * the inquiry form) so the long list can be judged; never on the landing
- * page. Hovering (desktop + pointer) a card widens it to show who the
- * programme is for and an Inquire button that jumps to the inquiry form
- * with that programme preselected. On touch or below `lg`, every card is
- * static — title, bullets, Inquire, no expand. Added 2026-09-19; copy
- * rewritten 2026-09-24 to say plainly these are in-house corporate
- * programmes. The landing page's `SpecRevealCards` section is deliberately
- * unchanged.
- */
-const CARDS: ProgramCard[] = CORPORATE_PROGRAMMES.map((spec) => ({
-  key: spec.key,
-  title: spec.title,
-  blurb: spec.blurb,
-  usefulFor: spec.usefulFor,
-  image: SPECIALIZATION_IMAGES[spec.key],
-  imageAlt: SPECIALIZATION_IMAGE_ALTS[spec.key],
-  imagePosition: SPECIALIZATION_IMAGE_POSITIONS[spec.key],
-}))
-
-export function CorporatePrograms() {
+export async function CorporatePrograms() {
+  const programs = await getPublicPrograms()
+  const CARDS = programs.map((program) => ({
+    key: program.slug,
+    title: program.title,
+    blurb: program.summary,
+    usefulFor: program.usefulFor,
+    image: program.image?.url ?? null,
+    imageAlt: program.image?.alt ?? "",
+  }))
   return (
     <section className="bg-muted/40 py-24 lg:py-36">
       <ProgramCarousel
