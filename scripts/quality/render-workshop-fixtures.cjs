@@ -25,6 +25,7 @@ require.extensions[".ts"] = compile
 require.extensions[".tsx"] = compile
 const { createElement } = require("react")
 const { renderToStaticMarkup } = require("react-dom/server")
+const { CmsImage } = require("../../src/app/_components/cms-image.tsx")
 
 const {
   WorkshopTagFilter,
@@ -71,6 +72,12 @@ const capacity = [
 }))
 process.stdout.write(
   JSON.stringify({
+    decorativeImage: renderToStaticMarkup(
+      createElement(CmsImage, { src: null, alt: "" })
+    ),
+    informativeImage: renderToStaticMarkup(
+      createElement(CmsImage, { src: null, alt: "Coach portrait" })
+    ),
     capacity,
     emptyList: renderToStaticMarkup(
       createElement(WorkshopTagFilter, { workshops: [] })

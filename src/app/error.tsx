@@ -1,4 +1,5 @@
 "use client"
+import { startTransition } from "react"
 import { useRouter } from "next/navigation"
 
 export default function ContentError({ reset }: { reset: () => void }) {
@@ -12,8 +13,10 @@ export default function ContentError({ reset }: { reset: () => void }) {
       <button
         type="button"
         onClick={() => {
-          router.refresh()
-          reset()
+          startTransition(() => {
+            router.refresh()
+            reset()
+          })
         }}
         className="mt-6 min-h-11 rounded-md border px-6 py-3"
       >

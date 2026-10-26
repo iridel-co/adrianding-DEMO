@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og"
+import { CMS_MEDIA_HOST } from "@/lib/cms-media"
 import { ogJpeg } from "@/lib/og-jpeg"
 import { ogPhotoForPath } from "@/lib/og-photo"
 import { OG_SANS, OG_SERIF, loadOgFonts } from "@/lib/og-fonts"
@@ -57,10 +58,7 @@ async function loadPortraitDataUri() {
   if (!profile.portrait) return null
   try {
     const url = new URL(profile.portrait.url)
-    if (
-      url.protocol !== "https:" ||
-      url.hostname !== "adrian-ding-assets.iridel.com"
-    )
+    if (url.protocol !== "https:" || url.hostname !== CMS_MEDIA_HOST)
       return null
     const response = await fetch(url, {
       next: { revalidate: 60 },

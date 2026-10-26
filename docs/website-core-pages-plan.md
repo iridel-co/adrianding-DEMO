@@ -472,6 +472,8 @@ branch `refactor/public-site-integration`, targeting `main`.
 - Availability: per-session `seatsLeft` appears on cards, calendar previews and
   details. Closed sessions stay closed. Original calendar circles have overflow
   room at both edges at 320px.
+- Review nits: decorative CMS image fallbacks stay hidden from assistive technology;
+  image consumers share the media host, and refresh/reset run in one transition.
 - CRM: workshop registrations and corporate inquiries use the supplied Portal
   contract: UUID retry keys, fresh Turnstile verification, omitted credentials,
   strict payloads and validated HTTP 202 acceptance. Confirmations require an

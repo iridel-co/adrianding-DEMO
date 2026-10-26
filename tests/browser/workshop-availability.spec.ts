@@ -3,6 +3,8 @@ import { execFileSync } from "node:child_process"
 import path from "node:path"
 
 const rendered: {
+  decorativeImage: string
+  informativeImage: string
   emptyList: string
   emptyCalendar: string
   capacity: { trigger: string; label: string; enabled: boolean }[]
@@ -13,6 +15,21 @@ const rendered: {
     { encoding: "utf8" }
   )
 )
+
+test("@policy missing CMS images preserve decorative and informative semantics", async ({
+  page,
+}) => {
+  await page.setContent(rendered.decorativeImage)
+  await expect(page.getByRole("img")).toHaveCount(0)
+  await expect(page.locator("span")).toHaveAttribute("aria-hidden", "true")
+  await page.setContent(rendered.informativeImage)
+  await expect(
+    page.getByRole("img", {
+      name: "Coach portrait (image unavailable)",
+      exact: true,
+    })
+  ).toHaveCount(1)
+})
 
 test("@policy empty catalogue and event-free calendar retain useful states", async ({
   page,

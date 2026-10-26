@@ -1,4 +1,5 @@
 import sharp from "sharp"
+import { CMS_MEDIA_HOST } from "./cms-media"
 import { readFile } from "node:fs/promises"
 import { join } from "node:path"
 
@@ -93,7 +94,7 @@ export async function ogPhotoForPath(
     let buf: Buffer
     if (publicRelativePath.startsWith("https://")) {
       const url = new URL(publicRelativePath)
-      if (url.hostname !== "adrian-ding-assets.iridel.com")
+      if (url.hostname !== CMS_MEDIA_HOST)
         throw new Error("Unsupported CMS image host")
       const response = await fetch(url, {
         next: { revalidate: 60 },

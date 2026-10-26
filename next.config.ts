@@ -1,4 +1,5 @@
 import type { NextConfig } from "next"
+import { CMS_MEDIA_HOST } from "./src/lib/cms-media"
 
 const nextConfig: NextConfig = {
   /**
@@ -23,7 +24,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "adrian-ding-assets.iridel.com",
+        hostname: CMS_MEDIA_HOST,
         pathname: "/**",
       },
       /**

@@ -1,6 +1,7 @@
 "use client"
 
 import Image from "next/image"
+import { CMS_MEDIA_HOST } from "@/lib/cms-media"
 import { useState, type ComponentProps } from "react"
 
 // Missing and unavailable CMS media use a neutral surface, never sample artwork.
@@ -13,12 +14,13 @@ export function CmsImage({
   const supported =
     src &&
     ((src.startsWith("/") && !src.startsWith("//")) ||
-      src.startsWith("https://adrian-ding-assets.iridel.com/"))
+      src.startsWith(`https://${CMS_MEDIA_HOST}/`))
   if (!supported || failedSrc === src) {
     return (
       <span
-        role="img"
-        aria-label={alt ? `${alt} (image unavailable)` : "Image unavailable"}
+        role={alt ? "img" : undefined}
+        aria-label={alt ? `${alt} (image unavailable)` : undefined}
+        aria-hidden={alt ? undefined : true}
         className={`inline-block bg-neutral-200 ${props.fill ? "absolute inset-0" : ""} ${props.className ?? ""}`}
         style={{
           width: props.fill ? undefined : props.width,
