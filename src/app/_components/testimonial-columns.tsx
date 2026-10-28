@@ -5,10 +5,14 @@ import { useEffect, useRef, useState } from "react"
 import { Quote, User } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { PublicTestimonial } from "@/lib/public-content"
+import type { Testimonial } from "@/lib/testimonials"
 import { Button } from "@/components/ui/button"
 
+type CardTestimonial = PublicTestimonial &
+  Pick<Testimonial, "logo" | "logoShape">
+
 type ColumnsProps = {
-  testimonials: PublicTestimonial[]
+  testimonials: (PublicTestimonial | Testimonial)[]
   className?: string
 }
 
@@ -23,7 +27,29 @@ type ColumnsProps = {
  * `_components/marquee.tsx` — two identical copies, slide by exactly one copy,
  * wrap. Reduced motion drops the animation and the mask for a plain scroll strip.
  */
-export function TestimonialColumns({ testimonials, className }: ColumnsProps) {
+export function TestimonialColumns({
+  testimonials: items,
+  className,
+}: ColumnsProps) {
+  const testimonials = items.map(
+    (item): CardTestimonial =>
+      "personName" in item
+        ? item
+        : {
+            logo: item.logo,
+            logoShape: item.logoShape,
+            id: item.name,
+            personName: item.name,
+            company: item.org,
+            role: item.role,
+            quote: item.quote,
+            photo: item.photo
+              ? { url: item.photo, alt: item.name, width: 320, height: 320 }
+              : null,
+            workshop: null,
+            isFeatured: true,
+          }
+  )
   const [paused, setPaused] = useState(false)
   const columnA = testimonials.filter((_, i) => i % 2 === 0)
   const columnB = testimonials.filter((_, i) => i % 2 === 1)
@@ -58,7 +84,7 @@ export function TestimonialColumns({ testimonials, className }: ColumnsProps) {
 }
 
 type ColumnProps = {
-  testimonials: PublicTestimonial[]
+  testimonials: CardTestimonial[]
   /** Upward drift in px/second. */
   speed: number
   paused: boolean
@@ -198,7 +224,7 @@ function TestimonialColumn({ testimonials, speed, paused }: ColumnProps) {
   )
 }
 
-function ColumnCard({ testimonial: t }: { testimonial: PublicTestimonial }) {
+function ColumnCard({ testimonial: t }: { testimonial: CardTestimonial }) {
   return (
     <figure
       tabIndex={0}
@@ -207,9 +233,27 @@ function ColumnCard({ testimonial: t }: { testimonial: PublicTestimonial }) {
       <div className="flex min-h-9 items-center justify-between gap-4">
         <Quote className="text-brand/25 size-7 shrink-0" aria-hidden />
 
-        <span className="text-foreground/65 text-sm font-semibold tracking-[-0.01em]">
-          {t.company}
-        </span>
+        {t.logo ? (
+          <Image
+            src={t.logo}
+            alt=""
+            aria-hidden
+            width={200}
+            height={80}
+            loading="eager"
+            style={{ width: "auto" }}
+            className={cn(
+              "w-auto object-contain opacity-80",
+              t.logoShape === "square"
+                ? "h-9 max-w-[110px] lg:h-10"
+                : "h-7 max-w-40 lg:h-8"
+            )}
+          />
+        ) : (
+          <span className="text-foreground/65 text-sm font-semibold tracking-[-0.01em]">
+            {t.company}
+          </span>
+        )}
       </div>
       <blockquote
         className={cn(
@@ -224,7 +268,7 @@ function ColumnCard({ testimonial: t }: { testimonial: PublicTestimonial }) {
         {t.quote}
       </blockquote>
       <figcaption className="mt-7 flex items-center gap-3.5">
-        {/* Round headshot; falls back to a dashed User icon if `photo` is unset. */}
+        {/* Keep the person icon for missing and unavailable photos. */}
         <span
           className={cn(
             "text-muted-foreground/70 flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full",
@@ -233,6 +277,7 @@ function ColumnCard({ testimonial: t }: { testimonial: PublicTestimonial }) {
         >
           {t.photo ? (
             <Image
+              fallback={<User className="size-5" aria-hidden />}
               src={t.photo?.url}
               alt={t.personName}
               width={96}

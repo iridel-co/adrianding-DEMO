@@ -61,7 +61,6 @@ export function WorkshopHero({ workshop }: { workshop: Workshop }) {
         >
           {workshop.title}
         </SplitReveal>
-        <p className="mt-4 text-xs text-white/75">API content</p>
 
         <Reveal className="mt-5">
           <WorkshopTagPills tags={workshop.tags} size="md" />

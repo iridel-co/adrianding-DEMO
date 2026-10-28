@@ -1,15 +1,10 @@
-import { getPublicClients, getPublicIndustries } from "@/lib/public-api"
 import { SplitReveal } from "@/app/_components/split-reveal"
 import { CompaniesMarquee } from "@/app/_components/companies-marquee"
 
 /**
  * Corporate Training — the logo wall again, framed for a corporate buyer.
  */
-export async function CorporateCompanies() {
-  const [clients, industries] = await Promise.all([
-    getPublicClients(),
-    getPublicIndustries(),
-  ])
+export function CorporateCompanies() {
   return (
     <section className="bg-muted/40 overflow-hidden pt-0 pb-24 lg:pb-36">
       <div className="mx-auto max-w-7xl px-6 sm:px-8">
@@ -21,7 +16,7 @@ export async function CorporateCompanies() {
         </p>
       </div>
       <div className="mt-16">
-        <CompaniesMarquee clients={clients} industries={industries} />
+        <CompaniesMarquee />
       </div>
     </section>
   )

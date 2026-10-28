@@ -9,7 +9,7 @@ import type { PublicProgram } from "@/lib/public-content"
 import { BloomFieldBackground } from "./bloom-field-background"
 
 type SiteCtaProps = {
-  programs: PublicProgram[]
+  programs?: Pick<PublicProgram, "slug" | "title">[]
   heading?: string
   subtext?: string
   /** Primary button — defaults to the workshop-forward copy used
@@ -46,7 +46,11 @@ function VerticalMarqueeTrack({ children }: { children: ReactNode }) {
  * item's distance from the panel's vertical center, recomputed every frame)
  * so the centered item always reads as the focused one.
  */
-function FocusAreaMarquee({ programs }: { programs: PublicProgram[] }) {
+function FocusAreaMarquee({
+  programs,
+}: {
+  programs: Pick<PublicProgram, "slug" | "title">[]
+}) {
   const panelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -132,7 +136,14 @@ function FocusAreaMarquee({ programs }: { programs: PublicProgram[] }) {
  * sit centered beside it instead of forcing the section shorter.
  */
 export function SiteCta({
-  programs,
+  programs = [
+    "Leadership",
+    "Keynotes",
+    "Winning Culture",
+    "Communication",
+    "Train the Trainer",
+    "Personal Branding",
+  ].map((title) => ({ slug: title, title })),
   heading = "Ready to build a winning culture?",
   subtext = "Start with a workshop, or bring Adrian in to train your whole team.",
   primaryLabel = "Register for a workshop",

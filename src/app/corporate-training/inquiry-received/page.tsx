@@ -5,7 +5,6 @@ import { SupportBand } from "@/app/_components/support-band"
 import { InquiryReceived } from "./_sections/received"
 import { InquiryCommitment } from "./_sections/commitment"
 import { InquirySummary } from "./_sections/summary"
-import { InquiryPrimer } from "./_sections/primer"
 import { InquiryCredibility } from "./_sections/credibility"
 
 export const metadata: Metadata = {
@@ -24,7 +23,6 @@ export default function InquiryReceivedPage() {
             the workshop confirmation's payment block. */}
         <InquiryCommitment />
         <InquirySummary />
-        <InquiryPrimer />
         <InquiryCredibility />
         <SupportBand
           heading="Need to reach us sooner?"

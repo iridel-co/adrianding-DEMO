@@ -1,12 +1,17 @@
-import { CmsImage as Image } from "@/app/_components/cms-image"
-import { getPublicProfile } from "@/lib/public-api"
-import type { PublicProfile } from "@/lib/public-content"
+import Image from "next/image"
 import { Reveal } from "@/app/_components/reveal"
 import { SplitReveal } from "@/app/_components/split-reveal"
+import { CERTIFICATIONS, type Certification } from "@/lib/certifications"
 
-export async function AboutCertifications() {
-  const { credentials: CERTS } = await getPublicProfile()
-  if (!CERTS.length) return null
+/**
+ * About — certifications & positions as a single logo row, matching the
+ * "in great company" treatment: bare marks, no card chrome.
+ * Data is shared with the workshop detail pages — see `src/lib/certifications.ts`.
+ */
+
+const CERTS = CERTIFICATIONS
+
+export function AboutCertifications() {
   return (
     <section className="border-border/60 mx-auto max-w-7xl border-t px-6 py-24 sm:px-8 lg:py-36">
       <SplitReveal className="font-serif text-[2.75rem] leading-[1.05] tracking-[-0.02em] lg:text-[3.75rem]">
@@ -19,7 +24,7 @@ export async function AboutCertifications() {
           className="flex flex-wrap items-start justify-center gap-x-12 gap-y-8 sm:gap-x-16 lg:gap-y-14"
         >
           {CERTS.slice(0, 3).map((c) => (
-            <CertCard key={c.organization} cert={c} />
+            <CertCard key={c.name} cert={c} />
           ))}
         </Reveal>
         <Reveal
@@ -27,7 +32,7 @@ export async function AboutCertifications() {
           className="flex flex-wrap items-start justify-center gap-x-12 gap-y-8 sm:gap-x-16 lg:gap-y-14"
         >
           {CERTS.slice(3).map((c) => (
-            <CertCard key={c.organization} cert={c} />
+            <CertCard key={c.name} cert={c} />
           ))}
         </Reveal>
       </div>
@@ -35,19 +40,18 @@ export async function AboutCertifications() {
   )
 }
 
-function CertCard({ cert }: { cert: PublicProfile["credentials"][number] }) {
-  const circleBg = cert.organization === "INSEAD" ? "#eaecef" : undefined
+function CertCard({ cert }: { cert: Certification }) {
   return (
     <div className="flex w-44 flex-col items-center gap-5 text-center sm:w-56">
       <div className="relative flex h-28 w-full items-center justify-center sm:h-32">
-        {circleBg ? (
+        {cert.circleBg ? (
           <div
             className="relative size-28 shrink-0 rounded-full sm:size-32"
-            style={{ backgroundColor: circleBg }}
+            style={{ backgroundColor: cert.circleBg }}
           >
             <Image
-              src={cert.logo?.url}
-              alt={cert.logo?.alt ?? cert.organization}
+              src={cert.src}
+              alt={cert.name}
               fill
               sizes="128px"
               className="object-contain p-4"
@@ -55,8 +59,8 @@ function CertCard({ cert }: { cert: PublicProfile["credentials"][number] }) {
           </div>
         ) : (
           <Image
-            src={cert.logo?.url}
-            alt={cert.logo?.alt ?? cert.organization}
+            src={cert.src}
+            alt={cert.name}
             fill
             sizes="224px"
             className="object-contain"
@@ -65,10 +69,10 @@ function CertCard({ cert }: { cert: PublicProfile["credentials"][number] }) {
       </div>
       <div>
         <h3 className="font-serif text-lg tracking-[-0.01em] sm:text-xl">
-          {cert.organization}
+          {cert.name}
         </h3>
         <p className="text-muted-foreground mt-1.5 text-sm leading-relaxed">
-          {cert.description}
+          {cert.line}
         </p>
       </div>
     </div>

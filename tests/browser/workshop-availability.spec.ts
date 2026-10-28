@@ -1,8 +1,10 @@
 import { expect, test } from "@playwright/test"
+import { fillRegistration } from "./helpers/form-data"
 import { execFileSync } from "node:child_process"
 import path from "node:path"
 
 const rendered: {
+  videos: string[]
   decorativeImage: string
   informativeImage: string
   emptyList: string
@@ -76,9 +78,7 @@ test("@policy workshop preserves the registration layout without a simulated res
   await expect(rail.getByText("Starts in", { exact: true })).toBeVisible()
   await rail.getByRole("button", { name: "Reserve your seat" }).click()
   const dialog = page.getByRole("dialog", { name: "Reserve your seat" })
-  await dialog
-    .getByRole("button", { name: /fill this form with sample data/i })
-    .click()
+  await fillRegistration(dialog)
   await dialog.getByRole("button", { name: "Continue", exact: true }).click()
   await dialog.getByRole("button", { name: "Continue", exact: true }).click()
   await expect(
@@ -87,7 +87,9 @@ test("@policy workshop preserves the registration layout without a simulated res
   await page.keyboard.press("Escape")
   await expect(page.getByText("9 seats left").first()).toBeVisible()
   await expect(
-    page.getByRole("link", { name: /coach@example.test/ }).first()
+    page
+      .getByRole("link", { name: /coachadrianding@maximumimpact.online/ })
+      .first()
   ).toBeVisible()
   for (const suffix of ["registered"]) {
     await page.goto(`/workshops/exceptional-salesmanship/${suffix}`)
@@ -177,4 +179,15 @@ test("@layout original calendar circles have room at both edges at 320px", async
       () => document.documentElement.scrollWidth <= innerWidth
     )
   ).toBe(true)
+})
+
+test("@policy workshop video is absent without an attached CMS URL", async ({
+  page,
+}) => {
+  for (const markup of rendered.videos.slice(0, 3)) expect(markup).toBe("")
+  await page.setContent(rendered.videos[3])
+  await expect(page.locator("iframe")).toHaveAttribute(
+    "src",
+    "https://www.youtube-nocookie.com/embed/abc123"
+  )
 })

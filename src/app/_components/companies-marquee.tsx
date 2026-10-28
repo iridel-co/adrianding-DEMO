@@ -1,9 +1,9 @@
 "use client"
 
-import { CmsImage as Image } from "@/app/_components/cms-image"
+import Image from "next/image"
 import { useEffect, useMemo, useState } from "react"
 import { Marquee } from "@/app/_components/marquee"
-import type { PublicClient, PublicIndustry } from "@/lib/public-content"
+import { COMPANY_GROUPS, type CompanyLogo } from "@/lib/companies"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
@@ -34,16 +34,12 @@ const ROW_DIRS = ["left", "right", "left"] as const
 const WIDE_BOX = "h-12 min-w-28 sm:h-14 sm:min-w-32 lg:h-16 lg:min-w-40"
 const SQUARE_BOX = "h-9 min-w-16 sm:h-10 sm:min-w-20 lg:h-12 lg:min-w-24"
 
-function CompanyMark({ company }: { company: PublicClient }) {
-  const isSquare = Boolean(
-    company.logo?.width &&
-    company.logo?.height &&
-    company.logo.width <= company.logo.height
-  )
-  if (company.logo?.url) {
+function CompanyMark({ company }: { company: CompanyLogo }) {
+  const isSquare = company.shape === "square"
+  if (company.src) {
     return (
       <Image
-        src={company.logo?.url}
+        src={company.src}
         alt={company.name}
         width={210}
         height={52}
@@ -76,7 +72,7 @@ function LogoRow({
   speed,
   paused,
 }: {
-  companies: PublicClient[]
+  companies: CompanyLogo[]
   direction: "left" | "right"
   speed: number
   paused: boolean
@@ -90,7 +86,7 @@ function LogoRow({
       className="py-2"
     >
       {companies.map((c) => (
-        <CompanyMark key={c.id} company={c} />
+        <CompanyMark key={c.name} company={c} />
       ))}
     </Marquee>
   )
@@ -124,13 +120,7 @@ function Pill({
 
 const FADE_MS = 300
 
-export function CompaniesMarquee({
-  clients,
-  industries,
-}: {
-  clients: PublicClient[]
-  industries: PublicIndustry[]
-}) {
+export function CompaniesMarquee() {
   const [paused, setPaused] = useState(false)
   const [selected, setSelected] = useState<string[]>([])
   // The wall lags the pills by one fade: `shown` only catches up once the old
@@ -142,7 +132,7 @@ export function CompaniesMarquee({
     setSelected((prev) =>
       prev.includes(category)
         ? prev.filter((c) => c !== category)
-        : industries.some((industry) => industry.id === category)
+        : COMPANY_GROUPS.some((group) => group.category === category)
           ? [...prev, category]
           : prev
     )
@@ -157,15 +147,13 @@ export function CompaniesMarquee({
     return () => clearTimeout(t)
   }, [selected, shown])
 
-  const visible = useMemo(
-    () =>
-      clients.filter(
-        (client) =>
-          shown.length === 0 ||
-          (client.industry !== null && shown.includes(client.industry.id))
-      ),
-    [clients, shown]
-  )
+  const visible = useMemo(() => {
+    const groups =
+      shown.length === 0
+        ? COMPANY_GROUPS
+        : COMPANY_GROUPS.filter((group) => shown.includes(group.category))
+    return groups.flatMap((group) => group.logos)
+  }, [shown])
 
   const rowCount = visible.length > 24 ? 3 : visible.length > 9 ? 2 : 1
   // Deal logos across rows round-robin, not in contiguous slices. The roster is
@@ -195,12 +183,12 @@ export function CompaniesMarquee({
           active={selected.length === 0}
           onClick={() => setSelected([])}
         />
-        {industries.map((g) => (
+        {COMPANY_GROUPS.map((g) => (
           <Pill
-            key={g.id}
-            label={g.name}
-            active={selected.includes(g.id)}
-            onClick={() => toggle(g.id)}
+            key={g.category}
+            label={g.category}
+            active={selected.includes(g.category)}
+            onClick={() => toggle(g.category)}
           />
         ))}
       </div>

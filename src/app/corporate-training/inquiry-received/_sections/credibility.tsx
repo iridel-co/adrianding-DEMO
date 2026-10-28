@@ -1,4 +1,3 @@
-import { getPublicProfile } from "@/lib/public-api"
 import { Reveal } from "@/app/_components/reveal"
 import { TrustLogos } from "@/app/_components/trust-logos"
 
@@ -11,10 +10,25 @@ import { TrustLogos } from "@/app/_components/trust-logos"
  * numerals set in it read decorative rather than factual.
  */
 
-export async function InquiryCredibility() {
-  const profile = await getPublicProfile()
-  const FIGURES = profile.stats.filter((stat) => stat.pages.includes("inquiry"))
-  if (!FIGURES.length) return null
+const FIGURES = [
+  {
+    value: "20+",
+    label: "years in the room",
+    body: "Two decades of live training, not a career pivot into it.",
+  },
+  {
+    value: "20,000+",
+    label: "professionals trained",
+    body: "From frontline supervisors to executive teams.",
+  },
+  {
+    value: "Top 500",
+    label: "PH companies",
+    body: "Multinationals, banks, hospitals, retailers and family businesses.",
+  },
+]
+
+export function InquiryCredibility() {
   return (
     <section className="bg-background py-16 lg:py-24">
       <div className="mx-auto max-w-5xl px-6 sm:px-8">
@@ -28,7 +42,7 @@ export async function InquiryCredibility() {
                 {f.label}
               </p>
               <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
-                {f.description}
+                {f.body}
               </p>
             </div>
           ))}

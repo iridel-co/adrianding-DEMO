@@ -7,7 +7,7 @@ import { LandingPaths } from "./_sections/paths"
 import { LandingWorkshopsOpen } from "./_sections/workshops-open"
 import { LandingTestimonials } from "./_sections/testimonials"
 import { SiteFooter } from "./_components/site-footer"
-import { getPublicProfile, getPublicPrograms } from "@/lib/public-api"
+import { getPublicPrograms } from "@/lib/public-api"
 
 /**
  * Landing funnel, top to bottom:
@@ -25,17 +25,14 @@ import { getPublicProfile, getPublicPrograms } from "@/lib/public-api"
  * capability material sits after it for anyone still reading.
  */
 export default async function Page() {
-  const [profile, programs] = await Promise.all([
-    getPublicProfile(),
-    getPublicPrograms(),
-  ])
+  const programs = await getPublicPrograms()
   return (
     <main id="main-content">
       {/* Editorial-cover hero. Renders the same <SiteNavbar> every other page
           does, just started at the hero's bottom edge instead of the top
           (`startBelowHero`); its sticky containing block is this <main>, so
           it stays pinned through every section below. */}
-      <HeroEditorial profile={profile} />
+      <HeroEditorial />
       {/* Video-transition beat: an opaque cream sheet rides up over the held
           (sticky) hero, pins, and writes the belief line in word by word. */}
       <QuoteReveal />

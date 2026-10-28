@@ -462,35 +462,37 @@ PR: pending. Evidence: pending. Merge status: not started.
 
 ## PR09 Frontend integration contracts
 
-Combined PR06–PR10 is in [draft PR #5](https://github.com/iridel-co/adrianding-DEMO/pull/5),
-branch `refactor/public-site-integration`, targeting `main`.
+### Production presentation and CMS scope
 
-- CMS: validated profile, workshop list/detail, clients/industries, programmes,
-  testimonials and FAQ reads use `PORTAL_API_URL`. Pages retain their existing
-  layouts; metadata/OG use CMS content, missing images have neutral fallbacks,
-  and failed reads offer retry. No local workshop samples or early-bird notes.
-- Availability: per-session `seatsLeft` appears on cards, calendar previews and
-  details. Closed sessions stay closed. Original calendar circles have overflow
-  room at both edges at 320px.
-- Review nits: decorative CMS image fallbacks stay hidden from assistive technology;
-  image consumers share the media host, and refresh/reset run in one transition.
-- CRM: workshop registrations and corporate inquiries use the supplied Portal
-  contract: UUID retry keys, fresh Turnstile verification, omitted credentials,
-  strict payloads and validated HTTP 202 acceptance. Confirmations require an
-  accepted receipt; no fabricated reference, payment account, QR or expiry.
-- Configuration: both forms activate with the API origin and public Turnstile
-  site key, without separate enable flags. The real site key is still pending;
-  Portal origins, real submission/email delivery and native devices are unverified.
-- Cleanup: retired demo submission/storage paths are removed. Contract tests use
-  current request schemas; countdown, sticky registration and filter-edge UI
-  regressions are retained, alongside form focus/consent, confirmation storage,
-  empty/closed/full states and Home carousel controls. Filtering resets native
-  carousel scroll state. Payment copy describes customer actions.
-- Validation: `quality:ci` covers 148 default-path cases plus six isolated
-  configured-intake cases. PR #5 includes four main/PR screenshot pairs with
-  verified fonts; confirmation captures use synthetic receipts, without POSTs.
-- Current CMS draft content includes null images and a sample image returning 404.
-  Decorative backgrounds remain website assets. No CMS writes or deployment.
+PR #5 (PR06–PR10) is merged into `main`. This follow-up preserves its CMS/CRM
+connections while restoring the agreed original presentation.
+
+- CMS-managed: workshop/event content, sessions, availability, workshop-linked
+  testimonials and corporate programs. Program cards on Home and Corporate
+  Training and inquiry choices use the same published CMS programs.
+- Static: About content, statistics and descriptions, general testimonials,
+  instructor biography/credentials, brand portraits/backgrounds, company logos,
+  industry groupings, shared contact/footer content and FAQs. Portal's media
+  library does not assign these bundled website assets to page sections.
+- Missing/broken CMS images use brand-toned backgrounds or a person icon;
+  informative alt labels and decorative-image silence are preserved. Failed
+  CMS reads retain retry. Workshop videos render only with a valid attached URL.
+- Removed demo fill buttons, API-content badges, the demo credit, email-template
+  preview and inert staff-login routes. Local workshop samples and early-bird
+  notes stay removed. Preserve short card dates, eligible Register/View details
+  labels, gallery removal, motion controls and unclipped calendar circles.
+- Turnstile uses the native light widget without an extra card, flexible sizing
+  where its 300px minimum fits, compact sizing below that, accessible status,
+  bounded script loading and failure/expiry retry. Local real-provider test-key
+  checks passed; earlier real-key checks failed local hostname authorization.
+- CRM retry keys, fresh verification, strict payloads, validated HTTP 202 receipts
+  and confirmation behavior remain connected. Browser fixtures cover accepted,
+  duplicate and ambiguous results without sending real submissions.
+- Validation: `quality:ci` passed 150 default-path browser cases and ten isolated
+  intake cases, plus format, lint, types, tooling, build and OG checks. Matched
+  screenshots and direct demo/local comparisons are local evidence. Production
+  hostname configuration, live submission/email delivery and native-device proof
+  remain unverified. Published sample CMS rows/URLs need editorial review.
 
 ## PR10 Demo submission boundaries (included in PR09)
 

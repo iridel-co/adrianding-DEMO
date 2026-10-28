@@ -15,6 +15,24 @@ for (const width of [360, 768]) {
     await page.goto("/")
     await expect(page.locator(".he-word")).toBeVisible()
     await expectInsideViewport(page.locator(".he-word"), width)
+    const stats = page.locator("section").filter({
+      has: page.getByRole("heading", { name: "By the numbers", exact: true }),
+    })
+    await stats.scrollIntoViewIfNeeded()
+    for (const [value, caption] of [
+      ["20+", "Years in the training circuit"],
+      ["20,000+", "Professionals trained"],
+      ["Top 500", "PH companies trained"],
+      ["9+", "Industries served"],
+    ]) {
+      const figure = stats
+        .getByText(caption, { exact: true })
+        .locator("..")
+        .locator("p")
+        .first()
+      await expect(figure).toHaveText(value)
+      await expectInsideViewport(figure, width)
+    }
     const paths = page.locator("#which-path")
     await paths.scrollIntoViewIfNeeded()
     for (const action of await paths.locator(".group\\/cta").all()) {

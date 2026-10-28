@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test"
+import { fillInquiry } from "./helpers/form-data"
 
 for (const width of [360, 768]) {
   test(`@layout Corporate inquiry preview remains editable without submitting at ${width}px`, async ({
@@ -18,7 +19,7 @@ for (const width of [360, 768]) {
     const forward = form.getByRole("button", { name: "Continue", exact: true })
     await forward.click()
     await expect(form.getByText("Please enter your full name.")).toBeVisible()
-    await form.getByRole("button", { name: /Demo shortcut/ }).click()
+    await fillInquiry(form)
     for (const step of [2, 3]) {
       await forward.click()
       await expect(
@@ -75,7 +76,7 @@ test("@layout Corporate inquiry review wraps long values", async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 844 })
   await page.goto("/corporate-training#inquiry")
   const form = page.locator("form")
-  await form.getByRole("button", { name: /Demo shortcut/ }).click()
+  await fillInquiry(form)
   await form.getByLabel("Full name", { exact: true }).fill("Alex".repeat(40))
   await form.getByRole("button", { name: "Continue", exact: true }).click()
   await form.getByLabel("Company", { exact: true }).fill("Company".repeat(28))
@@ -104,7 +105,7 @@ test("Corporate form labels, errors and overlapping Continue activations", async
   await expect(name).toHaveAccessibleDescription("Please enter your full name.")
   await form.getByText("Full name", { exact: true }).click()
   await expect(name).toBeFocused()
-  await form.getByRole("button", { name: /Demo shortcut/ }).click()
+  await fillInquiry(form)
   await expect(name).toHaveAttribute("aria-invalid", "false")
   const forward = form.getByRole("button", { name: "Continue", exact: true })
   await forward.evaluate((button: HTMLButtonElement) => {

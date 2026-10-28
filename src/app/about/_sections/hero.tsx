@@ -1,18 +1,22 @@
-import { CmsImage as Image } from "@/app/_components/cms-image"
-import { getPublicProfile } from "@/lib/public-api"
+import Image from "next/image"
 import { SplitReveal } from "@/app/_components/split-reveal"
 import { Reveal } from "@/app/_components/reveal"
 
-export async function AboutHero() {
-  const profile = await getPublicProfile()
+/**
+ * About — opening banner. Full-bleed shot with the belief-chain line ("Better
+ * people build better companies") set over it in the editorial serif, body
+ * copy + CTA to its right — same layout as `workshops/_sections/hero.tsx`
+ * and `corporate-training/_sections/hero.tsx`.
+ */
+export function AboutHero() {
   return (
     <section
       data-navbar-theme="dark"
       className="relative flex h-auto min-h-120 w-full items-end overflow-hidden bg-neutral-950 lg:h-[64svh]"
     >
       <Image
-        src={profile.portrait?.url}
-        alt={profile.portrait?.alt ?? ""}
+        src="/images/hero/about-hero.webp"
+        alt="Coach Adrian Ding leading a corporate training session"
         fill
         priority
         sizes="100vw"
@@ -24,11 +28,12 @@ export async function AboutHero() {
           as="h1"
           className="max-w-3xl font-serif text-[2.75rem] leading-[1.03] tracking-[-0.02em] text-white sm:text-[3.5rem] lg:text-[4.5rem]"
         >
-          {profile.headline || "About Coach Adrian Ding"}
+          Better people build better companies.
         </SplitReveal>
         <Reveal className="flex max-w-md flex-col gap-6 lg:pb-2">
           <p className="text-base leading-relaxed text-white/80 lg:text-lg">
-            {profile.shortBio}
+            20+ years in the training circuit, 20,000+ professionals trained
+            across the Top 500 companies in the Philippines.
           </p>
         </Reveal>
       </div>

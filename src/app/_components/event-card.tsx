@@ -6,11 +6,16 @@ import Link from "next/link"
 import { ArrowRight, MapPin, Ticket } from "lucide-react"
 import { WorkshopTagPills } from "@/app/_components/workshop-tags"
 import { type PublicWorkshop as Workshop } from "@/lib/public-content"
-import {
-  sessionSchedule,
-  sessionAvailability,
-  workshopPrice,
-} from "@/lib/public-workshops"
+import { sessionAvailability, workshopPrice } from "@/lib/public-workshops"
+
+function shortDate(iso: string) {
+  return new Date(iso).toLocaleDateString("en-PH", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "Asia/Manila",
+  })
+}
 
 export function EventCard({
   workshop,
@@ -29,6 +34,11 @@ export function EventCard({
   onActivate: () => void
   onDeactivate: () => void
 }) {
+  const session = workshop.nextSession
+  const canRegister =
+    session?.status === "open" &&
+    session.isRegistrationOpen &&
+    session.seatsLeft !== 0
   return (
     <Link
       href={`/workshops/${workshop.slug}`}
@@ -54,11 +64,8 @@ export function EventCard({
       />
 
       <div className="relative flex h-full w-full flex-col justify-end gap-3 px-6 py-8 text-left text-white lg:px-8">
-        <span className="w-fit rounded-full bg-black/40 px-3 py-1 text-xs text-white/80">
-          API content
-        </span>
         <p className="text-xs font-semibold tracking-[0.22em] text-white/75 uppercase">
-          {sessionSchedule(workshop.nextSession)}
+          {session ? shortDate(session.date) : "Dates to be announced"}
         </p>
         <h3 className="text-[1.75rem] leading-[1.08] font-extrabold tracking-[-0.01em] text-balance lg:text-[2.125rem]">
           {workshop.title}
@@ -108,7 +115,7 @@ export function EventCard({
                     that edge. Translate is safe since it only needs
                     headroom above. */}
               <span className="group/reg text-brand-foreground bg-brand before:bg-background hover:text-foreground relative isolate inline-flex shrink-0 items-center gap-2 overflow-hidden rounded-full px-5 py-2.5 text-sm font-semibold shadow-lg shadow-black/25 transition-[color,transform,box-shadow] duration-300 before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:transition-transform before:duration-300 before:content-[''] hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/40 hover:before:scale-x-100">
-                View details
+                {canRegister ? "Register" : "View details"}
                 <ArrowRight className="size-4 transition-transform duration-300 group-hover/reg:translate-x-1" />
               </span>
             </div>

@@ -27,7 +27,7 @@ export function AlsoInterested({
   selected,
   onToggle,
 }: {
-  programs: PublicProgram[]
+  programs: Pick<PublicProgram, "slug" | "title">[]
   primary: string
   selected: string[]
   onToggle: (title: string) => void

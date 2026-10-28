@@ -23,7 +23,9 @@ export const schema = corporateInquiryFieldsSchema.extend({
   alsoInterested: z.array(z.string().trim().min(1).max(200)).max(20).optional(),
 })
 
-export const createSchema = (programs: PublicProgram[]) =>
+export const createSchema = (
+  programs: Pick<PublicProgram, "slug" | "title">[]
+) =>
   schema.superRefine((value, ctx) => {
     const slugs = new Set(programs.map((program) => program.slug))
     if (value.program !== UNSURE_PROGRAM && !slugs.has(value.program)) {

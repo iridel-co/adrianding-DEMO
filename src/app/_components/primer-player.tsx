@@ -18,6 +18,7 @@ export function PrimerPlayer({
     url = null
   }
   if (url && url.protocol !== "https:" && url.protocol !== "http:") url = null
+  if (!url) return null
   const youtube =
     url?.hostname === "youtu.be"
       ? url.pathname.slice(1)
@@ -65,29 +66,20 @@ export function PrimerPlayer({
               }}
             />
             <div className="relative flex flex-col items-center gap-4 px-6 text-center">
-              {url ? (
-                <a
-                  href={url.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={`Watch ${title}`}
-                  className="ring-brand/40 bg-brand/25 flex size-16 items-center justify-center rounded-full text-white ring-1 backdrop-blur-sm"
-                >
-                  <Play className="size-6 translate-x-0.5 fill-current" />
-                </a>
-              ) : (
-                <span
-                  aria-hidden
-                  className="ring-brand/40 bg-brand/25 flex size-16 items-center justify-center rounded-full text-white ring-1 backdrop-blur-sm"
-                >
-                  <Play className="size-6 translate-x-0.5 fill-current" />
-                </span>
-              )}
+              <a
+                href={url.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Watch ${title}`}
+                className="ring-brand/40 bg-brand/25 flex size-16 items-center justify-center rounded-full text-white ring-1 backdrop-blur-sm"
+              >
+                <Play className="size-6 translate-x-0.5 fill-current" />
+              </a>
               <span className="font-serif text-xl text-white sm:text-2xl">
                 {title}
               </span>
               <span className="text-xs text-white/55">
-                {url ? "Watch the primer video" : "Primer video unavailable"}
+                Watch the primer video
               </span>
             </div>
           </>

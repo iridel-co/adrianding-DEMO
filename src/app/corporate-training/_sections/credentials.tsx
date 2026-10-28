@@ -1,11 +1,17 @@
-import { CmsImage as Image } from "@/app/_components/cms-image"
-import { getPublicProfile } from "@/lib/public-api"
+import Image from "next/image"
 import { Reveal } from "@/app/_components/reveal"
 import { SplitReveal } from "@/app/_components/split-reveal"
+import { CERTIFICATIONS } from "@/lib/certifications"
 
-export async function CorporateCredentials() {
-  const { credentials: CERTS } = await getPublicProfile()
-  if (!CERTS.length) return null
+/**
+ * Corporate training — credentials band. An L&D head signing off on a
+ * training spend has to justify the choice internally, and "he is a good
+ * speaker" does not survive that conversation. The credentials do, so
+ * they sit on the page rather than only on /about.
+ *
+ * Data is shared with the About page — see `src/lib/certifications.ts`.
+ */
+export function CorporateCredentials() {
   return (
     <section className="bg-background py-16 lg:py-24">
       <div className="mx-auto max-w-7xl px-6 sm:px-8">
@@ -13,30 +19,34 @@ export async function CorporateCredentials() {
           Certified and credentialed
         </SplitReveal>
         <p className="text-muted-foreground mt-5 max-w-2xl leading-relaxed">
-          The credentials your procurement and L&amp;D teams will ask for,
-          before they ask for it.
+          Every programme is delivered by a trainer certified through Peak
+          Potentials, Genos and INSEAD, and the founder of AET and CPD — the
+          credentials your procurement and L&amp;D teams will ask for, before
+          they ask for it.
         </p>
 
         <Reveal
           stagger={0.07}
           className="mt-12 grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:grid-cols-5"
         >
-          {CERTS.map((c, i) => (
+          {CERTIFICATIONS.map((c, i) => (
             <div
-              key={c.organization}
+              key={c.name}
               className={`flex flex-col items-center text-center ${
-                i === CERTS.length - 1 ? "col-span-2 sm:col-span-1" : ""
+                i === CERTIFICATIONS.length - 1
+                  ? "col-span-2 sm:col-span-1"
+                  : ""
               }`}
             >
               <div className="flex h-16 items-center justify-center">
-                {c.organization === "INSEAD" ? (
+                {c.circleBg ? (
                   <div
                     className="relative size-16 shrink-0 rounded-full"
-                    style={{ backgroundColor: "#eaecef" }}
+                    style={{ backgroundColor: c.circleBg }}
                   >
                     <Image
-                      src={c.logo?.url}
-                      alt={c.logo?.alt ?? c.organization}
+                      src={c.src}
+                      alt={c.name}
                       fill
                       sizes="64px"
                       className="object-contain p-2"
@@ -44,8 +54,8 @@ export async function CorporateCredentials() {
                   </div>
                 ) : (
                   <Image
-                    src={c.logo?.url}
-                    alt={c.logo?.alt ?? c.organization}
+                    src={c.src}
+                    alt={c.name}
                     height={64}
                     width={120}
                     style={{ width: "auto" }}
@@ -54,10 +64,10 @@ export async function CorporateCredentials() {
                 )}
               </div>
               <h3 className="mt-4 font-serif text-base tracking-[-0.01em]">
-                {c.organization}
+                {c.name}
               </h3>
               <p className="text-muted-foreground mt-1 text-sm leading-relaxed">
-                {c.description}
+                {c.short}
               </p>
             </div>
           ))}

@@ -4,11 +4,9 @@ import { SiteNavbar } from "@/app/_components/site-navbar"
 import { SiteFooter } from "@/app/_components/site-footer"
 import { SupportBand } from "@/app/_components/support-band"
 import {
-  getPublicFaqs,
   getPublicTestimonials,
   getPublicWorkshop,
   getPublicWorkshops,
-  getPublicProfile,
 } from "@/lib/public-api"
 import { workshopView } from "@/lib/workshop-view"
 import { WorkshopHero } from "./_sections/hero"
@@ -42,16 +40,14 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 }
 export default async function WorkshopPage({ params, searchParams }: Params) {
   const { slug } = await params
-  const [content, testimonials, faqs, profile] = await Promise.all([
+  const [content, testimonials] = await Promise.all([
     getPublicWorkshop(slug),
     getPublicTestimonials(),
-    getPublicFaqs(),
-    getPublicProfile(),
   ])
   const config = getIntakeConfig()
   const workshop = workshopView(
     content,
-    profile.phone,
+    "0920 900 7709",
     config,
     (await searchParams)?.session
   )
@@ -68,7 +64,7 @@ export default async function WorkshopPage({ params, searchParams }: Params) {
             (item) => item.workshop?.slug === slug
           )}
         />
-        <WorkshopFaq faqs={faqs.filter((item) => item.group === "workshop")} />
+        <WorkshopFaq />
         {workshop.status === "past" ? (
           <PastCta workshop={workshop} />
         ) : (

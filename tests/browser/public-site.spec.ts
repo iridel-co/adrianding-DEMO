@@ -6,6 +6,14 @@ test("gallery removal preserves public journeys @layout", async ({ page }) => {
   for (const route of ["/", "/workshops", "/corporate-training", workshop]) {
     await page.goto(route)
     await expect(page.locator('a[href^="/gallery"]')).toHaveCount(0)
+    await expect(page.getByText("API content", { exact: true })).toHaveCount(0)
+    await expect(page.locator('a[href="/email-templates"]')).toHaveCount(0)
+    await expect(
+      page.getByText("Demo by iridel.com", { exact: true })
+    ).toHaveCount(0)
+    await expect(
+      page.getByRole("button", { name: /fill this form with sample data/i })
+    ).toHaveCount(0)
     await expect(
       page.getByText("Inside the room", { exact: true })
     ).toHaveCount(0)
@@ -16,7 +24,12 @@ test("gallery removal preserves public journeys @layout", async ({ page }) => {
       )
     ).toBe(true)
   }
-  for (const route of ["/gallery", "/gallery/evercare"]) {
+  for (const route of [
+    "/gallery",
+    "/gallery/evercare",
+    "/email-templates",
+    "/staff-login",
+  ]) {
     const response = await page.goto(route)
     expect(response?.status()).toBe(404)
   }
@@ -198,6 +211,12 @@ test("workshop filters toggle and reset the listing", async ({ page }) => {
   await page.goto("/workshops")
   await expect(page.getByText("Local sample", { exact: true })).toHaveCount(0)
   await expect(page.getByText(/Early bird/i)).toHaveCount(0)
+  const openCard = page
+    .getByRole("link", { name: /Exceptional Salesmanship/ })
+    .first()
+  await expect(openCard.locator("p").first()).toContainText("2026")
+  await expect(openCard.locator("p").first()).not.toContainText(/AM|PM|·/)
+  await expect(openCard.getByText("Register", { exact: true })).toHaveCount(1)
   const sales = page.getByRole("button", { name: /^Sales/ })
   await sales.click()
   await expect(sales).toHaveAttribute("aria-pressed", "true")
@@ -213,6 +232,12 @@ test("workshop filters toggle and reset the listing", async ({ page }) => {
   await expect(
     page.getByRole("link", { name: /Exceptional Leadership/ }).first()
   ).toBeVisible()
+  await expect(
+    page
+      .getByRole("link", { name: /Exceptional Leadership/ })
+      .first()
+      .getByText("View details", { exact: true })
+  ).toHaveCount(1)
 })
 
 test("calendar changes months and opens a workshop by keyboard", async ({
@@ -242,42 +267,41 @@ test("calendar changes months and opens a workshop by keyboard", async ({
   await expect(page.getByText(/Early bird/i)).toHaveCount(0)
 })
 
-test("CMS content supplies dynamic programmes, client industries and contact details", async ({
+test("CMS programs and workshops coexist with static editorial content", async ({
   page,
 }) => {
   await page.goto("/corporate-training")
   await expect(
-    page.getByRole("heading", { name: "CMS Program 2", exact: true })
+    page.getByRole("heading", {
+      name: "CMS Program 2",
+      exact: true,
+    })
   ).toBeVisible()
   const clients = page.locator("section").filter({
     has: page.getByRole("button", { name: "All industries", exact: true }),
   })
-  await expect(
-    clients.getByText("CMS Client 1", { exact: true }).first()
-  ).toBeVisible()
+  await expect(clients.locator('img[alt="HSBC"]').first()).toBeVisible()
   const technology = clients.getByRole("button", {
-    name: "Technology",
+    name: "Multi-nationals",
     exact: true,
   })
   await technology.click()
   await expect(technology).toHaveAttribute("aria-pressed", "true")
-  await expect(clients.getByText("CMS Client 2", { exact: true })).toHaveCount(
-    0
-  )
+  await expect(clients.locator('img[alt="Petron"]')).toHaveCount(0)
   await clients
     .getByRole("button", { name: "All industries", exact: true })
     .click()
-  await expect(
-    clients.getByText("CMS Client 2", { exact: true }).first()
-  ).toBeVisible()
+  await expect(clients.locator('img[alt="Petron"]').first()).toBeVisible()
   await expect(
     page
-      .getByText("CMS Person 1", { exact: true })
+      .getByText("Aseem Roy", { exact: true })
       .filter({ visible: true })
       .first()
   ).toBeVisible()
   await expect(
-    page.locator('a[href="mailto:coach@example.test"]').first()
+    page
+      .locator('a[href="mailto:coachadrianding@maximumimpact.online"]')
+      .first()
   ).toBeVisible()
   await page.goto("/workshops")
   const newTag = page.getByRole("button", { name: /^New CMS tag/ })

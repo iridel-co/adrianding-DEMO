@@ -1,17 +1,28 @@
 import { Mail, MessageSquare, Phone } from "lucide-react"
-import { getPublicProfile } from "@/lib/public-api"
-export async function SupportBand({
+
+/**
+ * "Talk to a human" band — AD asked for a way to reach customer care from the
+ * conversion pages, since a question you can't get answered is a registration
+ * you don't get. Used on workshop detail pages, corporate training, and both
+ * confirmation pages.
+ *
+ * Contact details match the footer (`site-footer.tsx`); update both together.
+ */
+
+const PHONE_DISPLAY = "0920 900 7709"
+const PHONE_HREF = "tel:+639209007709"
+const EMAIL = "coachadrianding@maximumimpact.online"
+const EMAIL_ALT = "maximumimpactphilippines@yahoo.com"
+
+export function SupportBand({
   heading = "Questions before you register?",
   blurb = "Talk to someone on the team — not a form. We answer within one business day, and same-day on weekdays.",
 }: {
   heading?: string
   blurb?: string
 }) {
-  const profile = await getPublicProfile()
-  if (!profile.phone && !profile.emails.length) return null
-  const phone = profile.phone.replace(/[^\d+]/g, "")
   return (
-    <section className="bg-muted/40" id="contact">
+    <section className="bg-muted/40">
       <div className="mx-auto flex max-w-5xl flex-col gap-8 px-6 py-16 sm:px-8 lg:flex-row lg:items-center lg:justify-between lg:py-20">
         <div className="max-w-xl">
           <h2 className="font-serif text-[1.75rem] leading-[1.15] tracking-[-0.02em] sm:text-[2.25rem]">
@@ -19,42 +30,46 @@ export async function SupportBand({
           </h2>
           <p className="text-muted-foreground mt-3 leading-relaxed">{blurb}</p>
         </div>
+
         <ul className="flex shrink-0 flex-col gap-3">
-          {profile.phone && (
-            <>
-              <li>
-                <ContactLink
-                  href={`tel:${phone}`}
-                  icon={Phone}
-                  label="Call"
-                  value={profile.phone}
-                />
-              </li>
-              <li>
-                <ContactLink
-                  href={`sms:${phone}`}
-                  icon={MessageSquare}
-                  label="Text"
-                  value={profile.phone}
-                />
-              </li>
-            </>
-          )}
-          {profile.emails.map((email) => (
-            <li key={email}>
-              <ContactLink
-                href={`mailto:${email}`}
-                icon={Mail}
-                label="Email"
-                value={email}
-              />
-            </li>
-          ))}
+          <li>
+            <ContactLink
+              href={PHONE_HREF}
+              icon={Phone}
+              label="Call"
+              value={PHONE_DISPLAY}
+            />
+          </li>
+          <li>
+            <ContactLink
+              href={`sms:+639209007709`}
+              icon={MessageSquare}
+              label="Text"
+              value={PHONE_DISPLAY}
+            />
+          </li>
+          <li>
+            <ContactLink
+              href={`mailto:${EMAIL}`}
+              icon={Mail}
+              label="Email"
+              value={EMAIL}
+            />
+          </li>
+          <li>
+            <ContactLink
+              href={`mailto:${EMAIL_ALT}`}
+              icon={Mail}
+              label="Email"
+              value={EMAIL_ALT}
+            />
+          </li>
         </ul>
       </div>
     </section>
   )
 }
+
 function ContactLink({
   href,
   icon: Icon,

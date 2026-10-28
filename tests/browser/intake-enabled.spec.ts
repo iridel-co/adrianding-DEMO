@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test"
+import { fillInquiry, fillRegistration } from "./helpers/form-data"
 
 const cors = {
   "access-control-allow-origin": "*",
@@ -18,7 +19,7 @@ test.describe("@policy local enabled intake", () => {
         route.fulfill({
           headers: cors,
           contentType: "application/javascript",
-          body: `(() => { let next=0; const widgets=new Map(); window.__testActions=[]; window.turnstile={ render(element,options){const id=String(++next);widgets.set(id,{element,options});window.__testActions.push(options.action);element.textContent='Local verification fixture';setTimeout(()=>{if(widgets.has(id))options.callback('fixture-token-'+id)},10);return id}, remove(id){const widget=widgets.get(id);if(widget)widget.element.textContent='';widgets.delete(id)} };window.__verificationError=()=>{for(const widget of widgets.values())widget.options['error-callback']()};window.__expireVerification=()=>{for(const widget of widgets.values())widget.options['expired-callback']()};window.__verifyAgain=()=>{for(const widget of widgets.values())widget.options.callback('fixture-token-'+(++next))};})()`,
+          body: `(() => { let next=0; const widgets=new Map(); window.__testActions=[];window.__testWidgetOptions=[]; window.turnstile={ render(element,options){const id=String(++next);widgets.set(id,{element,options});window.__testActions.push(options.action);window.__testWidgetOptions.push({size:options.size,theme:options.theme});element.innerHTML='<div style="width:'+(options.size==='compact'?'150px':'100%')+';min-width:'+(options.size==='compact'?'150px':'300px')+';height:'+(options.size==='compact'?'140px':'65px')+'">Local verification fixture</div>';setTimeout(()=>{if(widgets.has(id))options.callback('fixture-token-'+id)},10);return id}, remove(id){const widget=widgets.get(id);if(widget)widget.element.textContent='';widgets.delete(id)} };window.__verificationError=(code)=>{for(const widget of widgets.values())widget.options['error-callback'](code)};window.__expireVerification=()=>{for(const widget of widgets.values())widget.options['expired-callback']()};window.__verifyAgain=()=>{for(const widget of widgets.values())widget.options.callback('fixture-token-'+(++next))};})()`,
         })
     )
   })
@@ -29,9 +30,7 @@ test.describe("@policy local enabled intake", () => {
       .getByRole("button", { name: "Reserve your seat" })
       .click()
     const form = page.getByRole("dialog", { name: "Reserve your seat" })
-    await form
-      .getByRole("button", { name: /fill this form with sample data/i })
-      .click()
+    await fillRegistration(form)
     await form.getByRole("button", { name: "Continue", exact: true }).click()
     await form.getByRole("button", { name: "Continue", exact: true }).click()
     await expect(
@@ -39,6 +38,162 @@ test.describe("@policy local enabled intake", () => {
     ).toBeEnabled()
     return form
   }
+  for (const width of [320, 1440])
+    test(`verification layout, expiry and retry fit at ${width}px`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 844 })
+      const form = await registration(page)
+      const verification = form.getByRole("group", {
+        name: "Security verification",
+        exact: true,
+      })
+      await expect(verification.getByRole("status")).toHaveText(
+        "Verification complete."
+      )
+      await expect(verification).not.toHaveClass(/rounded|border|bg-muted/)
+      const options = await page.evaluate(() =>
+        (
+          window as unknown as {
+            __testWidgetOptions: { size: string; theme: string }[]
+          }
+        ).__testWidgetOptions.at(-1)
+      )
+      expect(options).toEqual({
+        size: width === 320 ? "compact" : "flexible",
+        theme: "light",
+      })
+      const widgetBounds = await verification
+        .locator(":scope > div")
+        .evaluate((element) => ({
+          available: element.getBoundingClientRect().width,
+          widget: element.firstElementChild!.getBoundingClientRect().width,
+        }))
+      expect(widgetBounds.widget).toBeLessThanOrEqual(
+        widgetBounds.available + 1
+      )
+      if (width === 1440)
+        expect(widgetBounds.widget).toBeCloseTo(widgetBounds.available, 0)
+      await page.evaluate(() =>
+        (
+          window as unknown as { __verificationError: (code: string) => void }
+        ).__verificationError("110200")
+      )
+      await expect(form.getByRole("alert")).toContainText(
+        "not configured for this website"
+      )
+      await expect(
+        form.getByRole("button", { name: "Finish", exact: true })
+      ).toBeDisabled()
+      await form
+        .getByRole("button", { name: "Retry verification", exact: true })
+        .click()
+      await expect(
+        form.getByRole("button", { name: "Finish", exact: true })
+      ).toBeEnabled()
+      await page.evaluate(() =>
+        (
+          window as unknown as { __expireVerification: () => void }
+        ).__expireVerification()
+      )
+      await expect(form.getByRole("alert")).toContainText(
+        "Verification expired"
+      )
+      await form
+        .getByRole("button", { name: "Retry verification", exact: true })
+        .click()
+      await expect(
+        form.getByRole("button", { name: "Finish", exact: true })
+      ).toBeEnabled()
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth
+        )
+      ).toBe(true)
+    })
+  test("verification script download can retry without losing form answers", async ({
+    page,
+  }) => {
+    let blocked = true
+    await page.route(
+      "https://challenges.cloudflare.com/turnstile/v0/api.js**",
+      async (route) => {
+        if (blocked) return route.abort()
+        return route.fallback()
+      }
+    )
+    await page.goto("/workshops/exceptional-salesmanship")
+    await page
+      .getByRole("button", { name: "Register now", exact: true })
+      .click()
+    const form = page.getByRole("dialog", { name: "Reserve your seat" })
+    await fillRegistration(form)
+    await form
+      .getByRole("button", { name: "Continue", exact: true })
+      .press("Enter")
+    await form
+      .getByRole("button", { name: "Continue", exact: true })
+      .press("Enter")
+    await expect(form.getByRole("alert")).toContainText(
+      "couldn't complete verification"
+    )
+    blocked = false
+    await form
+      .getByRole("button", { name: "Retry verification", exact: true })
+      .click()
+    await expect(
+      form.getByRole("button", { name: "Finish", exact: true })
+    ).toBeEnabled()
+    await form.getByRole("button", { name: "Back", exact: true }).click()
+    await expect(form.locator('input[name="occupation"]')).toHaveValue(
+      "Insurance advisor"
+    )
+  })
+  test("stalled verification script times out and can retry", async ({
+    page,
+  }) => {
+    await page.clock.install()
+    let release: (() => void) | undefined
+    let hold = true
+    await page.route(
+      "https://challenges.cloudflare.com/turnstile/v0/api.js**",
+      async (route) => {
+        if (!hold) return route.fallback()
+        await new Promise<void>((resolve) => {
+          release = resolve
+        })
+        await route.abort()
+      }
+    )
+    await page.goto("/workshops/exceptional-salesmanship")
+    await page
+      .getByRole("button", { name: "Register now", exact: true })
+      .click()
+    const form = page.getByRole("dialog", { name: "Reserve your seat" })
+    await fillRegistration(form)
+    await form
+      .getByRole("button", { name: "Continue", exact: true })
+      .press("Enter")
+    await form
+      .getByRole("button", { name: "Continue", exact: true })
+      .press("Enter")
+    await expect(
+      form.getByText("Loading verification…", { exact: true })
+    ).toBeVisible()
+    await page.clock.fastForward(16000)
+    await expect(form.getByRole("alert")).toContainText(
+      "couldn't complete verification"
+    )
+    hold = false
+    release?.()
+    await form
+      .getByRole("button", { name: "Retry verification", exact: true })
+      .click()
+    await page.clock.resume()
+    await expect(
+      form.getByRole("button", { name: "Finish", exact: true })
+    ).toBeEnabled()
+  })
   for (const full of [true, false])
     test(`registration acceptance ${full ? "with reference" : "generic duplicate"}`, async ({
       page,
@@ -218,9 +373,7 @@ test.describe("@policy local enabled intake", () => {
       })
       await page.goto("/corporate-training#inquiry")
       const form = page.locator("form")
-      await form
-        .getByRole("button", { name: /fill this form with sample data/i })
-        .click()
+      await fillInquiry(form)
       const forward = form.getByRole("button", {
         name: "Continue",
         exact: true,

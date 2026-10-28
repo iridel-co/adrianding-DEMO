@@ -16,7 +16,6 @@ export function WorkshopDayPreview({ workshops }: { workshops: Workshop[] }) {
             {sessionSchedule(event.nextSession)}
           </p>
           <p className="font-serif text-2xl leading-tight">{event.title}</p>
-          <p className="text-muted-foreground text-xs">API content</p>
           <p className="text-muted-foreground flex items-start gap-2 text-sm">
             <MapPin className="mt-0.5 size-4 shrink-0" />
             {[event.nextSession?.venueName, event.nextSession?.city]

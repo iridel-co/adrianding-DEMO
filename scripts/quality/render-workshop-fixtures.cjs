@@ -25,6 +25,7 @@ require.extensions[".ts"] = compile
 require.extensions[".tsx"] = compile
 const { createElement } = require("react")
 const { renderToStaticMarkup } = require("react-dom/server")
+const { PrimerPlayer } = require("../../src/app/_components/primer-player.tsx")
 const { CmsImage } = require("../../src/app/_components/cms-image.tsx")
 
 const {
@@ -77,6 +78,16 @@ process.stdout.write(
     ),
     informativeImage: renderToStaticMarkup(
       createElement(CmsImage, { src: null, alt: "Coach portrait" })
+    ),
+    videos: [null, "", "invalid", "https://www.youtube.com/watch?v=abc123"].map(
+      (videoUrl) =>
+        renderToStaticMarkup(
+          createElement(PrimerPlayer, {
+            title: "Workshop video",
+            blurb: "Primer",
+            videoUrl,
+          })
+        )
     ),
     capacity,
     emptyList: renderToStaticMarkup(

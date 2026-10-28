@@ -1,15 +1,12 @@
 import { SplitReveal } from "@/app/_components/split-reveal"
 import { TestimonialColumns } from "@/app/_components/testimonial-columns"
-import { getPublicTestimonials } from "@/lib/public-api"
+import { CORPORATE_TESTIMONIALS } from "@/lib/testimonials"
 
 /**
  * Corporate Training — reuses the landing page's testimonial layout
  * (TestimonialColumns) with corporate-specific header text.
  */
-export async function CorporateTestimonials() {
-  const testimonials = (await getPublicTestimonials()).filter(
-    (item) => item.isFeatured
-  )
+export function CorporateTestimonials() {
   return (
     <section className="bg-muted/40 py-12 lg:py-16">
       <div className="mx-auto grid max-w-7xl gap-14 px-6 sm:px-8 lg:grid-cols-[0.5fr_minmax(0,1fr)] lg:gap-20">
@@ -18,7 +15,7 @@ export async function CorporateTestimonials() {
             From the people who signed off on it
           </SplitReveal>
         </div>
-        <TestimonialColumns testimonials={testimonials} />
+        <TestimonialColumns testimonials={CORPORATE_TESTIMONIALS} />
       </div>
     </section>
   )

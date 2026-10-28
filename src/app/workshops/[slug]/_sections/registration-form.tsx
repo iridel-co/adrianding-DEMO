@@ -20,7 +20,6 @@ import { FormField as Field } from "@/app/_components/form-field"
 import { useStepNavigation } from "@/app/_lib/use-step-navigation"
 import { ArrowLeft, ArrowRight, ChevronDown, Phone, Check } from "lucide-react"
 import { gsap, useGSAP } from "@/app/_lib/gsap"
-import { DemoFillButton } from "@/app/_components/demo-fill"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import type { WorkshopAvailability } from "@/lib/workshop-availability"
@@ -111,26 +110,6 @@ export function RegistrationForm({
     if (recovered.success) reset(recovered.data)
   }, [attempt.answers, reset])
 
-  /**
-   * Demo shortcut — see `_components/demo-fill.tsx`. `reset()` writes every
-   * field at once and clears any errors already on screen, so the form lands in
-   * a clean valid state rather than a half-touched one. The step is left where
-   * it is: the multi-step reveal is part of what the client is reviewing, and
-   * skipping to the end would hide it.
-   */
-  const fillSample = () => {
-    if (locked || submitting) return
-    reset({
-      fullName: "Juan Dela Cruz",
-      email: "juan.delacruz@email.com",
-      phone: "0917 555 0148",
-      occupation: "Insurance advisor",
-      salaryRange: "₱50,000 – ₱80,000",
-      city: "Cebu City",
-      consent: true,
-    })
-  }
-
   useGSAP(
     () => {
       const el = paneRef.current
@@ -214,7 +193,6 @@ export function RegistrationForm({
         >
           Step {step + 1} of {STEPS.length} · {current.title}
         </h2>
-        <DemoFillButton onFill={fillSample} />
       </div>
 
       {step < 2 && (
@@ -425,8 +403,7 @@ export function RegistrationForm({
               submits on mouseup even though nothing clicked the submit
               button — the click that was meant to advance one step silently
               fires the final submit instead. Reproduces reliably whenever
-              validation resolves fast (confirmed via the demo-fill button,
-              whose data is valid immediately) and is a real risk for a fast
+              validation resolves fast with already-valid values and is a risk for a fast
               real click too, not just automation. */}
           {step < STEPS.length - 1 ? (
             <Button

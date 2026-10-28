@@ -1,6 +1,5 @@
 "use client"
 
-import Script from "next/script"
 import { useEffect, useRef, useState } from "react"
 
 type TurnstileApi = {
@@ -9,18 +8,52 @@ type TurnstileApi = {
     options: {
       sitekey: string
       action: string
-      size: "compact"
+      size: "compact" | "flexible"
+      theme: "light"
       callback: (token: string) => void
       "expired-callback": () => void
-      "error-callback": () => boolean
+      "error-callback": (code?: string) => boolean
     }
   ) => string
   remove: (id: string) => void
 }
+
 declare global {
   interface Window {
     turnstile?: TurnstileApi
   }
+}
+
+let loading: Promise<TurnstileApi> | null = null
+function loadTurnstile(): Promise<TurnstileApi> {
+  if (window.turnstile) return Promise.resolve(window.turnstile)
+  if (loading) return loading
+  loading = new Promise((resolve, reject) => {
+    const script = document.createElement("script")
+    script.src =
+      "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
+    script.async = true
+    let settled = false
+    const fail = () => {
+      if (settled) return
+      settled = true
+      clearTimeout(timeout)
+      script.remove()
+      loading = null
+      reject(new Error("Verification script unavailable"))
+    }
+    const timeout = setTimeout(fail, 15000)
+    script.onerror = fail
+    script.onload = () => {
+      if (settled) return
+      if (!window.turnstile) return fail()
+      settled = true
+      clearTimeout(timeout)
+      resolve(window.turnstile)
+    }
+    document.head.appendChild(script)
+  })
+  return loading
 }
 
 export function Turnstile({
@@ -37,62 +70,103 @@ export function Turnstile({
   const container = useRef<HTMLDivElement>(null)
   const callback = useRef(onToken)
   callback.current = onToken
-  const [ready, setReady] = useState(false)
-  const [failed, setFailed] = useState(false)
+  const [status, setStatus] = useState<
+    "loading" | "ready" | "verified" | "expired" | "failed"
+  >("loading")
+  const [errorCode, setErrorCode] = useState<string | undefined>()
   const [retryKey, setRetryKey] = useState(0)
+  const [wide, setWide] = useState(false)
   useEffect(() => {
-    if (!ready || !container.current || !window.turnstile) return
+    const element = container.current
+    if (!element) return
+    const observer = new ResizeObserver(() =>
+      setWide(element.clientWidth >= 300)
+    )
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [])
+  useEffect(() => {
+    let active = true
+    let cleanup: (() => void) | undefined
     callback.current(null)
-    const api = window.turnstile
-    const id = api.render(container.current, {
-      sitekey: siteKey,
-      action,
-      size: "compact",
-      callback: (token) => {
-        setFailed(false)
-        callback.current(token)
-      },
-      "expired-callback": () => callback.current(null),
-      "error-callback": () => {
-        callback.current(null)
-        setFailed(true)
-        return true
-      },
-    })
+    loadTurnstile()
+      .then((api) => {
+        if (!active || !container.current) return
+        setStatus("ready")
+        const id = api.render(container.current, {
+          sitekey: siteKey,
+          action,
+          size: wide ? "flexible" : "compact",
+          theme: "light",
+          callback: (token) => {
+            if (!active) return
+            setStatus("verified")
+            callback.current(token)
+          },
+          "expired-callback": () => {
+            if (!active) return
+            setStatus("expired")
+            callback.current(null)
+          },
+          "error-callback": (code) => {
+            if (!active) return true
+            setStatus("failed")
+            setErrorCode(code)
+            callback.current(null)
+            return true
+          },
+        })
+        cleanup = () => api.remove(id)
+      })
+      .catch(() => {
+        if (active) setStatus("failed")
+      })
     return () => {
-      api.remove(id)
+      active = false
+      cleanup?.()
       callback.current(null)
     }
-  }, [ready, siteKey, action, resetKey, retryKey])
+  }, [siteKey, action, resetKey, retryKey, wide])
   return (
-    <div className="my-5">
-      <Script
-        id="portal-turnstile"
-        src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
-        onReady={() => setReady(true)}
-        onError={() => {
-          setFailed(true)
-          callback.current(null)
-        }}
-      />
-      <div ref={container} />
-      {failed && (
-        <p role="alert" className="text-destructive text-sm">
-          Verification is unavailable. Check your connection and keep this tab
-          open if a submission result is still unknown.
-        </p>
-      )}
-      {failed && ready && (
-        <button
-          type="button"
-          className="mt-2 min-h-11 underline"
-          onClick={() => {
-            setFailed(false)
-            setRetryKey((value) => value + 1)
-          }}
-        >
-          Retry verification
-        </button>
+    <div
+      className="my-5 w-full"
+      role="group"
+      aria-label="Security verification"
+    >
+      <p className="sr-only" role="status">
+        {status === "verified"
+          ? "Verification complete."
+          : status === "loading"
+            ? "Loading verification…"
+            : "Complete the check below before sending your form."}
+      </p>
+      <div ref={container} className="w-full" />
+      {(status === "failed" || status === "expired") && (
+        <>
+          <p
+            role="alert"
+            className="text-destructive mt-3 text-sm leading-relaxed"
+          >
+            {status === "expired"
+              ? "Verification expired. Please verify again."
+              : errorCode === "110200"
+                ? "Verification is not configured for this website. Please contact us directly."
+                : errorCode === "110100" || errorCode === "110110"
+                  ? "Verification is temporarily unavailable. Please contact us directly."
+                  : "We couldn't complete verification. Check your connection and try again."}
+          </p>
+          <button
+            type="button"
+            className="border-border text-foreground hover:bg-muted mt-3 min-h-11 rounded-full border bg-white px-4 text-sm font-medium transition-colors"
+            onClick={() => {
+              setStatus("loading")
+              setErrorCode(undefined)
+              setRetryKey((value) => value + 1)
+            }}
+          >
+            Retry verification
+          </button>
+        </>
       )}
     </div>
   )

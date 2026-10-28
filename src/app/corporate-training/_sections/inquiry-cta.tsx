@@ -1,4 +1,4 @@
-import { getPublicPrograms, getPublicProfile } from "@/lib/public-api"
+import { getPublicPrograms } from "@/lib/public-api"
 import { getIntakeConfig } from "@/lib/intake-config"
 import { Reveal } from "@/app/_components/reveal"
 import { BloomFieldBackground } from "@/app/_components/bloom-field-background"
@@ -13,10 +13,7 @@ import { CorporateInquiryForm } from "./inquiry-form"
  */
 export async function CorporateInquiryCta() {
   const intake = getIntakeConfig()
-  const [programs, profile] = await Promise.all([
-    getPublicPrograms(),
-    getPublicProfile(),
-  ])
+  const programs = await getPublicPrograms()
   return (
     <section
       id="inquiry"
@@ -40,8 +37,8 @@ export async function CorporateInquiryCta() {
             <CorporateInquiryForm
               intake={intake}
               programs={programs}
-              phone={profile.phone}
-              email={profile.emails[0]}
+              phone="0920 900 7709"
+              email="coachadrianding@maximumimpact.online"
             />
           </Reveal>
         </div>

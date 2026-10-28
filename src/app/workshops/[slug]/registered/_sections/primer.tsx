@@ -14,6 +14,7 @@ export function RegisteredPrimer({
 }: {
   workshop: Workshop & { primerVideoUrl?: string | null }
 }) {
+  if (!workshop.primerVideoUrl?.trim()) return null
   return (
     <section className="bg-muted/40 py-16 lg:py-24">
       <div className="mx-auto max-w-3xl px-6 sm:px-8">

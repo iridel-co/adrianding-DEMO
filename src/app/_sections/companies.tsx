@@ -1,4 +1,3 @@
-import { getPublicClients, getPublicIndustries } from "@/lib/public-api"
 import { SplitReveal } from "@/app/_components/split-reveal"
 import { CompaniesMarquee } from "@/app/_components/companies-marquee"
 
@@ -8,11 +7,7 @@ import { CompaniesMarquee } from "@/app/_components/companies-marquee"
  * tighter top padding so the two read as adjacent rather than merged.
  */
 
-export async function LandingCompanies() {
-  const [clients, industries] = await Promise.all([
-    getPublicClients(),
-    getPublicIndustries(),
-  ])
+export function LandingCompanies() {
   return (
     <section className="bg-background text-foreground overflow-hidden pt-20 pb-14 lg:pt-28 lg:pb-20">
       <div className="mx-auto max-w-7xl px-6 sm:px-8">
@@ -26,7 +21,7 @@ export async function LandingCompanies() {
       </div>
 
       <div className="mt-16">
-        <CompaniesMarquee clients={clients} industries={industries} />
+        <CompaniesMarquee />
       </div>
     </section>
   )

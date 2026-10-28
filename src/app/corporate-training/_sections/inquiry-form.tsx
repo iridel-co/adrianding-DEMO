@@ -27,7 +27,6 @@ import { useStepNavigation } from "@/app/_lib/use-step-navigation"
 import { InquiryActions } from "./inquiry-actions"
 import { gsap, useGSAP } from "@/app/_lib/gsap"
 import { smoothScrollToElement } from "@/app/_lib/smooth-scroll-to"
-import { DemoFillButton } from "@/app/_components/demo-fill"
 import { Input } from "@/components/ui/input"
 import { composeDateRange } from "./inquiry-dates"
 import type { PublicProgram } from "@/lib/public-content"
@@ -44,7 +43,7 @@ export function CorporateInquiryForm({
   email,
   intake,
 }: {
-  programs: PublicProgram[]
+  programs: Pick<PublicProgram, "slug" | "title">[]
   phone: string
   email?: string
   intake: IntakeConfig
@@ -214,29 +213,6 @@ export function CorporateInquiryForm({
   useEffect(() => {
     if (prefilled && primary !== prefilled) setPrefilled(null)
   }, [primary, prefilled])
-
-  const fillSample = () => {
-    const from = "2026-11-10"
-    const to = "2026-11-12"
-    setDateMode("pick")
-    setDateFrom(from)
-    setDateTo(to)
-    reset({
-      fullName: "Maria Santos",
-      email: "maria.santos@acme.com.ph",
-      phone: "0917 555 0132",
-      company: "Acme Manufacturing",
-      role: "Head of Learning & Development",
-      program: programs[0]?.slug ?? UNSURE_PROGRAM,
-      attendees: "16 – 30",
-      targetDate: composeDateRange(from, to),
-      venue: "Our head office in Cebu City",
-      context:
-        "New supervisors promoted from the floor this year — we need them leading, not just scheduling.",
-      consent: true,
-      alsoInterested: programs[1] ? [programs[1].slug] : [],
-    })
-  }
 
   const applyPickedDates = (from: string, to: string) => {
     setValue("targetDate", composeDateRange(from, to), {
@@ -420,9 +396,6 @@ export function CorporateInquiryForm({
         >
           Step {step + 1} of {STEPS.length} · {current.title}
         </h3>
-        <span inert={locked}>
-          <DemoFillButton onFill={fillSample} />
-        </span>
       </div>
       {prefilled && step < 2 && (
         <p className="text-muted-foreground mt-3 text-sm">

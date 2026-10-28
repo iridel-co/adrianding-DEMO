@@ -20,7 +20,7 @@ import {
 } from "./inquiry-model"
 
 type Props = Pick<UseFormReturn<FormValues>, "control" | "register"> & {
-  programs: PublicProgram[]
+  programs: Pick<PublicProgram, "slug" | "title">[]
   errors: FieldErrors<FormValues>
   primary: string
   also: string[]

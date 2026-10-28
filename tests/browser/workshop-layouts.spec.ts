@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test"
+import { fillRegistration } from "./helpers/form-data"
 
 test("Corporate programme arrows work on touch rails and in normal motion", async ({
   page,
@@ -71,7 +72,7 @@ test("Workshop form labels, errors and overlapping Continue activations", async 
   await expect(name).toHaveAccessibleDescription("Please enter your full name.")
   await form.getByText("Full name", { exact: true }).click()
   await expect(name).toBeFocused()
-  await form.getByRole("button", { name: /Demo shortcut/ }).click()
+  await fillRegistration(form)
   await form
     .locator('input[name="email"]')
     .fill(`${"a".repeat(70)}@example.com`)
