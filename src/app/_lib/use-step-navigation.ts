@@ -46,10 +46,11 @@ export function useStepNavigation(stepCount: number, blocked: boolean) {
       if (mounted.current && operation === generation.current) setPending(false)
     }
   }
-  const back = () => {
+  const goTo = (target: number) => {
     if (locked.current || blocked) return
-    current.current = Math.max(current.current - 1, 0)
+    current.current = Math.max(0, Math.min(target, stepCount - 1))
     setStep(current.current)
   }
-  return { step, pending, next, back }
+  const back = () => goTo(current.current - 1)
+  return { step, pending, next, back, goTo }
 }

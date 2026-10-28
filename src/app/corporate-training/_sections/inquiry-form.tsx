@@ -1,5 +1,8 @@
 "use client"
 
+import { focusInvalidStep } from "@/app/_lib/focus-invalid-step"
+import { FormErrorToast } from "@/app/_components/form-error-toast"
+
 import { useEffect, useId, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import type { IntakeConfig } from "@/lib/intake"
@@ -13,7 +16,7 @@ import {
   PROGRAM_INQUIRE_EVENT,
   type ProgramInquiryDetail,
 } from "@/app/_lib/program-inquiry"
-import { useForm } from "react-hook-form"
+import { useForm, type FieldErrors } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   UNSURE_PROGRAM,
@@ -66,6 +69,7 @@ export function CorporateInquiryForm({
     pending,
     next: advance,
     back,
+    goTo,
   } = useStepNavigation(STEPS.length, submitting)
   const step = locked && answers ? STEPS.length - 1 : navigationStep
   const paneRef = useRef<HTMLDivElement>(null)
@@ -106,6 +110,7 @@ export function CorporateInquiryForm({
     watch,
     reset,
     setError,
+    setFocus,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(createSchema(programs)),
@@ -275,6 +280,9 @@ export function CorporateInquiryForm({
       return true
     })
 
+  const onInvalid = (fieldErrors: FieldErrors<FormValues>) =>
+    focusInvalidStep(fieldErrors, STEPS, goTo, setFocus)
+
   const onSubmit = async (values: FormValues) => {
     if (!intake.enabled) {
       setError("root", {
@@ -304,9 +312,18 @@ export function CorporateInquiryForm({
       }
     )
     if (!payload.success) {
-      setError("root", {
-        message: "Check your programme and date details before submitting.",
-      })
+      const invalid: FieldErrors<FormValues> = {}
+      for (const issue of payload.error.issues) {
+        const name = String(issue.path[0])
+        const field = (
+          name.startsWith("targetDate") ? "targetDate" : name
+        ) as keyof FormValues
+        if (!STEPS.some((item) => item.fields.includes(field))) continue
+        const error = { type: "validate", message: issue.message }
+        invalid[field] = error
+        setError(field, error)
+      }
+      onInvalid(invalid)
       return
     }
     try {
@@ -357,7 +374,7 @@ export function CorporateInquiryForm({
           event.preventDefault()
           void onSubmit(getValues())
         } else {
-          void handleSubmit(onSubmit)(event)
+          void handleSubmit(onSubmit, onInvalid)(event)
         }
       }}
       className="bg-background text-foreground rounded-xl p-6 shadow-2xl outline-none sm:p-10"
@@ -571,17 +588,7 @@ export function CorporateInquiryForm({
           resetKey={resetKey}
         />
       )}
-      {error && (
-        <p role="alert" className="text-destructive mt-6 text-sm">
-          {error}
-        </p>
-      )}
-
-      {errors.root?.message && (
-        <p role="alert" className="text-destructive mt-6 text-sm">
-          {errors.root.message}
-        </p>
-      )}
+      <FormErrorToast message={error || errors.root?.message} />
       <InquiryActions
         phone={phone}
         step={step}

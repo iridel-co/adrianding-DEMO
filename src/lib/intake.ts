@@ -31,7 +31,7 @@ const errors: Record<string, string> = {
   session_unavailable:
     "This session is no longer available. Refresh the workshops and choose another run.",
   idempotency_key_mismatch:
-    "This attempt conflicts with an accepted submission. Its retry key has been kept. Please contact the team; do not submit it as a new request.",
+    "This submission conflicts with an earlier request. Please contact the team.",
   body_too_large:
     "Your submission is too long. Shorten the details and try again.",
   intake_unavailable:
@@ -48,7 +48,7 @@ class IntakeError extends Error {
   ) {
     super(
       errors[code] ??
-        "We could not confirm the result. Retry the same submission; your details have been kept."
+        "We could not confirm your submission. Please try again or contact the team."
     )
   }
 }
@@ -214,7 +214,7 @@ export class IntakeController {
         answers: this.attempt.answers,
         locked: this.attempt.locked,
         error: this.attempt.locked
-          ? "A previous attempt has an unconfirmed result. Retry its saved answers with fresh verification."
+          ? "Please verify again to retry your submission."
           : null,
       })
     } catch {
@@ -262,8 +262,7 @@ export class IntakeController {
       JSON.stringify(answers) !== JSON.stringify(this.attempt.answers)
     ) {
       this.update({
-        error:
-          "The previous result is unknown. Restore the saved answers before retrying; its retry key has been kept.",
+        error: "Please retry the previous submission or contact the team.",
         errorCode: "answers_changed",
       })
       return null
@@ -310,7 +309,7 @@ export class IntakeController {
         error:
           error.message +
           (!this.storageAvailable && error.uncertain
-            ? " Keep this tab open until the result is known; recovery storage is unavailable."
+            ? " Please keep this tab open until your retry completes."
             : ""),
       })
       return null

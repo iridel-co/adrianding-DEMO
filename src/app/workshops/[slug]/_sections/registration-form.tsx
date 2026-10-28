@@ -1,5 +1,9 @@
 "use client"
 
+import { focusInvalidStep } from "@/app/_lib/focus-invalid-step"
+import { FormSelect } from "@/app/_components/form-select"
+import { FormErrorToast } from "@/app/_components/form-error-toast"
+
 import { useEffect, useId, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useIntake } from "@/app/_lib/use-intake"
@@ -8,7 +12,7 @@ import { saveReceipt } from "@/app/_lib/handoff"
 import { registrationAcceptedSchema } from "@/lib/registration"
 import type { IntakeConfig } from "@/lib/intake"
 import { RegistrationReview } from "./registration-review"
-import { useForm } from "react-hook-form"
+import { Controller, useForm, type FieldErrors } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   SALARY_RANGES,
@@ -18,7 +22,7 @@ import {
 } from "./registration-model"
 import { FormField as Field } from "@/app/_components/form-field"
 import { useStepNavigation } from "@/app/_lib/use-step-navigation"
-import { ArrowLeft, ArrowRight, ChevronDown, Phone, Check } from "lucide-react"
+import { ArrowLeft, ArrowRight, Phone, Check } from "lucide-react"
 import { gsap, useGSAP } from "@/app/_lib/gsap"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -70,6 +74,7 @@ export function RegistrationForm({
     pending,
     next: advance,
     back,
+    goTo,
   } = useStepNavigation(STEPS.length, submitting)
   const step = locked && attempt.answers ? STEPS.length - 1 : navigationStep
   const paneRef = useRef<HTMLDivElement>(null)
@@ -78,11 +83,13 @@ export function RegistrationForm({
 
   const {
     register,
+    control: formControl,
     handleSubmit,
     trigger,
     getValues,
     reset,
     setError,
+    setFocus,
 
     formState: { errors },
   } = useForm<FormValues>({
@@ -132,6 +139,9 @@ export function RegistrationForm({
       trigger(STEPS[captured].fields, { shouldFocus: true })
     )
 
+  const onInvalid = (fieldErrors: FieldErrors<FormValues>) =>
+    focusInvalidStep(fieldErrors, STEPS, goTo, setFocus)
+
   const onSubmit = async (values: FormValues) => {
     if (!enabled || !workshopSessionId) {
       setError("root", {
@@ -172,7 +182,7 @@ export function RegistrationForm({
   const current = STEPS[step]
 
   return (
-    <form className="min-w-0" onSubmit={handleSubmit(onSubmit)}>
+    <form className="min-w-0" onSubmit={handleSubmit(onSubmit, onInvalid)}>
       {/* Progress */}
       <div className="flex items-center gap-2">
         {STEPS.map((s, i) => (
@@ -261,26 +271,28 @@ export function RegistrationForm({
                 )}
               </Field>
               <Field label="Salary range" error={errors.salaryRange?.message}>
-                {(control) => (
-                  <div className="relative">
-                    <select
-                      {...control}
-                      aria-label="Salary range (required)"
-                      className="border-input bg-background focus-visible:ring-ring h-12 w-full appearance-none rounded-md border py-3 pr-10 pl-3 text-base shadow-sm transition-colors focus-visible:ring-1 focus-visible:outline-none"
-                      defaultValue=""
-                      {...register("salaryRange")}
-                    >
-                      <option value="" disabled>
-                        Select a range
-                      </option>
-                      {SALARY_RANGES.map((r) => (
-                        <option key={r} value={r}>
-                          {r}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="text-muted-foreground pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2" />
-                  </div>
+                {(input) => (
+                  <Controller
+                    name="salaryRange"
+                    control={formControl}
+                    render={({ field }) => (
+                      <FormSelect
+                        {...input}
+                        ref={field.ref}
+                        name={field.name}
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        onBlur={field.onBlur}
+                        disabled={locked || submitting}
+                        aria-label="Salary range (required)"
+                        placeholder="Select a range"
+                        options={SALARY_RANGES.map((value) => ({
+                          value,
+                          label: value,
+                        }))}
+                      />
+                    )}
+                  />
                 )}
               </Field>
               <Field label="City (optional)" error={errors.city?.message}>
@@ -342,26 +354,10 @@ export function RegistrationForm({
           resetKey={resetKey}
         />
       )}
-      {attempt.error && (
-        <p role="alert" className="text-destructive mt-6 text-sm">
-          {attempt.error}
-        </p>
-      )}
-      {locked && (
-        <p className="text-muted-foreground mt-3 text-sm">
-          Your submitted answers are kept for a safe retry. Complete
-          verification again to retry this attempt.
-        </p>
-      )}
-      {errors.root?.message && (
-        <p role="alert" className="text-destructive mt-6 text-sm">
-          {errors.root.message}
-        </p>
-      )}
+      <FormErrorToast message={attempt.error || errors.root?.message} />
       {!availability.canRegister && (
         <p role="alert" className="text-destructive mt-6 text-sm">
-          {availability.label}. Your entered details have been kept;
-          registration cannot be completed for this date.
+          {availability.label}. Registration cannot be completed for this date.
         </p>
       )}
       {/* Keep the contact alternative separate from full-width mobile actions. */}

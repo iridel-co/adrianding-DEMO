@@ -1,3 +1,12 @@
+import { focusInvalidStep } from "@/app/_lib/focus-invalid-step"
+import {
+  STEPS as corporateSteps,
+  type FormValues as CorporateValues,
+} from "@/app/corporate-training/_sections/inquiry-model"
+import {
+  STEPS as registrationSteps,
+  type FormValues as RegistrationValues,
+} from "@/app/workshops/[slug]/_sections/registration-model"
 import { expect, test } from "@playwright/test"
 import { IntakeController, type IntakeConfig } from "@/lib/intake"
 import {
@@ -229,4 +238,36 @@ test("@policy disabled intake performs no POST or key persistence", async () => 
   ).toBeNull()
   expect(calls).toBe(0)
   expect(stored.size).toBe(0)
+})
+
+test("@policy final validation returns to the earliest invalid step and focuses its field", () => {
+  const previous = globalThis.requestAnimationFrame
+  globalThis.requestAnimationFrame = (callback) => {
+    callback(0)
+    return 0
+  }
+  try {
+    const steps: number[] = [],
+      fields: string[] = []
+    focusInvalidStep<CorporateValues>(
+      {
+        email: { type: "validate", message: "Invalid email" },
+        venue: { type: "validate", message: "Invalid venue" },
+      },
+      corporateSteps,
+      (step) => steps.push(step),
+      (field) => fields.push(field)
+    )
+    focusInvalidStep<RegistrationValues>(
+      { city: { type: "validate", message: "Enter a city" } },
+      registrationSteps,
+      (step) => steps.push(step),
+      (field) => fields.push(field)
+    )
+    expect(steps).toEqual([0, 1])
+    expect(fields).toEqual(["email", "city"])
+  } finally {
+    if (previous) globalThis.requestAnimationFrame = previous
+    else Reflect.deleteProperty(globalThis, "requestAnimationFrame")
+  }
 })

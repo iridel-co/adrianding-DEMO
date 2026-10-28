@@ -281,7 +281,21 @@ test.describe("@policy local enabled intake", () => {
     })
     const form = await registration(page)
     await form.getByRole("button", { name: "Finish", exact: true }).click()
-    await expect(form.getByRole("alert")).toContainText("could not confirm")
+    await expect(page.locator("[data-slot=toast]")).toContainText(
+      "could not confirm"
+    )
+    await expect(form.getByText(/kept for a safe retry/)).toHaveCount(0)
+    expect(
+      await page
+        .locator("[data-slot=toast]")
+        .evaluate((el) => el.closest("form,[role=dialog]") === null)
+    ).toBe(true)
+    await expect(
+      page.getByRole("region", { name: "Form notifications" })
+    ).toBeVisible()
+    await page.getByRole("button", { name: "Dismiss toast" }).click()
+    await expect(page.locator("[data-slot=toast]")).toHaveCount(0)
+    await expect(form).toBeVisible()
     await expect(
       form.getByRole("button", { name: "Back", exact: true })
     ).toBeDisabled()

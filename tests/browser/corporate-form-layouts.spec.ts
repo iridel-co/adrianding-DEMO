@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test"
-import { fillInquiry } from "./helpers/form-data"
+import { fillInquiry, chooseSelect } from "./helpers/form-data"
 
 for (const width of [360, 768]) {
   test(`@layout Corporate inquiry preview remains editable without submitting at ${width}px`, async ({
@@ -28,10 +28,8 @@ for (const width of [360, 768]) {
     }
     await expect(
       form.getByLabel("Preferred programme", { exact: true })
-    ).toHaveValue("leadership")
-    await form
-      .getByLabel("Preferred programme", { exact: true })
-      .selectOption("cms-program-2")
+    ).toHaveText("Leadership Training & Development")
+    await chooseSelect(form, "Preferred programme", "CMS Program 2")
     await form.getByLabel("To (optional)", { exact: true }).fill("2026-11-09")
     await forward.click()
     await expect(
@@ -57,9 +55,11 @@ for (const width of [360, 768]) {
     await form.evaluate((element) =>
       (element as HTMLFormElement).requestSubmit()
     )
-    await expect(form.getByRole("alert")).toContainText(
-      "Online inquiries are currently unavailable"
-    )
+    await expect(
+      page
+        .getByRole("region", { name: "Form notifications" })
+        .getByRole("alert")
+    ).toContainText("Online inquiries are currently unavailable")
     await expect(page).not.toHaveURL(/inquiry-received$/)
     expect(posts).toBe(0)
     expect(
@@ -68,7 +68,7 @@ for (const width of [360, 768]) {
     await form.getByRole("button", { name: "Back", exact: true }).click()
     await expect(
       form.getByLabel("Preferred programme", { exact: true })
-    ).toHaveValue("cms-program-2")
+    ).toHaveText("CMS Program 2")
   })
 }
 
@@ -120,10 +120,10 @@ test("Corporate form labels, errors and overlapping Continue activations", async
   await forward.click()
   await expect(
     form.getByLabel("Preferred programme", { exact: true })
-  ).toHaveValue("leadership")
+  ).toHaveText("Leadership Training & Development")
   await expect(
     form.getByLabel("Number of attendees", { exact: true })
-  ).toHaveValue("16 – 30")
+  ).toHaveText("16 – 30 people")
   await expect(form.getByLabel("From", { exact: true })).toHaveValue(
     "2026-11-10"
   )

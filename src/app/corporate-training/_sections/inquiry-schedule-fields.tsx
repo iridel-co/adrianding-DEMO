@@ -1,12 +1,11 @@
 "use client"
 
-import type { ComponentPropsWithRef } from "react"
 import {
   Controller,
   type UseFormReturn,
   type FieldErrors,
 } from "react-hook-form"
-import { ChevronDown } from "lucide-react"
+import { FormSelect } from "@/app/_components/form-select"
 import type { PublicProgram } from "@/lib/public-content"
 import { FormField as Field } from "@/app/_components/form-field"
 import { Input } from "@/components/ui/input"
@@ -49,18 +48,26 @@ export function InquiryScheduleFields({
   return (
     <>
       <Field label="Preferred programme" error={errors.program?.message}>
-        {(control) => (
-          <SelectField {...control} defaultValue="" {...register("program")}>
-            <option value="" disabled>
-              Select a programme
-            </option>
-            <option value={UNSURE_PROGRAM}>{UNSURE_PROGRAM}</option>
-            {programs.map((p) => (
-              <option key={p.slug} value={p.slug}>
-                {p.title}
-              </option>
-            ))}
-          </SelectField>
+        {(input) => (
+          <Controller
+            name="program"
+            control={control}
+            render={({ field }) => (
+              <FormSelect
+                {...input}
+                ref={field.ref}
+                name={field.name}
+                value={field.value}
+                onValueChange={field.onChange}
+                onBlur={field.onBlur}
+                placeholder="Select a programme"
+                options={[
+                  { value: UNSURE_PROGRAM, label: UNSURE_PROGRAM },
+                  ...programs.map((p) => ({ value: p.slug, label: p.title })),
+                ]}
+              />
+            )}
+          />
         )}
       </Field>
       <AlsoInterested
@@ -70,17 +77,26 @@ export function InquiryScheduleFields({
         onToggle={toggleAlso}
       />
       <Field label="Number of attendees" error={errors.attendees?.message}>
-        {(control) => (
-          <SelectField {...control} defaultValue="" {...register("attendees")}>
-            <option value="" disabled>
-              Select a range
-            </option>
-            {ATTENDEE_BANDS.map((a) => (
-              <option key={a} value={a}>
-                {a} people
-              </option>
-            ))}
-          </SelectField>
+        {(input) => (
+          <Controller
+            name="attendees"
+            control={control}
+            render={({ field }) => (
+              <FormSelect
+                {...input}
+                ref={field.ref}
+                name={field.name}
+                value={field.value}
+                onValueChange={field.onChange}
+                onBlur={field.onBlur}
+                placeholder="Select a range"
+                options={ATTENDEE_BANDS.map((value) => ({
+                  value,
+                  label: value + " people",
+                }))}
+              />
+            )}
+          />
         )}
       </Field>
       <Controller
@@ -126,19 +142,3 @@ export function InquiryScheduleFields({
     </>
   )
 }
-
-/** Native select styled to match `Input` — same treatment as the workshop form. */
-const SelectField = ({
-  children,
-  ...props
-}: ComponentPropsWithRef<"select">) => (
-  <div className="relative">
-    <select
-      className="border-input bg-background focus-visible:ring-ring h-12 w-full appearance-none rounded-md border py-3 pr-10 pl-3 text-base shadow-sm transition-colors focus-visible:ring-1 focus-visible:outline-none"
-      {...props}
-    >
-      {children}
-    </select>
-    <ChevronDown className="text-muted-foreground pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2" />
-  </div>
-)

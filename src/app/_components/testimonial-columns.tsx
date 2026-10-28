@@ -6,7 +6,6 @@ import { Quote, User } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { PublicTestimonial } from "@/lib/public-content"
 import type { Testimonial } from "@/lib/testimonials"
-import { Button } from "@/components/ui/button"
 
 type CardTestimonial = PublicTestimonial &
   Pick<Testimonial, "logo" | "logoShape">
@@ -50,34 +49,24 @@ export function TestimonialColumns({
             isFeatured: true,
           }
   )
-  const [paused, setPaused] = useState(false)
   const columnA = testimonials.filter((_, i) => i % 2 === 0)
   const columnB = testimonials.filter((_, i) => i % 2 === 1)
 
   return (
     <div className={className}>
-      <Button
-        type="button"
-        variant="outline"
-        aria-pressed={paused}
-        onClick={() => setPaused((value) => !value)}
-        className="mb-5 motion-reduce:hidden"
-      >
-        {paused ? "Resume testimonials" : "Pause testimonials"}
-      </Button>
       {/* Mobile: a single column carrying every quote. */}
       <div className="md:hidden">
         <TestimonialColumn
           testimonials={testimonials}
           speed={24}
-          paused={paused}
+          paused={false}
         />
       </div>
       {/* Desktop: two interleaved columns at slightly different speeds so they
           never march in lockstep. */}
       <div className="hidden gap-5 md:grid md:grid-cols-2">
-        <TestimonialColumn testimonials={columnA} speed={22} paused={paused} />
-        <TestimonialColumn testimonials={columnB} speed={30} paused={paused} />
+        <TestimonialColumn testimonials={columnA} speed={22} paused={false} />
+        <TestimonialColumn testimonials={columnB} speed={30} paused={false} />
       </div>
     </div>
   )

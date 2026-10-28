@@ -462,6 +462,23 @@ PR: pending. Evidence: pending. Merge status: not started.
 
 ## PR09 Frontend integration contracts
 
+### Local form feedback review
+
+- Remove company/testimonial pause buttons; preserve hover/focus holds and reduced motion.
+- Use dismissible page-viewport submission-error toasts, concise retry copy and icon-led review cards.
+  Salary, program and attendee dropdowns use the existing custom Select component.
+  Final validation returns to the first invalid step and focuses its inline field error.
+- About KPI design remains local pending application of the approved prototype.
+- Read-only Portal preflights now allow the Vercel preview and production website
+  origins. User-reported `intake_unavailable` remains a Portal configuration/backend
+  issue; CRM acceptance and email delivery remain unverified. No real form was sent
+  by the agent. The supplied Turnstile public key is set only in ignored local env.
+
+Validation: formatting, source-size, lint/CSS, types, 19 tooling checks, production
+build and OG checks passed. All 151 default browser cases and 10 mocked enabled
+intake cases passed after rerunning Firefox with a fresh isolated runtime.
+These checks do not establish live CRM or email acceptance.
+
 ### Production presentation and CMS scope
 
 Local follow-up: center corporate program cards when they fit the rail; retain
