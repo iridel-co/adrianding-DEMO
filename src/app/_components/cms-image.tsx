@@ -29,7 +29,7 @@ export function CmsImage({
         style={{
           backgroundImage:
             fallback === undefined
-              ? "radial-gradient(ellipse at top right, transparent 40%, #ffffff0d 40.5%, transparent 41%, transparent 58%, #ffffff0d 58.5%, transparent 59%)"
+              ? "repeating-radial-gradient(circle at top right, transparent 0 140px, #ffffff0d 141px 142px, transparent 143px 240px)"
               : undefined,
           width: props.fill ? undefined : props.width,
           height: props.fill ? undefined : props.height,

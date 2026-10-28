@@ -464,6 +464,12 @@ PR: pending. Evidence: pending. Merge status: not started.
 
 ### Production presentation and CMS scope
 
+Local follow-up: center corporate program cards when they fit the rail; retain
+left-aligned scrolling and arrows when they overflow. Keep card sizing and the
+heading alignment unchanged. Limit hover expansion for small catalogues so
+neighboring titles stay readable; shared missing-media artwork uses circles
+that crop instead of stretching with the container.
+
 PR #5 (PR06–PR10) is merged into `main`. This follow-up preserves its CMS/CRM
 connections while restoring the agreed original presentation.
 

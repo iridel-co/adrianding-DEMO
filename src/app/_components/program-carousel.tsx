@@ -85,22 +85,20 @@ const ACTIVE_REM = 34 // hovered / focused / tapped card
 // numbers the newly-active card's new span always contains its previous
 // span, so the pointer can't fall off the card it just entered. Re-check
 // that before changing any value.
-const SIBLING_REM = (n: number) => (n * REST_REM - ACTIVE_REM) / (n - 1) // 20.67rem for n=10 (19.6 for n=6)
+// Small catalogues reserve 18rem for each neighboring card so text stays readable.
+const expandedRem = (n: number) =>
+  Math.min(ACTIVE_REM, n * REST_REM - (n - 1) * 18)
+const SIBLING_REM = (n: number) => (n * REST_REM - expandedRem(n)) / (n - 1)
 const EASE = "cubic-bezier(0.33, 1, 0.68, 1)" // = SpecRevealCards' [0.33,1,0.68,1]
 const DURATION_MS = 420 // = SpecRevealCards' 0.42s
 
 const RAIL =
-  "no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-6 px-6 pb-1 sm:scroll-px-8 sm:px-8 lg:snap-none lg:gap-5 lg:scroll-px-0 lg:pr-0 lg:pb-0 lg:pl-10"
+  "no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-6 px-6 pb-1 sm:scroll-px-8 sm:px-8 lg:snap-none lg:gap-5 lg:scroll-px-0 lg:px-10 lg:pb-0"
 
 const CARD =
-  "group relative h-[32rem] w-[82vw] max-w-[22rem] shrink-0 snap-start overflow-hidden rounded-3xl contain-layout lg:h-[34rem] lg:w-auto lg:max-w-none lg:flex-[0_0_22rem]"
+  "group relative h-[32rem] w-[82vw] max-w-[22rem] shrink-0 snap-start overflow-hidden rounded-3xl contain-layout first:ml-auto last:mr-auto lg:h-[34rem] lg:w-auto lg:max-w-none lg:flex-[0_0_22rem]"
 
-// Static (touch / below lg) detail wrapper: full width, no fixed rail width.
-// Interactive (desktop + pointer) detail wrapper: fixed width so the bullets
-// don't reflow while the card widens.
-const DETAIL_INTERACTIVE = "w-full pt-1 lg:w-[30rem]"
-const DETAIL_STATIC = "w-full pt-1"
-
+// Auto margins center fitting cards and collapse to zero when the rail overflows.
 // Desktop + pointer card title. Extra-bold at all sizes (pass 4, 2026-09-24).
 // max-w keeps the text from reflowing while the card widens (see SIBLING_REM).
 const TITLE_INTERACTIVE =
@@ -216,7 +214,7 @@ export function ProgramCarousel({
       active === null
         ? REST_REM
         : active === i
-          ? ACTIVE_REM
+          ? expandedRem(items.length)
           : SIBLING_REM(items.length)
     const style: CSSProperties | undefined = interactive
       ? {
@@ -229,7 +227,14 @@ export function ProgramCarousel({
     const panelId = `program-${item.key}-detail`
 
     const detail = (
-      <div className={interactive ? DETAIL_INTERACTIVE : DETAIL_STATIC}>
+      <div
+        className="w-full pt-1"
+        style={
+          interactive
+            ? { width: `${expandedRem(items.length) - 4}rem` }
+            : undefined
+        }
+      >
         <p className="text-sm font-semibold text-white">Useful for</p>
         <ul className="mt-2 space-y-1.5">
           {item.usefulFor.map((b) => (
@@ -246,7 +251,7 @@ export function ProgramCarousel({
           ))}
         </ul>
         {/* Bottom-right (pass 4). In interactive mode this sits inside
-            the fixed 30rem `DETAIL_INTERACTIVE`, which is exactly the active
+            the fixed expanded detail width, which matches the active
             card's content width, so it lands at the card's bottom-right
             without touching any width. ring-inset because `Collapse`'s
             overflow-hidden clips an outer ring at this edge. */}
@@ -355,7 +360,6 @@ export function ProgramCarousel({
           className={RAIL}
         >
           {items.map((item, i) => renderCard(item, i))}
-          <div aria-hidden className="w-px shrink-0 lg:w-8" />
         </div>
       </Reveal>
     </div>
