@@ -1142,3 +1142,19 @@ profile, including after a retry under `/private/tmp`. No hosted or remote-CI
 validation was performed.
 Hosted diagnosis requires deploying Portal before web and setting the switch
 in both. Restore web verification before restoring Portal enforcement.
+
+### Hard-coded Turnstile bypass — 2026-10-29
+
+Temporarily hard-code verification off in web and Portal, regardless of
+`TURNSTILE_ENABLED`. This supersedes the environment-switch rollout above.
+Keep all other intake checks. Update configuration tests and browser fixtures
+for submission without verification, including when the old env flag is true.
+The normal verification UI suite remains skipped during this diagnosis.
+Validation: 75 focused Portal tests and Portal typecheck passed. Web formatting,
+source-size, lint/CSS, types, 19 tooling tests, production build and OG checks
+passed with Webpack and an explicit public CMS URL. Browser checks passed
+136 cases in Chromium/WebKit, including both submissions with no Cloudflare
+requests while `TURNSTILE_ENABLED=true`. Ten verification-mode tests are
+intentionally skipped; 19 Firefox cases remain blocked by the existing local
+profile-launch failure, so the full handoff gate is not green. Deployment and
+live root-cause diagnosis remain separate.

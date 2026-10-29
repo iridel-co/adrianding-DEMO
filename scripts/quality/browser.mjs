@@ -21,7 +21,7 @@ const env = {
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: "",
   TEST_INTAKE_ENABLED: "0",
   TURNSTILE_ENABLED: "true",
-  TEST_TURNSTILE_DISABLED: "0",
+  TEST_TURNSTILE_DISABLED: "1",
 }
 
 async function run(file, args, runEnv = env) {
@@ -36,38 +36,9 @@ async function run(file, args, runEnv = env) {
 
 try {
   const args = process.argv.slice(2)
-  const enabledOnly = args.some((arg) => arg.includes("intake-enabled.spec"))
-  const bypassOnly = args.some((arg) => arg.includes("intake-bypass.spec"))
-  if (!enabledOnly && !bypassOnly) {
-    await run("node_modules/next/dist/bin/next", ["build"])
-    await run("node_modules/@playwright/test/cli.js", ["test", ...args])
-  }
-  if (enabledOnly || args.length === 0) {
-    const enabledEnv = {
-      ...env,
-      NEXT_PUBLIC_TURNSTILE_SITE_KEY: "local-fixture-key",
-      TEST_INTAKE_ENABLED: "1",
-    }
-    await run("node_modules/next/dist/bin/next", ["build"], enabledEnv)
-    await run(
-      "node_modules/@playwright/test/cli.js",
-      ["test", "tests/browser/intake-enabled.spec.ts", "--project=desktop"],
-      enabledEnv
-    )
-  }
-  if (bypassOnly || args.length === 0) {
-    const bypassEnv = {
-      ...env,
-      TURNSTILE_ENABLED: "false",
-      TEST_TURNSTILE_DISABLED: "1",
-    }
-    await run("node_modules/next/dist/bin/next", ["build"], bypassEnv)
-    await run(
-      "node_modules/@playwright/test/cli.js",
-      ["test", "tests/browser/intake-bypass.spec.ts", "--project=desktop"],
-      bypassEnv
-    )
-  }
+  // Verification fixtures remain skipped while the application hard-codes it off.
+  await run("node_modules/next/dist/bin/next", ["build"])
+  await run("node_modules/@playwright/test/cli.js", ["test", ...args])
 } catch (error) {
   console.error(error.message)
   process.exitCode = 1
