@@ -83,7 +83,7 @@ test("@policy workshop preserves the registration layout without a simulated res
   await dialog.getByRole("button", { name: "Continue", exact: true }).click()
   await expect(
     dialog.getByRole("button", { name: "Finish", exact: true })
-  ).toBeEnabled()
+  ).toBeDisabled()
   await page.keyboard.press("Escape")
   await expect(page.getByText("9 seats left").first()).toBeVisible()
   await expect(

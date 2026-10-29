@@ -74,6 +74,7 @@ export function CorporateInquiryForm({
   const step = locked && answers ? STEPS.length - 1 : navigationStep
   const paneRef = useRef<HTMLDivElement>(null)
   const headingRef = useRef<HTMLHeadingElement>(null)
+  const formRef = useRef<HTMLFormElement>(null)
   const previousStep = useRef(step)
 
   useEffect(() => {
@@ -82,7 +83,7 @@ export function CorporateInquiryForm({
     const heading = headingRef.current
     if (!heading) return
     heading.focus({ preventScroll: true })
-    return smoothScrollToElement(heading)
+    if (formRef.current) return smoothScrollToElement(formRef.current)
   }, [step])
 
   useEffect(() => setHydrated(true), [])
@@ -95,7 +96,6 @@ export function CorporateInquiryForm({
   const [dateMode, setDateMode] = useState<"pick" | "text">("pick")
   const [dateFrom, setDateFrom] = useState("")
   const [dateTo, setDateTo] = useState("")
-  const formRef = useRef<HTMLFormElement>(null)
   const prefillFocusFrame = useRef(0)
   useEffect(() => () => cancelAnimationFrame(prefillFocusFrame.current), [])
   const [prefilled, setPrefilled] = useState<string | null>(null)
@@ -326,6 +326,7 @@ export function CorporateInquiryForm({
       onInvalid(invalid)
       return
     }
+    let completed = false
     try {
       const result = await submit(
         (locked ? answers : null) ?? payload.data,
@@ -333,6 +334,7 @@ export function CorporateInquiryForm({
         websiteRef.current?.value ?? ""
       )
       if (!result?.accepted) return
+      completed = true
       const saved = corporateInquiryAnswersSchema.parse(
         (locked ? answers : null) ?? payload.data
       )
@@ -357,7 +359,7 @@ export function CorporateInquiryForm({
       router.push("/corporate-training/inquiry-received")
     } finally {
       setToken(null)
-      setResetKey((key) => key + 1)
+      if (!completed) setResetKey((key) => key + 1)
     }
   }
 
@@ -365,11 +367,17 @@ export function CorporateInquiryForm({
 
   return (
     <form
+      noValidate
       inert={!hydrated}
       aria-busy={!hydrated}
       ref={formRef}
       tabIndex={-1}
       onSubmit={(event) => {
+        if (step < STEPS.length - 1) {
+          event.preventDefault()
+          void next()
+          return
+        }
         if (locked && answers) {
           event.preventDefault()
           void onSubmit(getValues())
@@ -377,7 +385,7 @@ export function CorporateInquiryForm({
           void handleSubmit(onSubmit, onInvalid)(event)
         }
       }}
-      className="bg-background text-foreground rounded-xl p-6 shadow-2xl outline-none sm:p-10"
+      className="bg-background text-foreground scroll-mt-[calc(var(--nav-h)+1.5rem)] rounded-xl p-6 shadow-2xl outline-none sm:p-10"
     >
       {!intake.enabled && (
         <p className="text-muted-foreground mb-5 text-sm" role="status">
@@ -409,7 +417,7 @@ export function CorporateInquiryForm({
         <h3
           ref={headingRef}
           tabIndex={-1}
-          className="text-muted-foreground scroll-mt-28 text-xs tracking-[0.1em] uppercase outline-none"
+          className="text-muted-foreground text-xs tracking-[0.1em] uppercase outline-none"
         >
           Step {step + 1} of {STEPS.length} · {current.title}
         </h3>
@@ -595,9 +603,6 @@ export function CorporateInquiryForm({
         pending={pending}
         submitting={submitting}
         locked={locked}
-        next={() => {
-          void next()
-        }}
         back={back}
         canSubmit={Boolean(
           intake.enabled && (!intake.turnstileEnabled || token)

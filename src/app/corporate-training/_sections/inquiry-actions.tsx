@@ -9,7 +9,6 @@ export function InquiryActions({
   pending,
   submitting,
   locked,
-  next,
   back,
   canSubmit,
 }: {
@@ -18,7 +17,6 @@ export function InquiryActions({
   pending: boolean
   submitting: boolean
   locked: boolean
-  next: () => void
   back: () => void
   canSubmit: boolean
 }) {
@@ -52,16 +50,14 @@ export function InquiryActions({
             Back
           </Button>
         )}
-        {/* Distinct `key`s so React can't reuse this <button> DOM node
-              across branches — see the identical comment in the workshop
-              form's registration-form.tsx for the failure mode this avoids. */}
+        {/* Separate nodes keep a rapid Continue click from activating Send. */}
         {step < STEPS.length - 1 ? (
           <Button
             key="continue"
-            type="button"
+            type="submit"
             variant="brand"
             onClick={(event) => {
-              if (event.detail < 2) void next()
+              if (event.detail >= 2) event.preventDefault()
             }}
             disabled={pending || submitting}
             aria-busy={pending}

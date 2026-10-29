@@ -7,6 +7,13 @@ const cors = {
   "access-control-allow-headers": "content-type,idempotency-key",
 }
 
+async function widgetRenderCount(page: Page) {
+  return page.evaluate(
+    () =>
+      (window as unknown as { __testActions: string[] }).__testActions.length
+  )
+}
+
 test.describe("@policy local enabled intake", () => {
   test.skip(
     process.env.TEST_INTAKE_ENABLED !== "1",
@@ -234,11 +241,17 @@ test.describe("@policy local enabled intake", () => {
           .click()
         await consent.check()
       }
-      await form.getByRole("button", { name: "Finish", exact: true }).click()
+      const rendersBeforeSubmit = await widgetRenderCount(page)
+      await form.getByRole("checkbox", { name: /I agree/ }).press("Enter")
       await expect(page).toHaveURL(/\/registered$/)
+      expect(await widgetRenderCount(page)).toBe(rendersBeforeSubmit)
       await expect(
         page.getByRole("heading", { name: /Registration accepted/ })
       ).toBeVisible()
+      await expect(page.locator("iframe, video")).toHaveCount(0)
+      await expect(page.getByText("Start before the day starts.")).toHaveCount(
+        0
+      )
       expect(posted).toHaveLength(1)
       expect(posted[0]).toMatchObject({
         workshopSessionId: "12345678-abcd-4000-8000-123456789abc",
@@ -421,8 +434,10 @@ test.describe("@policy local enabled intake", () => {
         expect(body).toBeUndefined()
         await consent.check()
       }
-      await form.getByRole("button", { name: "Send inquiry" }).click()
+      const rendersBeforeSubmit = await widgetRenderCount(page)
+      await form.getByRole("checkbox", { name: /I agree/ }).press("Enter")
       await expect(page).toHaveURL(/inquiry-received$/)
+      expect(await widgetRenderCount(page)).toBe(rendersBeforeSubmit)
       await expect(
         page.getByRole("heading", { name: /got your inquiry/ })
       ).toBeVisible()

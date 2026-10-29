@@ -152,6 +152,7 @@ export function RegistrationForm({
       return
     }
     if ((config.turnstileEnabled && !token) || submitting) return
+    let completed = false
     try {
       const result = await attempt.submit(
         { ...values, workshopSessionId },
@@ -160,6 +161,7 @@ export function RegistrationForm({
       )
       const accepted = registrationAcceptedSchema.safeParse(result)
       if (!accepted.success) return
+      completed = true
       saveReceipt({
         kind: "workshop",
         accepted: true,
@@ -177,13 +179,24 @@ export function RegistrationForm({
       router.push(`/workshops/${encodeURIComponent(slug)}/registered`)
     } finally {
       setToken(null)
-      setResetKey((value) => value + 1)
+      if (!completed) setResetKey((value) => value + 1)
     }
   }
   const current = STEPS[step]
 
   return (
-    <form className="min-w-0" onSubmit={handleSubmit(onSubmit, onInvalid)}>
+    <form
+      className="min-w-0"
+      noValidate
+      onSubmit={(event) => {
+        if (step < STEPS.length - 1) {
+          event.preventDefault()
+          void next()
+          return
+        }
+        void handleSubmit(onSubmit, onInvalid)(event)
+      }}
+    >
       {/* Progress */}
       <div className="flex items-center gap-2">
         {STEPS.map((s, i) => (
@@ -392,24 +405,15 @@ export function RegistrationForm({
               Back
             </Button>
           )}
-          {/* Distinct `key`s force React to unmount/remount rather than reuse
-              the same <button> DOM node across the two branches. Without them,
-              a click that lands right as validation resolves can catch React
-              mid-swap: it flips this node's `type` from "button" to "submit"
-              between the click's mousedown and mouseup, and the browser
-              submits on mouseup even though nothing clicked the submit
-              button — the click that was meant to advance one step silently
-              fires the final submit instead. Reproduces reliably whenever
-              validation resolves fast with already-valid values and is a risk for a fast
-              real click too, not just automation. */}
+          {/* Separate nodes keep a rapid Continue click from activating Finish. */}
           {step < STEPS.length - 1 ? (
             <Button
               className="min-w-0 flex-1 sm:flex-none"
               key="continue"
-              type="button"
+              type="submit"
               variant="brand"
               onClick={(event) => {
-                if (event.detail < 2) void next()
+                if (event.detail >= 2) event.preventDefault()
               }}
               disabled={pending || submitting || locked}
               aria-busy={pending}
