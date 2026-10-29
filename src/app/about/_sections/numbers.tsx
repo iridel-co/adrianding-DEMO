@@ -1,3 +1,11 @@
+import {
+  Clock,
+  Building2,
+  ListChecks,
+  Globe,
+  Layers,
+  Award,
+} from "lucide-react"
 import { Counter } from "@/app/_components/counter"
 import { Reveal } from "@/app/_components/reveal"
 import { SplitReveal } from "@/app/_components/split-reveal"
@@ -26,13 +34,32 @@ const ROSTER_COUNT = COMPANY_GROUPS.reduce((n, g) => n + g.logos.length, 0)
 const ROSTER_FLOOR = Math.floor(ROSTER_COUNT / 10) * 10
 
 const FIGURES = [
-  { value: 20, suffix: "+", label: "Years in the training circuit" },
-  { value: 500, prefix: "Top ", label: "PH companies trained" },
-  { value: ROSTER_FLOOR, suffix: "+", label: "Companies on the roster" },
+  {
+    icon: Clock,
+    value: 20,
+    suffix: "+",
+    label: "Years in the training circuit",
+  },
+  {
+    icon: Building2,
+    value: 500,
+    prefix: "Top ",
+    label: "PH companies trained",
+  },
+  {
+    icon: ListChecks,
+    value: ROSTER_FLOOR,
+    suffix: "+",
+    label: "Companies on the roster",
+  },
   // TODO: confirm industry count with the client (PRD marks this a placeholder).
-  { value: 9, suffix: "+", label: "Industries served" },
-  { value: SPECIALIZATIONS.length, label: "Core program tracks" },
-  { value: CERTIFICATIONS.length, label: "International credentials" },
+  { icon: Globe, value: 9, suffix: "+", label: "Industries served" },
+  { icon: Layers, value: SPECIALIZATIONS.length, label: "Core program tracks" },
+  {
+    icon: Award,
+    value: CERTIFICATIONS.length,
+    label: "International credentials",
+  },
 ]
 
 export function AboutNumbers() {
@@ -43,14 +70,12 @@ export function AboutNumbers() {
           The work, in numbers
         </h2>
 
-        {/* Headline figure. Baseline-aligned against its caption on desktop so
-            the number and the first line of the label share a baseline rather
-            than floating in their own boxes. */}
-        <div className="mt-12 grid gap-8 lg:mt-16 lg:grid-cols-[auto_1fr] lg:items-baseline lg:gap-16">
-          <p className="text-foreground text-[4.5rem] leading-[0.85] font-bold tracking-[-0.045em] whitespace-nowrap tabular-nums sm:text-[7rem] lg:text-[9.5rem]">
+        {/* The wider desktop caption fits above its last baseline; narrower layouts retain first-baseline alignment. */}
+        <div className="mt-12 grid gap-8 lg:mt-16 lg:grid-cols-[auto_1fr] lg:items-baseline lg:gap-16 xl:[align-items:last_baseline] xl:gap-x-20">
+          <p className="text-foreground text-[4.5rem] leading-[0.85] font-bold tracking-[-0.045em] whitespace-nowrap tabular-nums sm:text-[7rem] lg:-ml-[0.04em] lg:text-[9.5rem]">
             <Counter to={20000} suffix="+" duration={2.4} />
           </p>
-          <div className="max-w-md">
+          <div className="max-w-md xl:max-w-none">
             <SplitReveal
               as="h3"
               className="font-serif text-[1.75rem] leading-[1.15] tracking-[-0.02em] lg:text-[2.25rem]"
@@ -77,8 +102,13 @@ export function AboutNumbers() {
               <p className="text-foreground text-[2rem] leading-none font-bold tracking-[-0.03em] whitespace-nowrap tabular-nums sm:text-5xl lg:text-6xl">
                 <Counter to={f.value} prefix={f.prefix} suffix={f.suffix} />
               </p>
-              <p className="text-muted-foreground mt-5 max-w-[22ch] text-xs leading-snug tracking-[0.14em] uppercase lg:mt-6 lg:text-sm">
-                {f.label}
+              <p className="text-muted-foreground mt-5 grid max-w-[22ch] grid-cols-[18px_minmax(0,1fr)] items-start gap-x-2 text-xs leading-snug tracking-[0.14em] uppercase max-[359px]:block min-[400px]:gap-x-2.5 lg:mt-6 lg:text-sm">
+                <f.icon
+                  aria-hidden
+                  strokeWidth={1.5}
+                  className="size-4.5 shrink-0 text-[#91645f] max-[359px]:hidden"
+                />
+                <span>{f.label}</span>
               </p>
             </div>
           ))}
