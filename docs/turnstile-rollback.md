@@ -1,5 +1,10 @@
 # Turnstile diagnosis and rollback
 
+The website now uses `TURNSTILE_ENABLED` instead of hard-coding verification off.
+It defaults to enabled; `false` (case-insensitive) temporarily disables the widget
+and token requirement. Portal configuration is separate and must match.
+The Vercel config no longer overrides this setting.
+
 Recorded on 2026-10-29. These temporary changes were committed directly to
 `main` in two repositories. Use new revert commits; do not reset or force-push
 shared history.

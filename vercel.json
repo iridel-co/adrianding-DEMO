@@ -1,12 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "regions": ["sin1"],
-  "env": {
-    "TURNSTILE_ENABLED": "false"
-  },
-  "build": {
-    "env": {
-      "TURNSTILE_ENABLED": "false"
-    }
-  }
+  "regions": ["sin1"]
 }

@@ -468,7 +468,9 @@ PR: pending. Evidence: pending. Merge status: not started.
 - Use dismissible page-viewport submission-error toasts, concise retry copy and icon-led review cards.
   Salary, program and attendee dropdowns use the existing custom Select component.
   Final validation returns to the first invalid step and focuses its inline field error.
-- About KPI design remains local pending application of the approved prototype.
+- Refined C is applied locally to About: caption-side 18px icons, hanging labels,
+  neutral headline, and last-baseline desktop alignment from 1280px. Icons hide
+  below 360px as in the approved prototype; original figures and copy remain.
 - Read-only Portal preflights now allow the Vercel preview and production website
   origins. User-reported `intake_unavailable` remains a Portal configuration/backend
   issue; CRM acceptance and email delivery remain unverified. No real form was sent
@@ -478,6 +480,26 @@ Validation: formatting, source-size, lint/CSS, types, 19 tooling checks, product
 build and OG checks passed. All 151 default browser cases and 10 mocked enabled
 intake cases passed after rerunning Firefox with a fresh isolated runtime.
 These checks do not establish live CRM or email acceptance.
+
+Local keyboard/verification follow-up: Enter validates and advances the current
+step in both forms through native submit behavior; final submission retains consent
+and token checks. Successful acceptance no longer restarts Turnstile during
+navigation; unsuccessful attempts still reset for a fresh token. Formatting, lint,
+types and fixture builds passed, with 24 form/layout cases across five browser
+projects and all 10 mocked enabled-intake cases passing. Corporate intake was also
+read back from the isolated local database after a user-submitted real-widget test.
+Both flows now have local database readback after real-widget submissions. Workshop
+payment storage used a labelled local QR fixture with email delivery disabled.
+The dummy local primer URL has been removed; confirmation coverage checks that no
+player or primer section appears without an attached CMS URL.
+
+The grouped follow-up removes hard-coded Turnstile/Vercel overrides and restores
+the environment switch (enabled by default; false is case-insensitive). Portal
+configuration remains separate. Corporate step navigation now scrolls the card
+24px below the navbar. Publication is authorized for this grouped follow-up.
+Full `quality:ci` passed: 19 tooling tests, production build/OG checks,
+153 browser cases across five projects, 10 verification-enabled cases and
+2 verification-disabled cases. Hosted submission remains separately unverified.
 
 ### Production presentation and CMS scope
 
@@ -1123,38 +1145,3 @@ checks and all 176 Playwright cases. Existing tests verify mount/step focus and
 accessible Zod consent errors without navigation; malformed numeric capacity
 fixtures retain unavailable handling. Reviewer reply posted with local validation results; publication authorized.
 Native-device, hosted and remote-CI evidence remain separate.
-
-### Temporary Turnstile diagnosis — 2026-10-29
-
-Add an explicit `TURNSTILE_ENABLED=false` switch coordinated with Portal.
-Verification stays enabled by default. Bypass mode omits the widget and accepts
-an empty token; origin checks, honeypot, consent, answer validation and retry
-protection remain. Browser fixtures cover both forms without loading Cloudflare;
-normal verification fixtures remain separate.
-
-Local validation: Portal typecheck and 80 focused tests passed. Web formatting,
-source-size, lint/CSS, types, 19 tooling tests, production build and OG checks
-passed using Webpack (`IS_WEBPACK_TEST=1`); Turbopack's worker port is blocked
-in this environment. Browser checks passed 134 cases in Chromium/WebKit,
-10 verification-enabled cases and both bypass submission cases. The full
-handoff gate remains incomplete because Firefox cannot open its temporary
-profile, including after a retry under `/private/tmp`. No hosted or remote-CI
-validation was performed.
-Hosted diagnosis requires deploying Portal before web and setting the switch
-in both. Restore web verification before restoring Portal enforcement.
-
-### Hard-coded Turnstile bypass — 2026-10-29
-
-Temporarily hard-code verification off in web and Portal, regardless of
-`TURNSTILE_ENABLED`. This supersedes the environment-switch rollout above.
-Keep all other intake checks. Update configuration tests and browser fixtures
-for submission without verification, including when the old env flag is true.
-The normal verification UI suite remains skipped during this diagnosis.
-Validation: 75 focused Portal tests and Portal typecheck passed. Web formatting,
-source-size, lint/CSS, types, 19 tooling tests, production build and OG checks
-passed with Webpack and an explicit public CMS URL. Browser checks passed
-136 cases in Chromium/WebKit, including both submissions with no Cloudflare
-requests while `TURNSTILE_ENABLED=true`. Ten verification-mode tests are
-intentionally skipped; 19 Firefox cases remain blocked by the existing local
-profile-launch failure, so the full handoff gate is not green. Deployment and
-live root-cause diagnosis remain separate.

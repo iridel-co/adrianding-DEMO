@@ -15,8 +15,8 @@ export function getIntakeConfig(): IntakeConfig {
     /* Missing configuration leaves intake disabled. */
   }
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ""
-  // shortcut: verification is hard-coded off for diagnosis; restore the env switch after testing.
-  const turnstileEnabled = false
+  const turnstileEnabled =
+    process.env.TURNSTILE_ENABLED?.trim().toLowerCase() !== "false"
   return {
     origin,
     siteKey,
