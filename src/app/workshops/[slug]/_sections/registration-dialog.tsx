@@ -62,7 +62,7 @@ export function RegistrationDialog({
           </DialogTitle>
           <DialogDescription className="text-base">
             {workshop.intake?.enabled && workshop.workshopSessionId
-              ? "Complete your details and verification to submit your registration."
+              ? "Complete your details to submit your registration."
               : "Preview the registration form. Online registration is currently unavailable."}
           </DialogDescription>
         </DialogHeader>

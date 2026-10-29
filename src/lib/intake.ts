@@ -10,7 +10,12 @@ import {
   registrationAcceptedSchema,
 } from "./registration"
 
-export type IntakeConfig = { origin: string; siteKey: string; enabled: boolean }
+export type IntakeConfig = {
+  origin: string
+  siteKey: string
+  enabled: boolean
+  turnstileEnabled: boolean
+}
 export type IntakeKind = "registration" | "corporate"
 export type RegistrationAccepted = z.infer<typeof registrationAcceptedSchema>
 export type CorporateAccepted = z.infer<typeof corporateInquiryAcceptedSchema>
@@ -68,10 +73,14 @@ async function post(
   website: string,
   send: typeof fetch
 ) {
-  const request = (
+  const schema =
     kind === "registration"
       ? registrationRequestSchema
       : corporateInquiryRequestSchema
+  const request = (
+    config.turnstileEnabled
+      ? schema
+      : schema.safeExtend({ turnstileToken: z.string().max(2048) })
   ).safeParse({ ...answers, website, turnstileToken: token })
   if (!request.success) throw new IntakeError("invalid_submission", false)
   const body = JSON.stringify(request.data)
@@ -214,7 +223,7 @@ export class IntakeController {
         answers: this.attempt.answers,
         locked: this.attempt.locked,
         error: this.attempt.locked
-          ? "Please verify again to retry your submission."
+          ? "Please retry your previous submission."
           : null,
       })
     } catch {
@@ -228,7 +237,11 @@ export class IntakeController {
     website = ""
   ): Promise<IntakeAccepted | null> {
     if (this.state.submitting) return null
-    if (!config.enabled || !config.siteKey || !config.origin) {
+    if (
+      !config.enabled ||
+      (config.turnstileEnabled && !config.siteKey) ||
+      !config.origin
+    ) {
       this.update({
         error:
           "Online submissions are currently unavailable. Please contact the team directly.",

@@ -17,6 +17,7 @@ import {
 const config: IntakeConfig = {
   origin: "https://portal.example.test",
   siteKey: "fixture-key",
+  turnstileEnabled: true,
   enabled: true,
 }
 const answers = {
@@ -271,3 +272,51 @@ test("@policy final validation returns to the earliest invalid step and focuses 
     else Reflect.deleteProperty(globalThis, "requestAnimationFrame")
   }
 })
+
+for (const kind of ["registration", "corporate"] as const) {
+  test(`@policy ${kind} diagnostic bypass sends without a site key or token`, async () => {
+    let calls = 0
+    const controller = new IntakeController(
+      kind,
+      "bypass",
+      async (_url, init) => {
+        calls++
+        expect(JSON.parse(init!.body as string).turnstileToken).toBe("")
+        return json({ accepted: true })
+      }
+    )
+    const input =
+      kind === "registration"
+        ? answers
+        : {
+            fullName: "Maria Santos",
+            email: "maria@example.test",
+            phone: "+639171234567",
+            company: "Test Company",
+            role: "HR Manager",
+            program: "Leadership",
+            attendees: "16 to 30",
+            targetDateText: "Next month",
+            venue: "Our office",
+            consent: true,
+          }
+    expect(
+      await controller.submit(
+        { ...config, turnstileEnabled: false, siteKey: "" },
+        input,
+        ""
+      )
+    ).toEqual({ accepted: true })
+    expect(calls).toBe(1)
+    const protectedController = new IntakeController(
+      kind,
+      "protected",
+      async () => {
+        calls++
+        return json({ accepted: true })
+      }
+    )
+    expect(await protectedController.submit(config, input, "")).toBeNull()
+    expect(calls).toBe(1)
+  })
+}

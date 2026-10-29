@@ -1123,3 +1123,22 @@ checks and all 176 Playwright cases. Existing tests verify mount/step focus and
 accessible Zod consent errors without navigation; malformed numeric capacity
 fixtures retain unavailable handling. Reviewer reply posted with local validation results; publication authorized.
 Native-device, hosted and remote-CI evidence remain separate.
+
+### Temporary Turnstile diagnosis — 2026-10-29
+
+Add an explicit `TURNSTILE_ENABLED=false` switch coordinated with Portal.
+Verification stays enabled by default. Bypass mode omits the widget and accepts
+an empty token; origin checks, honeypot, consent, answer validation and retry
+protection remain. Browser fixtures cover both forms without loading Cloudflare;
+normal verification fixtures remain separate.
+
+Local validation: Portal typecheck and 80 focused tests passed. Web formatting,
+source-size, lint/CSS, types, 19 tooling tests, production build and OG checks
+passed using Webpack (`IS_WEBPACK_TEST=1`); Turbopack's worker port is blocked
+in this environment. Browser checks passed 134 cases in Chromium/WebKit,
+10 verification-enabled cases and both bypass submission cases. The full
+handoff gate remains incomplete because Firefox cannot open its temporary
+profile, including after a retry under `/private/tmp`. No hosted or remote-CI
+validation was performed.
+Hosted diagnosis requires deploying Portal before web and setting the switch
+in both. Restore web verification before restoring Portal enforcement.

@@ -15,9 +15,11 @@ export function getIntakeConfig(): IntakeConfig {
     /* Missing configuration leaves intake disabled. */
   }
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ""
+  const turnstileEnabled = process.env.TURNSTILE_ENABLED !== "false"
   return {
     origin,
     siteKey,
-    enabled: Boolean(origin && siteKey.trim()),
+    turnstileEnabled,
+    enabled: Boolean(origin && (!turnstileEnabled || siteKey.trim())),
   }
 }

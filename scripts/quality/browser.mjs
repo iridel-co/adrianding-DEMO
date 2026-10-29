@@ -20,6 +20,8 @@ const env = {
   PORTAL_API_URL: `http://127.0.0.1:${fixture.address().port}`,
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: "",
   TEST_INTAKE_ENABLED: "0",
+  TURNSTILE_ENABLED: "true",
+  TEST_TURNSTILE_DISABLED: "0",
 }
 
 async function run(file, args, runEnv = env) {
@@ -35,7 +37,8 @@ async function run(file, args, runEnv = env) {
 try {
   const args = process.argv.slice(2)
   const enabledOnly = args.some((arg) => arg.includes("intake-enabled.spec"))
-  if (!enabledOnly) {
+  const bypassOnly = args.some((arg) => arg.includes("intake-bypass.spec"))
+  if (!enabledOnly && !bypassOnly) {
     await run("node_modules/next/dist/bin/next", ["build"])
     await run("node_modules/@playwright/test/cli.js", ["test", ...args])
   }
@@ -50,6 +53,19 @@ try {
       "node_modules/@playwright/test/cli.js",
       ["test", "tests/browser/intake-enabled.spec.ts", "--project=desktop"],
       enabledEnv
+    )
+  }
+  if (bypassOnly || args.length === 0) {
+    const bypassEnv = {
+      ...env,
+      TURNSTILE_ENABLED: "false",
+      TEST_TURNSTILE_DISABLED: "1",
+    }
+    await run("node_modules/next/dist/bin/next", ["build"], bypassEnv)
+    await run(
+      "node_modules/@playwright/test/cli.js",
+      ["test", "tests/browser/intake-bypass.spec.ts", "--project=desktop"],
+      bypassEnv
     )
   }
 } catch (error) {

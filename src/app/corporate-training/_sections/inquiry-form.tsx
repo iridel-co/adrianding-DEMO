@@ -291,7 +291,7 @@ export function CorporateInquiryForm({
       })
       return
     }
-    if (!token || submitting) return
+    if ((intake.turnstileEnabled && !token) || submitting) return
     const {
       targetDate: _targetDate,
       program,
@@ -329,7 +329,7 @@ export function CorporateInquiryForm({
     try {
       const result = await submit(
         (locked ? answers : null) ?? payload.data,
-        token,
+        token ?? "",
         websiteRef.current?.value ?? ""
       )
       if (!result?.accepted) return
@@ -580,7 +580,7 @@ export function CorporateInquiryForm({
         className="hidden"
         aria-hidden="true"
       />
-      {step === 3 && intake.enabled && (
+      {step === 3 && intake.enabled && intake.turnstileEnabled && (
         <Turnstile
           siteKey={intake.siteKey}
           action="corporate-inquiry"
@@ -599,7 +599,9 @@ export function CorporateInquiryForm({
           void next()
         }}
         back={back}
-        canSubmit={Boolean(intake.enabled && token)}
+        canSubmit={Boolean(
+          intake.enabled && (!intake.turnstileEnabled || token)
+        )}
       />
     </form>
   )

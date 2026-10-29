@@ -63,6 +63,7 @@ export function RegistrationForm({
     origin: intake?.origin ?? "",
     siteKey: intake?.siteKey ?? "",
     enabled,
+    turnstileEnabled: intake?.turnstileEnabled ?? true,
   }
   const attempt = useIntake("registration", config, workshopSessionId ?? slug)
   const { submitting, locked } = attempt
@@ -150,11 +151,11 @@ export function RegistrationForm({
       })
       return
     }
-    if (!token || submitting) return
+    if ((config.turnstileEnabled && !token) || submitting) return
     try {
       const result = await attempt.submit(
         { ...values, workshopSessionId },
-        token,
+        token ?? "",
         ""
       )
       const accepted = registrationAcceptedSchema.safeParse(result)
@@ -346,7 +347,7 @@ export function RegistrationForm({
           )}
         </div>
       </fieldset>
-      {step === 2 && enabled && intake?.siteKey && (
+      {step === 2 && enabled && config.turnstileEnabled && intake?.siteKey && (
         <Turnstile
           siteKey={intake.siteKey}
           action="workshop-registration"
@@ -422,7 +423,9 @@ export function RegistrationForm({
               key="submit"
               type="submit"
               variant="brand"
-              disabled={!enabled || !token || submitting}
+              disabled={
+                !enabled || (config.turnstileEnabled && !token) || submitting
+              }
             >
               {submitting ? "Submitting…" : "Finish"}
               <Check className="size-4 shrink-0" aria-hidden />
