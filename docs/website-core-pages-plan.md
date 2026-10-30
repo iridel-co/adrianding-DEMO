@@ -501,6 +501,18 @@ Full `quality:ci` passed: 19 tooling tests, production build/OG checks,
 153 browser cases across five projects, 10 verification-enabled cases and
 2 verification-disabled cases. Hosted submission remains separately unverified.
 
+Local success-page/date-control follow-up adds a Back to home CTA to both
+confirmation headers and replaces native corporate date inputs with the shared
+shadcn-style Calendar/Popover controls. Raw date payloads and range validation
+stay unchanged; browser coverage exercises keyboard focus, disabled dates,
+optional-date clearing and confirmation links. Screenshots use read-only CMS
+fixtures and synthetic receipts; this follow-up has not been published.
+Dropdown follow-up moves Radix scroll locking to the root so the sticky navbar
+stays visible without a scroll jump, and replaces the untouched programme
+field's raw schema error with its existing user-facing validation message.
+Validation: full `quality:ci` passed, including 170 browser cases. Local screenshot
+checks cover desktop and 320px mobile; hosted submissions were not exercised.
+
 ### Production presentation and CMS scope
 
 Local follow-up: center corporate program cards when they fit the rail; retain

@@ -6,7 +6,7 @@ export function todayIso() {
 }
 
 /**
- * Turns the two `<input type="date">` values into the single human-readable
+ * Turns the two date picker values into the single human-readable
  * string the rest of the flow carries (review step, handoff, confirmation page).
  *
  * Formats from the raw `YYYY-MM-DD` parts rather than `new Date(iso)` — that

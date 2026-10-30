@@ -13,7 +13,11 @@ export const ATTENDEE_BANDS = [
 ] as const
 
 export const schema = corporateInquiryFieldsSchema.extend({
-  program: z.string().trim().min(1, "Pick the closest programme.").max(200),
+  program: z
+    .string({ error: "Pick the closest programme." })
+    .trim()
+    .min(1, "Pick the closest programme.")
+    .max(200),
   attendees: z.enum(ATTENDEE_BANDS, { message: "Roughly how many people?" }),
   targetDate: z
     .string()

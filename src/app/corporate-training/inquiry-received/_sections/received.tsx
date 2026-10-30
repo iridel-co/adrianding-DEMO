@@ -1,7 +1,9 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Check } from "lucide-react"
+import Link from "next/link"
+import { Check, ArrowLeft } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { Reveal } from "@/app/_components/reveal"
 import {
   firstNameOf,
@@ -66,6 +68,12 @@ export function InquiryReceived() {
               </>
             )}
           </p>
+          <Button asChild variant="brand" size="lg" className="mt-8">
+            <Link href="/">
+              <ArrowLeft aria-hidden />
+              Back to home
+            </Link>
+          </Button>
         </Reveal>
 
         <Reveal

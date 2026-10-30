@@ -3,6 +3,7 @@ import { useId } from "react"
 import type { ControllerRenderProps } from "react-hook-form"
 import type { FormValues } from "./inquiry-model"
 import { Input } from "@/components/ui/input"
+import { DatePicker } from "@/components/ui/date-picker"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { todayIso } from "./inquiry-dates"
 export function InquiryDatePicker({
@@ -50,8 +51,7 @@ export function InquiryDatePicker({
               >
                 From
               </label>
-              <Input
-                type="date"
+              <DatePicker
                 aria-invalid={Boolean(error)}
                 aria-describedby={error ? `${id}-error` : undefined}
                 className="h-12 text-base"
@@ -61,8 +61,8 @@ export function InquiryDatePicker({
                 id={`${id}-from`}
                 value={dateFrom}
                 min={todayIso()}
-                onChange={(e) => {
-                  onDatesChange(e.target.value, dateTo)
+                onChange={(value) => {
+                  onDatesChange(value, dateTo)
                 }}
               />
             </div>
@@ -73,16 +73,15 @@ export function InquiryDatePicker({
               >
                 To <span className="text-muted-foreground/70">(optional)</span>
               </label>
-              <Input
-                type="date"
+              <DatePicker
                 aria-invalid={Boolean(error)}
                 aria-describedby={error ? `${id}-error` : undefined}
                 className="h-12 text-base"
                 id={`${id}-to`}
                 value={dateTo}
                 min={dateFrom || todayIso()}
-                onChange={(e) => {
-                  onDatesChange(dateFrom, e.target.value)
+                onChange={(value) => {
+                  onDatesChange(dateFrom, value)
                 }}
               />
             </div>

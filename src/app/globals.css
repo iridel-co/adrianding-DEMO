@@ -178,6 +178,15 @@
     overflow-x: clip;
   }
 
+  /* Lock the root so Radix overlays don't turn body into the sticky navbar's scroll container. */
+  html:has(body[data-scroll-locked]) {
+    overflow: hidden !important;
+  }
+
+  body[data-scroll-locked] {
+    overflow: clip !important;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     html {
       scroll-behavior: auto;

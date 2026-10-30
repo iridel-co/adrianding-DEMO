@@ -248,6 +248,9 @@ test.describe("@policy local enabled intake", () => {
       await expect(
         page.getByRole("heading", { name: /Registration accepted/ })
       ).toBeVisible()
+      await expect(
+        page.getByRole("link", { name: "Back to home", exact: true })
+      ).toHaveAttribute("href", "/")
       await expect(page.locator("iframe, video")).toHaveCount(0)
       await expect(page.getByText("Start before the day starts.")).toHaveCount(
         0
@@ -441,6 +444,9 @@ test.describe("@policy local enabled intake", () => {
       await expect(
         page.getByRole("heading", { name: /got your inquiry/ })
       ).toBeVisible()
+      await expect(
+        page.getByRole("link", { name: "Back to home", exact: true })
+      ).toHaveAttribute("href", "/")
       if (mode === "pick") {
         await expect(page.getByRole("heading", { level: 1 })).toContainText(
           "Alex".repeat(40)

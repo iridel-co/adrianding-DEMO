@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test"
-import { fillInquiry, chooseSelect } from "./helpers/form-data"
+import { fillInquiry, chooseSelect, chooseDate } from "./helpers/form-data"
 
 for (const width of [360, 768]) {
   test(`@layout Corporate inquiry preview remains editable without submitting at ${width}px`, async ({
@@ -30,12 +30,12 @@ for (const width of [360, 768]) {
       form.getByLabel("Preferred programme", { exact: true })
     ).toHaveText("Leadership Training & Development")
     await chooseSelect(form, "Preferred programme", "CMS Program 2")
-    await form.getByLabel("To (optional)", { exact: true }).fill("2026-11-09")
+    await chooseDate(form, "From", "2026-11-13")
     await forward.click()
     await expect(
       form.getByText("End date cannot precede start date.")
     ).toBeVisible()
-    await form.getByLabel("To (optional)", { exact: true }).fill("2026-11-12")
+    await chooseDate(form, "From", "2026-11-10")
     const context = form.getByRole("textbox", {
       name: "Anything else we should know? (optional)",
     })
@@ -93,6 +93,51 @@ test("@layout Corporate inquiry review wraps long values", async ({ page }) => {
     form.getByRole("button", { name: "Send inquiry" })
   ).toBeDisabled()
 })
+test("Form dropdowns preserve the sticky header and scroll position", async ({
+  page,
+  isMobile,
+}) => {
+  await page.goto("/corporate-training#inquiry")
+  const form = page.locator("form")
+  await expect(form).toHaveAttribute("aria-busy", "false")
+  await form.getByLabel("Full name", { exact: true }).fill("Ana Reviewer")
+  await form.getByLabel("Work email", { exact: true }).fill("ana@example.com")
+  await form.getByLabel("Contact number", { exact: true }).fill("0917 555 0132")
+  const next = form.getByRole("button", { name: "Continue", exact: true })
+  await next.press("Enter")
+  await form.getByLabel("Company", { exact: true }).fill("Example Team")
+  await form.getByLabel("Your role", { exact: true }).fill("Team lead")
+  await next.press("Enter")
+  await expect(form.getByRole("heading", { name: /Step 3 of 4/ })).toBeFocused()
+  const header = page.locator("header").first()
+  for (const label of ["Preferred programme", "Number of attendees"]) {
+    const trigger = form.getByRole("combobox", { name: label, exact: true })
+    await trigger.scrollIntoViewIfNeeded()
+    const scrollY = await page.evaluate(() => window.scrollY)
+    await trigger.click()
+    await expect(page.getByRole("listbox")).toBeVisible()
+    await expect
+      .poll(() =>
+        header.evaluate((el) => Math.round(el.getBoundingClientRect().top))
+      )
+      .toBe(0)
+    if (!isMobile) await page.mouse.wheel(0, 300)
+    expect(await page.evaluate(() => window.scrollY)).toBe(scrollY)
+    await page.keyboard.press("Escape")
+    await expect(trigger).toBeFocused()
+    await expect
+      .poll(() =>
+        header.evaluate((el) => Math.round(el.getBoundingClientRect().top))
+      )
+      .toBe(0)
+    expect(await page.evaluate(() => window.scrollY)).toBe(scrollY)
+  }
+  await next.press("Enter")
+  await expect(
+    form.getByRole("combobox", { name: "Preferred programme", exact: true })
+  ).toHaveAccessibleDescription("Pick the closest programme.")
+})
+
 test("Corporate form labels, errors and overlapping Continue activations", async ({
   page,
 }) => {
@@ -138,11 +183,32 @@ test("Corporate form labels, errors and overlapping Continue activations", async
   await expect(
     form.getByLabel("Number of attendees", { exact: true })
   ).toHaveText("16 – 30 people")
-  await expect(form.getByLabel("From", { exact: true })).toHaveValue(
-    "2026-11-10"
+  await expect(form.getByLabel("From", { exact: true })).toContainText(
+    "10 Nov 2026"
   )
-  await form.getByLabel("From", { exact: true }).fill("2026-11-11")
-  await form.getByLabel("To (optional)", { exact: true }).focus()
+  await chooseDate(form, "From", "2026-11-11")
+  const endDate = form.getByLabel("To (optional)", { exact: true })
+  await endDate.press("Enter")
+  const calendar = page.locator('[data-slot="popover-content"]')
+  await expect(
+    calendar.getByRole("button", { name: /November 10th, 2026/ })
+  ).toBeDisabled()
+  const selectedDay = calendar.getByRole("button", {
+    name: /November 12th, 2026/,
+  })
+  await expect(selectedDay).toBeFocused()
+  await selectedDay.press("ArrowRight")
+  await expect(
+    calendar.getByRole("button", { name: /November 13th, 2026/ })
+  ).toBeFocused()
+  await page.keyboard.press("Escape")
+  await expect(endDate).toBeFocused()
+  await endDate.click()
+  await calendar
+    .getByRole("button", { name: "Clear date", exact: true })
+    .click()
+  await expect(endDate).toHaveText("Pick a date")
+  await chooseDate(form, "To (optional)", "2026-11-12")
   await forward.click()
   await expect(form.locator("dl")).toContainText(
     "11 November 2026 – 12 November 2026"
