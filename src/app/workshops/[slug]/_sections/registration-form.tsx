@@ -235,7 +235,7 @@ export function RegistrationForm({
                 {(control) => (
                   <Input
                     {...control}
-                    className="placeholder:text-muted-foreground/50 h-12 text-base"
+                    className="h-12 text-base"
                     autoComplete="name"
                     placeholder="Juan Dela Cruz"
                     {...register("fullName")}
@@ -247,7 +247,7 @@ export function RegistrationForm({
                   <Input
                     {...control}
                     type="email"
-                    className="placeholder:text-muted-foreground/50 h-12 text-base"
+                    className="h-12 text-base"
                     autoComplete="email"
                     placeholder="juan@email.com"
                     {...register("email")}
@@ -259,7 +259,7 @@ export function RegistrationForm({
                   <Input
                     {...control}
                     type="tel"
-                    className="placeholder:text-muted-foreground/50 h-12 text-base"
+                    className="h-12 text-base"
                     autoComplete="tel"
                     placeholder="0917 000 0000"
                     {...register("phone")}
@@ -278,7 +278,7 @@ export function RegistrationForm({
                 {(control) => (
                   <Input
                     {...control}
-                    className="placeholder:text-muted-foreground/50 h-12 text-base"
+                    className="h-12 text-base"
                     placeholder="e.g. Insurance advisor"
                     {...register("occupation")}
                   />
@@ -313,7 +313,7 @@ export function RegistrationForm({
                 {(control) => (
                   <Input
                     {...control}
-                    className="placeholder:text-muted-foreground/50 h-12 text-base"
+                    className="h-12 text-base"
                     autoComplete="address-level2"
                     placeholder="Cebu City"
                     {...register("city")}

@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils"
  * - Min height: min-h-[120px]
  * - Padding: py-2 px-3
  * - Focus: focus-visible:ring-1 focus-visible:ring-ring
- * - Placeholder: placeholder:text-muted-foreground
+ * - Placeholder: placeholder:text-neutral-500
  */
 
 export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
@@ -23,7 +23,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         ref={ref}
         data-slot="textarea"
         className={cn(
-          "border-input bg-background placeholder:text-muted-foreground min-h-[120px] w-full rounded-md border px-3 py-2 text-sm shadow-sm transition-colors",
+          "border-input bg-background min-h-[120px] w-full rounded-md border px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-neutral-500",
           "focus-visible:ring-ring focus-visible:ring-1 focus-visible:outline-none",
           "disabled:cursor-not-allowed disabled:opacity-50",
           "aria-invalid:border-destructive aria-invalid:ring-destructive/20",

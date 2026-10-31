@@ -36,7 +36,7 @@ export const DatePicker = forwardRef<HTMLButtonElement, Props>(
             variant="outline"
             className={cn(
               "hover:text-foreground aria-invalid:border-destructive h-12 w-full justify-between rounded-md px-3 text-left text-base font-normal before:hidden hover:translate-y-0 hover:shadow-sm",
-              !value && "text-muted-foreground",
+              !value && "text-neutral-500",
               className
             )}
           >

@@ -38,7 +38,7 @@ const SelectTrigger = React.forwardRef<
       size === "default" ? "h-9" : "h-8",
       "focus-visible:ring-ring focus-visible:ring-1 focus-visible:outline-none",
       "disabled:cursor-not-allowed disabled:opacity-50",
-      "data-[placeholder]:text-muted-foreground",
+      "data-[placeholder]:text-neutral-500",
       "aria-invalid:border-destructive aria-invalid:ring-destructive/20",
       "[&_svg:not([class*='text-'])]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
       className
