@@ -49,7 +49,7 @@ export function AboutFaq() {
         Frequently asked questions
       </SplitReveal>
 
-      <Reveal className="mt-16 max-w-3xl">
+      <Reveal className="mx-auto mt-16 max-w-3xl">
         <Accordion
           type="single"
           collapsible

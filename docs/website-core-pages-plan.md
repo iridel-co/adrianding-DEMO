@@ -1157,3 +1157,20 @@ checks and all 176 Playwright cases. Existing tests verify mount/step focus and
 accessible Zod consent errors without navigation; malformed numeric capacity
 fixtures retain unavailable handling. Reviewer reply posted with local validation results; publication authorized.
 Native-device, hosted and remote-CI evidence remain separate.
+
+### PR12 website QA nits — 2026-11-01
+
+Reviewed `QA Testing for AD Website.docx` within the website-only scope:
+center the About FAQ accordion and fix registration dismissal after touching an
+empty field. Blur validation moved the centered dialog between pointer-down and
+click; the close control now preserves focus until dismissal. A regression covers
+both registration entry points. Programme options and additional-interest choices
+are CMS content; catalogue additions and email requests remain outside this pass.
+
+Local `quality:ci` passed all selected checks, including 163 standard browser
+cases, 10 mocked enabled-intake cases and two diagnostic-bypass cases. The new
+close regression failed before the fix and passes in all five browser projects.
+FAQ captures were visually inspected at 1440px and 390px: accordion bounds are
+768px wide with 336px viewport margins and 342px wide with 24px margins,
+respectively. Existing OG image lint warnings remain. No publication, hosted or
+physical-device verification is claimed.

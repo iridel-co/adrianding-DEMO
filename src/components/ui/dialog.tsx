@@ -81,6 +81,8 @@ function DialogContent({
           <DialogPrimitive.Close
             data-slot="dialog-close"
             aria-label="Close dialog"
+            // Keep blur validation from moving the dialog before the click lands.
+            onPointerDown={(event) => event.preventDefault()}
             className="focus-visible:ring-ring absolute top-4 right-4 rounded-md opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-1 focus-visible:outline-none disabled:pointer-events-none"
           >
             <XIcon className="size-4" />
