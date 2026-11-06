@@ -1,3 +1,4 @@
+import { workshopVenue } from "@/lib/public-workshops"
 import { CalendarDays, Check, MapPin, Tag } from "lucide-react"
 import { Reveal } from "@/app/_components/reveal"
 import { SplitReveal } from "@/app/_components/split-reveal"
@@ -41,9 +42,7 @@ export function RegisteredExpect({ workshop }: { workshop: Workshop }) {
               <Meta
                 icon={MapPin}
                 label="Where"
-                value={[workshop.venue, workshop.city]
-                  .filter(Boolean)
-                  .join(", ")}
+                value={workshopVenue(workshop.venue, workshop.city)}
               />
               <Meta icon={Tag} label="Investment" value={workshop.price} />
             </dl>

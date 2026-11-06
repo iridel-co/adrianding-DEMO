@@ -1,3 +1,4 @@
+import { workshopVenue } from "@/lib/public-workshops"
 import Link from "next/link"
 import { ArrowRight, MapPin } from "lucide-react"
 import type { PublicWorkshop as Workshop } from "@/lib/public-content"
@@ -18,9 +19,10 @@ export function WorkshopDayPreview({ workshops }: { workshops: Workshop[] }) {
           <p className="font-serif text-2xl leading-tight">{event.title}</p>
           <p className="text-muted-foreground flex items-start gap-2 text-sm">
             <MapPin className="mt-0.5 size-4 shrink-0" />
-            {[event.nextSession?.venueName, event.nextSession?.city]
-              .filter(Boolean)
-              .join(", ")}
+            {workshopVenue(
+              event.nextSession?.venueName,
+              event.nextSession?.city
+            )}
           </p>
           <p className="text-muted-foreground text-sm leading-relaxed">
             {event.summary}

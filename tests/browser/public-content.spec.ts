@@ -18,7 +18,10 @@ import {
 } from "../../src/lib/public-content"
 import { workshopView } from "../../src/lib/workshop-view"
 import { getWorkshopAvailability } from "../../src/lib/workshop-availability"
-import { sessionAvailability } from "../../src/lib/public-workshops"
+import {
+  sessionAvailability,
+  workshopVenue,
+} from "../../src/lib/public-workshops"
 
 const media = {
   url: "https://example.test/photo.webp",
@@ -99,7 +102,7 @@ const detail = {
   defaultCapacity: null,
   defaultVenue: { name: "Sample", city: "Manila", mapUrl: null },
   outcomes: [],
-  curriculum: [],
+  curriculum: ["Sample curriculum"],
   inclusions: [],
   whatToExpect: [],
   sessions: [session, { ...session, id: "2", status: "closed" }],
@@ -117,6 +120,35 @@ const collections = [
 ] as const
 
 test.describe("Public CMS contracts @policy", () => {
+  test("blank optional workshop details have readable fallbacks", () => {
+    expect(workshopVenue("  ", "")).toBe("Venue to be announced")
+    expect(workshopVenue("", " Cebu ")).toBe("Venue to be announced, Cebu")
+    expect(workshopVenue(" Hall ", " Cebu ")).toBe("Hall, Cebu")
+    const missing = workshopView({
+      ...detail,
+      sessions: [],
+      defaultVenue: { name: " ", city: " ", mapUrl: null },
+      curriculum: [" "],
+      inclusions: [],
+      outcomes: [],
+      whatToExpect: [],
+    })
+    expect(missing.schedule).toBe("Dates to be announced")
+    expect(missing.price).toBe("₱6,500.00")
+    expect(missing.audience).toBe("Audience details to be announced")
+    expect(missing.format).toBe("Format to be announced")
+    expect(missing.curriculum).toEqual(["Curriculum to be announced"])
+    expect(missing.inclusions).toEqual(["Inclusions to be announced"])
+    expect(missing.outcomes).toEqual(["Learning outcomes to be announced"])
+    expect(missing.whatToExpect).toEqual(["Workshop details to be announced"])
+    const defaultVenue = workshopView({
+      ...detail,
+      sessions: [{ ...session, venueName: " ", city: "" }],
+    })
+    expect(workshopVenue(defaultVenue.venue, defaultVenue.city)).toBe(
+      "Sample, Manila"
+    )
+  })
   test("accepts all endpoints, empty collections and masked relationships", () => {
     expect(publicProfileSchema.parse(profile)).toEqual(profile)
     for (const [schema, record] of collections) {

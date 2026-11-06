@@ -1,5 +1,7 @@
 "use client"
 
+import { workshopVenue } from "@/lib/public-workshops"
+
 import {
   Dialog,
   DialogContent,
@@ -73,7 +75,7 @@ export function RegistrationDialog({
           intake={workshop.intake}
           workshopTitle={workshop.title}
           schedule={workshop.schedule}
-          venue={`${workshop.venue}, ${workshop.city}`}
+          venue={workshopVenue(workshop.venue, workshop.city)}
           availability={availability}
           phone={workshop.contactPhone}
         />

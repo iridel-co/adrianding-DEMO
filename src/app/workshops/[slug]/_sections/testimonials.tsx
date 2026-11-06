@@ -3,9 +3,8 @@ import { TestimonialColumns } from "@/app/_components/testimonial-columns"
 import type { PublicTestimonial } from "@/lib/public-content"
 
 /**
- * Social proof on the workshop detail page — the full testimonial set, not the
- * corporate subset, because a public-workshop visitor is buying a seat for
- * themselves and needs to hear from individuals as well as sponsors.
+ * Social proof linked to this workshop by the caller. Hide the section when
+ * there are no matching published testimonials.
  *
  * Reuses the landing page's drifting-columns layout so the page feels part of
  * the site even when it is the only page someone ever sees.

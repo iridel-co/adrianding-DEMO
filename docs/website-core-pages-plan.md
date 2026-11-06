@@ -1,5 +1,39 @@
 # Website Design and Core Pages Delivery Plan
 
+### PR12 local review batch — 2026-11-07
+
+Restore multi-select company industries: selected categories form a union,
+individual pills toggle off, and All industries resets. Mix category logos from
+the beginning of the wall and recover opacity when a pending fade is cancelled
+by returning to the displayed selection. This supersedes the single-select
+behavior recorded below.
+
+Testimonial columns pause for mouse hover and keyboard focus, while pointer
+clicks/taps no longer retain a focus pause. Workshop testimonials remain scoped
+to their linked workshop slug; no matching published testimonials means no
+testimonial section. Read-only hosted/CMS checks confirmed one match for
+`talk-about-olympus` and none for `bobcat-testworkshop-007`.
+
+Workshop venue displays now share a trimmed fallback across detail, registration,
+confirmation, listing and calendar views. Empty session venue/city values fall
+back to workshop defaults; missing venue shows “Venue to be announced”. Missing
+audience, format, curriculum, inclusions, outcomes and expectations receive
+explicit announcement wording. Existing date/pricing fallbacks are retained.
+
+Local `quality:ci` passed formatting, source size, lint/CSS, types, 19 tooling
+checks, build/OG checks, 179 standard cases, 10 enabled-intake cases and two
+diagnostic-bypass cases. New interaction and workshop-page regressions pass in
+all five browser projects; empty-field policy cases cover whitespace and venue
+defaults. Earlier development runs exposed test locator/clock assumptions and
+an obsolete empty-curriculum expectation; the final integrated run passed.
+
+The local development preview was visually inspected against the configured
+public CMS: both selected company industries are visible, Olympus has its
+linked testimonial, and Bobcat displays audience/format/inclusion announcements.
+Desktop and 390px Bobcat views were inspected; native-device and deployed-fix
+proof remain separate. No commit, push, CMS edit, real submission or deployment
+was performed for this batch.
+
 ### PR12 company industry filters — 2026-11-06
 
 Changed the shared Home/Corporate Training company pills to select one industry

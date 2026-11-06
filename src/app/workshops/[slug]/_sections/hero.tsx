@@ -1,3 +1,4 @@
+import { workshopVenue } from "@/lib/public-workshops"
 import { WorkshopAvailabilityText } from "@/app/_components/workshop-availability-text"
 import { CmsImage as Image } from "@/app/_components/cms-image"
 import Link from "next/link"
@@ -72,7 +73,7 @@ export function WorkshopHero({ workshop }: { workshop: Workshop }) {
         >
           <Chip icon={CalendarDays}>{workshop.schedule}</Chip>
           <Chip icon={MapPin}>
-            {workshop.venue}, {workshop.city}
+            {workshopVenue(workshop.venue, workshop.city)}
           </Chip>
           {
             <span className="bg-brand/90 inline-flex min-h-11 items-center rounded-full px-4 py-2 text-sm font-medium text-white">

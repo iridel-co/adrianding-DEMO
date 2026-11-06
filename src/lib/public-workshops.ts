@@ -25,6 +25,12 @@ export function workshopPrice(workshop: PublicWorkshop) {
   return price ? formatPublicPrice(price) : "Contact us for pricing"
 }
 
+export function workshopVenue(venue?: string | null, city?: string | null) {
+  return [venue?.trim() || "Venue to be announced", city?.trim()]
+    .filter(Boolean)
+    .join(", ")
+}
+
 export function sessionAvailability(session: PublicSession | null) {
   return !session
     ? "Dates to be announced"

@@ -1,5 +1,7 @@
 "use client"
 
+import { workshopVenue } from "@/lib/public-workshops"
+
 import type { CSSProperties } from "react"
 import { CmsImage as Image } from "./cms-image"
 import Link from "next/link"
@@ -93,7 +95,10 @@ export function EventCard({
                 <div className="flex items-center gap-1.5">
                   <MapPin className="size-4 shrink-0" />
                   <span className="line-clamp-1">
-                    {workshop.nextSession?.venueName}
+                    {workshopVenue(
+                      workshop.nextSession?.venueName,
+                      workshop.nextSession?.city
+                    )}
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5">

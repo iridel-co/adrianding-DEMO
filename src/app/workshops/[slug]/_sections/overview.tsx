@@ -1,3 +1,4 @@
+import { workshopVenue } from "@/lib/public-workshops"
 import { WorkshopAvailabilityText } from "@/app/_components/workshop-availability-text"
 import { CalendarDays, Check, MapPin, Tag } from "lucide-react"
 import { Countdown } from "@/app/_components/countdown"
@@ -48,7 +49,7 @@ export function WorkshopOverview({
             <Meta
               icon={MapPin}
               label="Where"
-              value={`${workshop.venue}, ${workshop.city}`}
+              value={workshopVenue(workshop.venue, workshop.city)}
             />
             <Meta icon={Tag} label="Investment" value={workshop.price} />
           </dl>

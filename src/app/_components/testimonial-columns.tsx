@@ -18,7 +18,7 @@ type ColumnsProps = {
 /**
  * Landing testimonials — quote cards drifting upward on a seamless loop. One
  * column on mobile (every quote), two interleaved columns from `md` up. Hovering
- * or focusing into a column stops that column only; the others keep moving.
+ * or keyboard-focusing into a column stops that column only; the others keep moving.
  *
  * Manual rAF rather than a framer-motion transform: this codebase's framer
  * transform values misbehave under headless capture and drop viewport units
@@ -182,14 +182,17 @@ function TestimonialColumn({ testimonials, speed, paused }: ColumnProps) {
           ? "overflow-y-auto"
           : "overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,#000_9%,#000_91%,transparent)] [-webkit-mask-image:linear-gradient(to_bottom,transparent,#000_9%,#000_91%,transparent)]"
       )}
-      onMouseEnter={() => {
-        hoveredRef.current = true
+      onPointerEnter={(event) => {
+        hoveredRef.current = event.pointerType === "mouse"
       }}
-      onMouseLeave={() => {
+      onPointerLeave={() => {
         hoveredRef.current = false
       }}
-      onFocusCapture={() => {
-        focusedRef.current = true
+      onPointerDownCapture={() => {
+        focusedRef.current = false
+      }}
+      onFocusCapture={(event) => {
+        focusedRef.current = event.target.matches(":focus-visible")
       }}
       onBlurCapture={(event) => {
         focusedRef.current = event.currentTarget.contains(event.relatedTarget)

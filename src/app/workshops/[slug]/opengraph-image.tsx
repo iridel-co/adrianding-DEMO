@@ -65,8 +65,10 @@ export default async function WorkshopOgImage({
     .trim()
   const address = workshop
     ? addressLine(
-        workshop.sessions[0]?.venueName ?? workshop.defaultVenue.name,
-        workshop.sessions[0]?.city ?? workshop.defaultVenue.city
+        workshop.sessions[0]?.venueName.trim() ||
+          workshop.defaultVenue.name.trim() ||
+          "Venue to be announced",
+        workshop.sessions[0]?.city.trim() || workshop.defaultVenue.city.trim()
       )
     : ""
   const title = workshop?.title ?? "Workshop"

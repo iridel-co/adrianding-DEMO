@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test"
+import { COMPANY_GROUPS } from "../../src/lib/companies"
 
 const workshop = "/workshops/exceptional-salesmanship"
 
@@ -75,6 +76,44 @@ test("company and testimonial motion retains hover, focus and reduced-motion beh
   }
   await page.emulateMedia({ reducedMotion: "reduce" })
   await expect(page.locator("figure:visible").first()).toBeVisible()
+})
+
+test("testimonial clicks resume after hover while keyboard focus pauses", async ({
+  page,
+  isMobile,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" })
+  await page.goto("/")
+  const section = page.locator("section").filter({
+    has: page.getByRole("heading", {
+      name: /language that\s*outlasts the room/i,
+    }),
+  })
+  const track = section.locator(".will-change-transform:visible").first()
+  const card = track.locator("figure").first()
+  await card.scrollIntoViewIfNeeded()
+  await page.clock.runFor(300)
+  if (isMobile) await card.tap({ force: true })
+  else {
+    await card.click({ force: true })
+    await page.mouse.move(0, 0)
+  }
+  const transform = () => track.evaluate((el) => getComputedStyle(el).transform)
+  const clicked = await transform()
+  await page.clock.runFor(500)
+  expect(await transform()).not.toBe(clicked)
+  if (!isMobile) {
+    await track.locator("..").hover()
+    const hovered = await transform()
+    await page.clock.runFor(400)
+    expect(await transform()).toBe(hovered)
+    await page.mouse.move(0, 0)
+    await card.focus()
+    await page.keyboard.press("Tab")
+    const focused = await transform()
+    await page.clock.runFor(400)
+    expect(await transform()).toBe(focused)
+  }
 })
 
 test.beforeEach(async ({ page }) => {
@@ -240,7 +279,7 @@ test("calendar changes months and opens a workshop by keyboard", async ({
   await expect(page.getByText(/Early bird/i)).toHaveCount(0)
 })
 
-test("company filters replace the previous industry on both pages", async ({
+test("company filters combine and remove industries on both pages", async ({
   page,
 }) => {
   for (const route of ["/", "/corporate-training"]) {
@@ -259,18 +298,87 @@ test("company filters replace the previous industry on both pages", async ({
     await multinationals.click()
     await expect(clients.locator('img[alt="Petron"]')).toHaveCount(0)
     await mega.click()
-    await expect(multinationals).toHaveAttribute("aria-pressed", "false")
+    await expect(multinationals).toHaveAttribute("aria-pressed", "true")
     await expect(mega).toHaveAttribute("aria-pressed", "true")
-    await expect(clients.locator('img[alt="HSBC"]')).toHaveCount(0)
+    await expect(clients.locator('img[alt="HSBC"]').first()).toBeVisible()
     await expect(clients.locator('img[alt="Petron"]').first()).toBeVisible()
+    const expected = COMPANY_GROUPS.filter((group) =>
+      ["Multi-nationals", "Mega-corporations"].includes(group.category)
+    )
+      .flatMap((group) => group.logos.map((logo) => logo.name))
+      .sort()
+    await expect
+      .poll(async () =>
+        [
+          ...new Set(
+            await clients
+              .locator("img[alt]")
+              .evaluateAll((images) =>
+                images.map((image) => image.getAttribute("alt"))
+              )
+          ),
+        ].sort()
+      )
+      .toEqual(expected)
+    await multinationals.click()
+    await expect(multinationals).toHaveAttribute("aria-pressed", "false")
+    await expect(clients.locator('img[alt="HSBC"]')).toHaveCount(0)
     await mega.click()
-    await expect(mega).toHaveAttribute("aria-pressed", "true")
+    await expect(
+      clients.getByRole("button", { name: "All industries", exact: true })
+    ).toHaveAttribute("aria-pressed", "true")
+    await expect(clients.locator('img[alt="HSBC"]').first()).toBeVisible()
+    // Returning to the currently displayed set during its fade must reveal it.
+    await page.clock.pauseAt(await page.evaluate(() => Date.now() + 1000))
+    await multinationals.click()
+    await page.clock.runFor(100)
     await clients
       .getByRole("button", { name: "All industries", exact: true })
       .click()
+    await page.clock.runFor(500)
+    await expect(clients.locator(".transition-opacity")).toHaveCSS(
+      "opacity",
+      "1"
+    )
     await expect(clients.locator('img[alt="HSBC"]').first()).toBeVisible()
     await expect(clients.locator('img[alt="Petron"]').first()).toBeVisible()
+    await page.clock.resume()
   }
+})
+
+test("workshop testimonials match the workshop and missing details are announced", async ({
+  page,
+}) => {
+  await page.goto(workshop)
+  const heading = "What people say after a day in the room"
+  await expect(page.getByRole("heading", { name: heading })).toBeVisible()
+  await expect(
+    page
+      .getByText("CMS quote 1", { exact: true })
+      .filter({ visible: true })
+      .first()
+  ).toBeVisible()
+  await expect(page.getByText("CMS quote 2", { exact: true })).toHaveCount(0)
+  await page.goto("/workshops/exceptional-leadership")
+  await expect(page.getByRole("heading", { name: heading })).toHaveCount(0)
+  for (const text of [
+    "Dates to be announced",
+    "Venue to be announced",
+    "Contact us for pricing",
+    "Curriculum to be announced",
+    "Inclusions to be announced",
+    "Audience details to be announced",
+    "Format to be announced",
+    "Learning outcomes to be announced",
+  ]) {
+    await expect(
+      page.getByText(text).filter({ visible: true }).first()
+    ).toBeVisible()
+  }
+  await page.goto("/workshops/exceptional-leadership/registered")
+  await expect(
+    page.getByText("Workshop details to be announced", { exact: true })
+  ).toBeVisible()
 })
 
 test("CMS programs and workshops coexist with static editorial content", async ({

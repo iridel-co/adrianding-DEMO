@@ -8,8 +8,8 @@ import { cn } from "@/lib/utils"
 
 /**
  * Companies-served marquee — category pills that filter the wall, over one to
- * three full-colour logo rows that drift in alternating directions. Select a
- * pill to reveal only that industry; "All industries" clears the filter.
+ * three full-colour logo rows that drift in alternating directions. Select any
+ * pills to combine those industries; "All industries" clears the filter.
  * Clients without logo artwork yet render as a name chip.
  *
  * Each logo is a plain <Image> with the company name as its `alt` — no tooltip,
@@ -119,8 +119,18 @@ export function CompaniesMarquee() {
   const [shown, setShown] = useState<string[]>([])
   const [fading, setFading] = useState(false)
 
+  const toggle = (category: string) =>
+    setSelected((previous) =>
+      previous.includes(category)
+        ? previous.filter((value) => value !== category)
+        : [...previous, category]
+    )
+
   useEffect(() => {
-    if (selected.join("|") === shown.join("|")) return
+    if (selected.join("|") === shown.join("|")) {
+      setFading(false)
+      return
+    }
     setFading(true)
     const t = setTimeout(() => {
       setShown(selected)
@@ -134,16 +144,18 @@ export function CompaniesMarquee() {
       shown.length === 0
         ? COMPANY_GROUPS
         : COMPANY_GROUPS.filter((group) => shown.includes(group.category))
-    return groups.flatMap((group) => group.logos)
+    // Mix industries from the start instead of showing a long first-category block.
+    return Array.from(
+      { length: Math.max(...groups.map((group) => group.logos.length)) },
+      (_, index) =>
+        groups.flatMap((group) =>
+          group.logos[index] ? [group.logos[index]] : []
+        )
+    ).flat()
   }, [shown])
 
   const rowCount = visible.length > 24 ? 3 : visible.length > 9 ? 2 : 1
-  // Deal logos across rows round-robin, not in contiguous slices. The roster is
-  // grouped by category and only the first couple of categories have logo
-  // artwork, so a straight slice piles every artwork-less category into the last
-  // row(s) — which then drift as sparse, gappy strips of name chips. Dealing
-  // every Nth item gives each row the same blend of wordmarks and chips and
-  // near-equal counts.
+  // Deal the mixed roster across rows with near-equal counts.
   const rows = Array.from({ length: rowCount }, (_, r) =>
     visible.filter((_, i) => i % rowCount === r)
   )
@@ -161,7 +173,7 @@ export function CompaniesMarquee() {
             key={g.category}
             label={g.category}
             active={selected.includes(g.category)}
-            onClick={() => setSelected([g.category])}
+            onClick={() => toggle(g.category)}
           />
         ))}
       </div>

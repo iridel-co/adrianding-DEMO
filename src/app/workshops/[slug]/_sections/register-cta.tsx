@@ -1,3 +1,4 @@
+import { workshopVenue } from "@/lib/public-workshops"
 import { WorkshopAvailabilityText } from "@/app/_components/workshop-availability-text"
 import { CtaBanner } from "@/components/common/cta-banner"
 import { BloomFieldBackground } from "@/app/_components/bloom-field-background"
@@ -23,7 +24,7 @@ export function RegisterCta({ workshop }: { workshop: Workshop }) {
             <span className="block sm:inline">{workshop.schedule}</span>
             <span className="hidden sm:inline"> · </span>
             <span className="mt-2 block sm:mt-0 sm:inline">
-              {workshop.venue}, {workshop.city}
+              {workshopVenue(workshop.venue, workshop.city)}
             </span>
             <span className="hidden sm:inline"> · </span>
             <span className="mt-2 block sm:mt-0 sm:inline">

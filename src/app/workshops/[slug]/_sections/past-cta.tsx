@@ -1,3 +1,4 @@
+import { workshopVenue } from "@/lib/public-workshops"
 import Link from "next/link"
 import { ArrowRight, CalendarDays, MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -59,7 +60,7 @@ export async function PastCta({ workshop }: { workshop: Workshop }) {
                 </li>
                 <li className="flex items-center gap-2.5">
                   <MapPin className="text-brand size-4 shrink-0" />
-                  {next.venue}, {next.city}
+                  {workshopVenue(next.venue, next.city)}
                 </li>
               </ul>
               <div className="mt-7 flex flex-col gap-3 sm:flex-row">

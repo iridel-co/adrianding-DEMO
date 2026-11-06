@@ -26,8 +26,8 @@ export function workshopView(
     tags: content.tags as Workshop["tags"],
     start: session ? publicSessionTimestamps(session).start : "",
     schedule: sessionSchedule(session),
-    venue: session?.venueName ?? content.defaultVenue.name,
-    city: session?.city ?? content.defaultVenue.city,
+    venue: session?.venueName.trim() || content.defaultVenue.name.trim(),
+    city: session?.city.trim() || content.defaultVenue.city.trim(),
     price: workshopPrice({ ...content, nextSession: session }),
     image: content.heroImage?.url ?? "",
     status: session?.isRegistrationOpen
@@ -44,16 +44,33 @@ export function workshopView(
         : undefined,
     summary: content.summary,
     intro: content.intro,
-    audience: content.audience,
-    format: content.format,
-    curriculum: content.curriculum,
-    inclusions: content.inclusions,
+    audience: content.audience.trim() || "Audience details to be announced",
+    format: content.format.trim() || "Format to be announced",
+    curriculum: detailsOrAnnouncement(
+      content.curriculum,
+      "Curriculum to be announced"
+    ),
+    inclusions: detailsOrAnnouncement(
+      content.inclusions,
+      "Inclusions to be announced"
+    ),
     problem: content.problem,
-    outcomes: content.outcomes,
-    whatToExpect: content.whatToExpect,
+    outcomes: detailsOrAnnouncement(
+      content.outcomes,
+      "Learning outcomes to be announced"
+    ),
+    whatToExpect: detailsOrAnnouncement(
+      content.whatToExpect,
+      "Workshop details to be announced"
+    ),
     primerBlurb: content.primerBlurb,
     primerVideoUrl: content.primerVideoUrl,
     seatsTotal: session?.seatsLeft !== undefined ? session.capacity : 0,
     seatsLeft: session?.seatsLeft ?? 0,
   }
+}
+
+function detailsOrAnnouncement(values: string[], fallback: string) {
+  const details = values.map((value) => value.trim()).filter(Boolean)
+  return details.length ? details : [fallback]
 }
