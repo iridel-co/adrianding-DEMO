@@ -8,8 +8,8 @@ import { cn } from "@/lib/utils"
 
 /**
  * Companies-served marquee — category pills that filter the wall, over one to
- * three full-colour logo rows that drift in alternating directions. Select any
- * pills to reveal only those industries; "All industries" clears the filter.
+ * three full-colour logo rows that drift in alternating directions. Select a
+ * pill to reveal only that industry; "All industries" clears the filter.
  * Clients without logo artwork yet render as a name chip.
  *
  * Each logo is a plain <Image> with the company name as its `alt` — no tooltip,
@@ -119,15 +119,6 @@ export function CompaniesMarquee() {
   const [shown, setShown] = useState<string[]>([])
   const [fading, setFading] = useState(false)
 
-  const toggle = (category: string) =>
-    setSelected((prev) =>
-      prev.includes(category)
-        ? prev.filter((c) => c !== category)
-        : COMPANY_GROUPS.some((group) => group.category === category)
-          ? [...prev, category]
-          : prev
-    )
-
   useEffect(() => {
     if (selected.join("|") === shown.join("|")) return
     setFading(true)
@@ -170,7 +161,7 @@ export function CompaniesMarquee() {
             key={g.category}
             label={g.category}
             active={selected.includes(g.category)}
-            onClick={() => toggle(g.category)}
+            onClick={() => setSelected([g.category])}
           />
         ))}
       </div>

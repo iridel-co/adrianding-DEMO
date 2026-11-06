@@ -1,5 +1,20 @@
 # Website Design and Core Pages Delivery Plan
 
+### PR12 company industry filters — 2026-11-06
+
+Changed the shared Home/Corporate Training company pills to select one industry
+at a time. Previously, selections accumulated and kept earlier categories in
+the wall, making later selections appear ineffective. Clicking the active pill
+keeps it selected; “All industries” restores the full roster.
+
+Local `quality:ci` passed formatting, source size, lint/CSS, types, 19 tooling
+checks, production build/OG checks, 168 standard browser cases, 10 enabled-intake
+cases and two diagnostic-bypass cases. The new regression covers replacement,
+active-pill stability and reset on both pages in all five browser projects.
+The attempted pre-change browser run was blocked by font-download/build errors;
+no pre-change failing browser result is claimed. Hosted and native-device
+verification remain separate; no publication performed.
+
 This is the shared checklist for completing the Website Design and Core Pages
 milestone across reviewable PRs. Start with the portable quality harness and
 repository documentation cleanup. Finish with the user's design and nitpick pass.

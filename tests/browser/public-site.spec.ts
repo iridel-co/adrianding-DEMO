@@ -240,6 +240,39 @@ test("calendar changes months and opens a workshop by keyboard", async ({
   await expect(page.getByText(/Early bird/i)).toHaveCount(0)
 })
 
+test("company filters replace the previous industry on both pages", async ({
+  page,
+}) => {
+  for (const route of ["/", "/corporate-training"]) {
+    await page.goto(route)
+    const clients = page.locator("section").filter({
+      has: page.getByRole("button", { name: "All industries", exact: true }),
+    })
+    const multinationals = clients.getByRole("button", {
+      name: "Multi-nationals",
+      exact: true,
+    })
+    const mega = clients.getByRole("button", {
+      name: "Mega-corporations",
+      exact: true,
+    })
+    await multinationals.click()
+    await expect(clients.locator('img[alt="Petron"]')).toHaveCount(0)
+    await mega.click()
+    await expect(multinationals).toHaveAttribute("aria-pressed", "false")
+    await expect(mega).toHaveAttribute("aria-pressed", "true")
+    await expect(clients.locator('img[alt="HSBC"]')).toHaveCount(0)
+    await expect(clients.locator('img[alt="Petron"]').first()).toBeVisible()
+    await mega.click()
+    await expect(mega).toHaveAttribute("aria-pressed", "true")
+    await clients
+      .getByRole("button", { name: "All industries", exact: true })
+      .click()
+    await expect(clients.locator('img[alt="HSBC"]').first()).toBeVisible()
+    await expect(clients.locator('img[alt="Petron"]').first()).toBeVisible()
+  }
+})
+
 test("CMS programs and workshops coexist with static editorial content", async ({
   page,
 }) => {
