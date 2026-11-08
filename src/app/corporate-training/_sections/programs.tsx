@@ -11,6 +11,9 @@ export async function CorporatePrograms() {
     usefulFor: program.usefulFor,
     image: program.image?.url ?? null,
     imageAlt: program.image?.alt ?? "",
+    imagePosition: program.imageFocus
+      ? `${program.imageFocus.x}% ${program.imageFocus.y}%`
+      : undefined,
   }))
   return (
     <section className="bg-muted/40 py-24 lg:py-36">

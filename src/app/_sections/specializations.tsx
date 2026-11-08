@@ -21,6 +21,9 @@ export function LandingSpecializations({
     usefulFor: program.usefulFor,
     image: program.image?.url ?? null,
     imageAlt: program.image?.alt ?? "",
+    imagePosition: program.imageFocus
+      ? `${program.imageFocus.x}% ${program.imageFocus.y}%`
+      : undefined,
   }))
   const railRef = useRef<HTMLDivElement>(null)
   const reduced = useReducedMotionSafe()

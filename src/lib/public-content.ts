@@ -87,6 +87,9 @@ export const publicProgramSchema = z.object({
   title: z.string(),
   summary: z.string(),
   image: publicMediaSchema.nullable(),
+  // Spot on the photo (% from top-left) that must stay in view. Optional so
+  // the site keeps working against a portal that doesn't send it yet.
+  imageFocus: z.object({ x: z.number(), y: z.number() }).optional(),
   usefulFor: z.array(z.string()),
 })
 export const publicTestimonialSchema = z.object({
