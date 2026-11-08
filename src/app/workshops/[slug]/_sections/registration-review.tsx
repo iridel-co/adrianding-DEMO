@@ -1,4 +1,11 @@
-import { BookOpen, CalendarDays, MapPin, UserRound, Mail } from "lucide-react"
+import {
+  BookOpen,
+  CalendarDays,
+  MapPin,
+  UserRound,
+  Mail,
+  Phone,
+} from "lucide-react"
 import { ReviewDetails } from "@/app/_components/review-details"
 import type { FormValues } from "./registration-model"
 
@@ -26,6 +33,7 @@ export function RegistrationReview({
         { label: "Venue", value: venue, icon: MapPin },
         { label: "Name", value: values("fullName") || "—", icon: UserRound },
         { label: "Email", value: values("email") || "—", icon: Mail },
+        { label: "Mobile number", value: values("phone") || "—", icon: Phone },
       ]}
     />
   )

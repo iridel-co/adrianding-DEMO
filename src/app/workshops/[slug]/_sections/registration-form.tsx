@@ -12,7 +12,12 @@ import { saveReceipt } from "@/app/_lib/handoff"
 import { registrationAcceptedSchema } from "@/lib/registration"
 import type { IntakeConfig } from "@/lib/intake"
 import { RegistrationReview } from "./registration-review"
-import { Controller, useForm, type FieldErrors } from "react-hook-form"
+import {
+  Controller,
+  useForm,
+  type DefaultValues,
+  type FieldErrors,
+} from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   SALARY_RANGES,
@@ -30,6 +35,15 @@ import type { WorkshopAvailability } from "@/lib/workshop-availability"
 import { cn } from "@/lib/utils"
 
 /** Progressive registration hands details to the dedicated confirmation route. */
+
+/*
+  What the visitor has typed so far, per workshop session, kept in memory only.
+  The popup unmounts the form whenever it closes (X, Escape or a tap outside)
+  and the page has several Register buttons, so without this every close wiped
+  the answers. Consent is left out so it is always given fresh. Cleared after a
+  successful registration; gone on reload.
+*/
+const drafts = new Map<string, DefaultValues<FormValues>>()
 
 type Props = {
   slug: string
@@ -55,6 +69,7 @@ export function RegistrationForm({
   phone,
 }: Props) {
   const consentId = useId()
+  const draftKey = workshopSessionId ?? slug
   const router = useRouter()
   const enabled = Boolean(
     intake?.enabled && workshopSessionId && availability.canRegister
@@ -91,12 +106,21 @@ export function RegistrationForm({
     reset,
     setError,
     setFocus,
+    watch,
 
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     mode: "onTouched",
+    defaultValues: drafts.get(draftKey),
   })
+
+  useEffect(() => {
+    const { unsubscribe } = watch((values) =>
+      drafts.set(draftKey, { ...values, consent: undefined })
+    )
+    return unsubscribe
+  }, [watch, draftKey])
 
   useEffect(() => {
     if (previousStep.current === step) return
@@ -162,6 +186,7 @@ export function RegistrationForm({
       const accepted = registrationAcceptedSchema.safeParse(result)
       if (!accepted.success) return
       completed = true
+      drafts.delete(draftKey)
       saveReceipt({
         kind: "workshop",
         accepted: true,

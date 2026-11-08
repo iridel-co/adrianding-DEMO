@@ -8,6 +8,7 @@ import {
   Users,
   CalendarDays,
   MapPin,
+  Phone,
 } from "lucide-react"
 import { ReviewDetails } from "@/app/_components/review-details"
 import type { FormValues } from "./inquiry-model"
@@ -29,6 +30,7 @@ export function CorporateInquiryReview({
         },
         { label: "Name", value: data.fullName || "—", icon: UserRound },
         { label: "Email", value: data.email || "—", icon: Mail },
+        { label: "Contact number", value: data.phone || "—", icon: Phone },
         { label: "Company", value: data.company || "—", icon: Building2 },
         { label: "Role", value: data.role || "—", icon: BriefcaseBusiness },
         {
