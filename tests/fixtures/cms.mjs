@@ -36,6 +36,23 @@ const workshops = [
     defaultPrice: null,
     nextSession: null,
   },
+  {
+    slug: "past-sales-masterclass",
+    title: "Past Sales Masterclass",
+    summary: "CMS past summary.",
+    tags: ["Sales"],
+    heroImage: null,
+    defaultPrice: null,
+    nextSession: null,
+    lastSession: {
+      ...session,
+      id: "12345678-abcd-4000-8000-123456789abe",
+      date: "2026-10-01",
+      endDate: "2026-10-01",
+      status: "closed",
+      isRegistrationOpen: false,
+    },
+  },
 ]
 const industries = [
   { id: "industry-1", name: "Technology" },

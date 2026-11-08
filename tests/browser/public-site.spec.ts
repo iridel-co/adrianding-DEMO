@@ -252,6 +252,27 @@ test("workshop filters toggle and reset the listing", async ({ page }) => {
   ).toHaveCount(1)
 })
 
+test("lapsed workshops move from the listing to Past workshops", async ({
+  page,
+}) => {
+  await page.goto("/workshops")
+  const past = page.locator("section").filter({
+    has: page.getByRole("heading", { name: "Past workshops" }),
+  })
+  const card = past.getByRole("link", { name: /Past Sales Masterclass/ })
+  await expect(card).toHaveAttribute(
+    "href",
+    "/workshops/past-sales-masterclass"
+  )
+  await expect(card).toContainText("Ran Oct 1, 2026")
+  await expect(
+    page.getByRole("link", { name: /Past Sales Masterclass/ })
+  ).toHaveCount(1)
+  await expect(
+    past.getByRole("link", { name: /Exceptional Leadership/ })
+  ).toHaveCount(0)
+})
+
 test("calendar changes months and opens a workshop by keyboard", async ({
   page,
 }) => {

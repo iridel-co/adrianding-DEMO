@@ -45,6 +45,9 @@ export const publicWorkshopSchema = z.object({
   tags: z.array(z.string()),
   defaultPrice: publicPriceSchema.nullable(),
   nextSession: publicSessionSchema.nullable(),
+  // Most recent session that has ended. Optional so the site keeps working
+  // against a portal that doesn't send it.
+  lastSession: publicSessionSchema.nullable().optional(),
 })
 
 export const publicWorkshopDetailSchema = publicWorkshopSchema
