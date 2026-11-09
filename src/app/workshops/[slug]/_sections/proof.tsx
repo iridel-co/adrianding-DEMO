@@ -17,7 +17,7 @@ import { AboutPromptAnchor } from "@/app/_components/about-prompt"
  * TODO: client sign-off on the three headline figures (years, professionals
  * trained, company count) — they are from the PRD, not from a verified source.
  */
-export function WorkshopProof() {
+export function WorkshopProof({ completed }: { completed: boolean }) {
   return (
     <section className="bg-muted/40 py-16 lg:py-24">
       <div className="mx-auto grid max-w-5xl gap-12 px-6 sm:px-8 lg:grid-cols-[0.75fr_minmax(0,1fr)] lg:items-start lg:gap-16">
@@ -53,30 +53,50 @@ export function WorkshopProof() {
           </Reveal>
 
           <Reveal
-            className="mt-10 grid grid-cols-2 gap-x-8 gap-y-8 sm:grid-cols-3"
+            className={
+              "mt-10 grid grid-cols-2 gap-x-4 gap-y-8 " +
+              (completed
+                ? "sm:grid-cols-[max-content_max-content_max-content] sm:justify-between sm:gap-x-3"
+                : "sm:grid-cols-3 sm:gap-x-8")
+            }
             stagger={0.1}
           >
             <div>
               <p className="text-brand text-4xl font-semibold tracking-[-0.02em]">
                 <Counter to={20} suffix="+" />
               </p>
-              <p className="text-muted-foreground mt-2 text-sm leading-snug">
+              <p
+                className={
+                  "text-muted-foreground mt-2 text-sm leading-snug" +
+                  (completed ? " sm:w-0 sm:min-w-full" : "")
+                }
+              >
                 Years training professionals
               </p>
             </div>
-            <div>
+            <div className="order-3 col-span-2 sm:order-none sm:col-span-1">
               <p className="text-brand text-4xl font-semibold tracking-[-0.02em]">
                 <Counter to={20000} suffix="+" />
               </p>
-              <p className="text-muted-foreground mt-2 text-sm leading-snug">
+              <p
+                className={
+                  "text-muted-foreground mt-2 text-sm leading-snug" +
+                  (completed ? " sm:w-0 sm:min-w-full" : "")
+                }
+              >
                 Professionals trained in person
               </p>
             </div>
-            <div className="col-span-2 sm:col-span-1">
+            <div className="order-2 sm:order-none">
               <p className="text-brand text-4xl font-semibold tracking-[-0.02em]">
                 <Counter to={500} prefix="Top " />
               </p>
-              <p className="text-muted-foreground mt-2 text-sm leading-snug">
+              <p
+                className={
+                  "text-muted-foreground mt-2 text-sm leading-snug" +
+                  (completed ? " sm:w-0 sm:min-w-full" : "")
+                }
+              >
                 Philippine companies on the client list
               </p>
             </div>

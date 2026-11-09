@@ -3,16 +3,8 @@ import { ArrowRight } from "lucide-react"
 import { CmsImage as Image } from "@/app/_components/cms-image"
 import { SplitReveal } from "@/app/_components/split-reveal"
 import { WorkshopTagPills } from "@/app/_components/workshop-tags"
+import { pastSessionDate } from "@/lib/public-workshops"
 import type { PublicWorkshop } from "@/lib/public-content"
-
-function ranOn(iso: string) {
-  return new Date(iso).toLocaleDateString("en-PH", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "Asia/Manila",
-  })
-}
 
 /* Workshops that have already run, newest first, so visitors can see the
    history. Each card opens the workshop page, which points to the next open
@@ -50,7 +42,8 @@ export function PastWorkshops({ workshops }: { workshops: PublicWorkshop[] }) {
                 <div className="relative flex flex-col gap-2 px-6 py-7 text-white">
                   {workshop.lastSession && (
                     <p className="text-xs font-semibold tracking-[0.22em] text-white/75 uppercase">
-                      Ran {ranOn(workshop.lastSession.date)}
+                      {workshop.lastSession.date ? "Ran " : ""}
+                      {pastSessionDate(workshop.lastSession)}
                     </p>
                   )}
                   <h3 className="text-2xl leading-[1.1] font-extrabold tracking-[-0.01em] text-balance">

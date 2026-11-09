@@ -271,6 +271,28 @@ test("lapsed workshops move from the listing to Past workshops", async ({
   await expect(
     past.getByRole("link", { name: /Exceptional Leadership/ })
   ).toHaveCount(0)
+  await card.click()
+  await expect(page.getByText("Completed", { exact: true })).toHaveCount(1)
+  await expect(
+    page.getByRole("heading", { name: "What participants learned" })
+  ).toBeVisible()
+  await expect(
+    page.getByRole("heading", { name: "What was included" })
+  ).toBeVisible()
+  await expect(page.getByText("Who it was for:", { exact: true })).toBeVisible()
+  await expect(
+    page.getByRole("heading", { name: "This one has already run" })
+  ).toBeVisible()
+  await expect(
+    page.locator("dd").filter({ hasText: "Oct 1, 2026" })
+  ).toBeVisible()
+  await expect(
+    page.getByText("Dates to be announced", { exact: true })
+  ).toHaveCount(0)
+  await expect(
+    page.getByRole("heading", { name: "Before you register" })
+  ).toHaveCount(0)
+  await expect(page.locator("#workshop-registration-card")).toHaveCount(0)
 })
 
 test("calendar changes months and opens a workshop by keyboard", async ({

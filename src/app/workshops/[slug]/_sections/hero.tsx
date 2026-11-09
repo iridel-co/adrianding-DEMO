@@ -64,7 +64,14 @@ export function WorkshopHero({ workshop }: { workshop: Workshop }) {
         </SplitReveal>
 
         <Reveal className="mt-5">
-          <WorkshopTagPills tags={workshop.tags} size="md" />
+          <WorkshopTagPills
+            tags={
+              workshop.status === "past"
+                ? [...workshop.tags, "Completed"]
+                : workshop.tags
+            }
+            size="md"
+          />
         </Reveal>
 
         <Reveal
@@ -75,11 +82,11 @@ export function WorkshopHero({ workshop }: { workshop: Workshop }) {
           <Chip icon={MapPin}>
             {workshopVenue(workshop.venue, workshop.city)}
           </Chip>
-          {
+          {workshop.status !== "past" && (
             <span className="bg-brand/90 inline-flex min-h-11 items-center rounded-full px-4 py-2 text-sm font-medium text-white">
               <WorkshopAvailabilityText workshop={workshop} onDark />
             </span>
-          }
+          )}
           <ShareButton />
         </Reveal>
       </div>

@@ -139,6 +139,7 @@ export function cmsReply(url) {
     )
     if (!item) return missing
     const { nextSession, ...course } = item
+    const hasWorkshopDetails = Boolean(nextSession || item.lastSession)
     return {
       status: 200,
       body: {
@@ -146,7 +147,7 @@ export function cmsReply(url) {
         courseCode: null,
         problem: "CMS problem.",
         intro: "CMS workshop introduction.",
-        audience: nextSession ? "CMS audience." : " ",
+        audience: hasWorkshopDetails ? "CMS audience." : " ",
         format: nextSession ? "CMS format." : "",
         primerVideoUrl: null,
         primerBlurb: "CMS primer.",
@@ -156,9 +157,9 @@ export function cmsReply(url) {
           mapUrl: null,
         },
         defaultCapacity: null,
-        outcomes: nextSession ? ["CMS outcome"] : [],
+        outcomes: hasWorkshopDetails ? ["CMS outcome"] : [],
         curriculum: nextSession ? ["CMS curriculum"] : [" "],
-        inclusions: nextSession ? ["CMS inclusion"] : [],
+        inclusions: hasWorkshopDetails ? ["CMS inclusion"] : [],
         whatToExpect: nextSession ? ["CMS expectation"] : [],
         sessions: nextSession
           ? [

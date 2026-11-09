@@ -1,4 +1,5 @@
 import {
+  Check,
   Compass,
   GraduationCap,
   HeartHandshake,
@@ -21,6 +22,7 @@ import {
  * in sync with this icon map.
  */
 export const WORKSHOP_TAG_ICONS: Record<string, typeof Compass> = {
+  Completed: Check,
   Leadership: Compass,
   Sales: TrendingUp,
   Communication: MessagesSquare,

@@ -37,6 +37,13 @@ export const publicSessionSchema = z.object({
   isRegistrationOpen: z.boolean(),
 })
 
+const pastSessionSchema = publicSessionSchema.extend({
+  date: date.or(z.literal("")).nullish(),
+  endDate: date.or(z.literal("")).nullish(),
+  venueName: z.string().nullish(),
+  city: z.string().nullish(),
+})
+
 export const publicWorkshopSchema = z.object({
   slug: z.string(),
   title: z.string(),
@@ -47,7 +54,7 @@ export const publicWorkshopSchema = z.object({
   nextSession: publicSessionSchema.nullable(),
   // Most recent session that has ended. Optional so the site keeps working
   // against a portal that doesn't send it.
-  lastSession: publicSessionSchema.nullable().optional(),
+  lastSession: pastSessionSchema.nullish(),
 })
 
 export const publicWorkshopDetailSchema = publicWorkshopSchema

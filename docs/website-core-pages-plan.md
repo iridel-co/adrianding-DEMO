@@ -1,5 +1,27 @@
 # Website Design and Core Pages Delivery Plan
 
+### Completed workshop detail
+
+Completed workshop details use the Portal's last session when there is no
+current detail session. The hero shows one Completed tag, the When and Where
+fields show historical data or explicit missing values, and the page links
+visitors to upcoming workshops instead of prompting registration.
+The completed section reuses the brand background. Its next-workshop card
+uses left-aligned desktop actions and stacked mobile actions without a divider.
+Local Chromium checked the layout and primary link at 320px, 390px and 1440px.
+Completed pages use past-tense outcomes, inclusions and audience labels.
+Chromium confirmed equal desktop gaps between the proof metrics and the mobile
+ordering. Ten focused browser checks passed across five projects, and a local
+upcoming page retained the original labels.
+
+Fifteen focused browser checks passed across five projects. Local Chromium
+also verified the two published past-only samples, their recorded dates and
+venue, the upcoming Olympus registration card, and the mobile stats order.
+
+Workshop proof stats now put Top 500 beside 20+ on mobile and give the
+professionals-trained metric a full row. Local Chromium checks confirmed
+containment at 320px and 390px and the original order at 1440px.
+
 ### PR12 local review batch — 2026-11-07
 
 Restore multi-select company industries: selected categories form a union,

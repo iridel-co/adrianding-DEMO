@@ -19,6 +19,20 @@ export function sessionSchedule(session: PublicSession | null) {
   return `${date.format(new Date(dates.start))}${session.endDate !== session.date ? ` – ${date.format(new Date(dates.end))}` : ""} · ${time.format(new Date(dates.start))} – ${time.format(new Date(dates.end))}`
 }
 
+export function pastSessionDate(
+  session: NonNullable<PublicWorkshop["lastSession"]>
+) {
+  if (!session.date) return "Date not specified"
+  const format = (date: string) =>
+    new Intl.DateTimeFormat("en-PH", {
+      dateStyle: "medium",
+      timeZone: "Asia/Manila",
+    }).format(new Date(date))
+  return session.endDate && session.endDate > session.date
+    ? format(session.date) + " – " + format(session.endDate)
+    : format(session.date)
+}
+
 export function workshopPrice(workshop: PublicWorkshop) {
   const price = workshop.nextSession?.price ?? workshop.defaultPrice
   // Promotional pricing notes stay hidden until early-bird display is ready.

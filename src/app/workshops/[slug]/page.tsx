@@ -49,7 +49,11 @@ export default async function WorkshopPage({ params, searchParams }: Params) {
     content,
     "0920 900 7709",
     config,
-    (await searchParams)?.session
+    (await searchParams)?.session,
+    content.sessions.length === 0 && !content.lastSession
+      ? (await getPublicWorkshops()).find((item) => item.slug === slug)
+          ?.lastSession
+      : undefined
   )
   return (
     <>
@@ -57,21 +61,21 @@ export default async function WorkshopPage({ params, searchParams }: Params) {
       <main>
         <WorkshopHero workshop={workshop} />
         <WorkshopOverview workshop={workshop} />
-        <WorkshopProof />
+        <WorkshopProof completed={workshop.status === "past"} />
         <WorkshopDetails workshop={workshop} />
         <WorkshopTestimonials
           testimonials={testimonials.filter(
             (item) => item.workshop?.slug === slug
           )}
         />
-        <WorkshopFaq />
+        {workshop.status !== "past" && <WorkshopFaq />}
         {workshop.status === "past" ? (
           <PastCta workshop={workshop} />
         ) : (
           <RegisterCta workshop={workshop} />
         )}
         <TeamCta />
-        <SupportBand />
+        {workshop.status !== "past" && <SupportBand />}
       </main>
       <SiteFooter />
       {workshop.status === "open" && <StickyRegisterBar workshop={workshop} />}

@@ -32,17 +32,23 @@ export function WorkshopOverview({
 
       <div className="mt-10 flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between lg:gap-16">
         <div className="flex-1">
-          <h2 className="text-sm font-semibold tracking-[0.1em] uppercase">
-            You leave able to
-          </h2>
-          <ul className="mt-5 space-y-3">
-            {workshop.outcomes.map((o) => (
-              <li key={o} className="flex gap-3">
-                <Check className="text-brand mt-1 size-4 shrink-0" />
-                <span className="leading-relaxed">{o}</span>
-              </li>
-            ))}
-          </ul>
+          {workshop.outcomes.length > 0 && (
+            <>
+              <h2 className="text-sm font-semibold tracking-[0.1em] uppercase">
+                {workshop.status === "past"
+                  ? "What participants learned"
+                  : "You leave able to"}
+              </h2>
+              <ul className="mt-5 space-y-3">
+                {workshop.outcomes.map((o) => (
+                  <li key={o} className="flex gap-3">
+                    <Check className="text-brand mt-1 size-4 shrink-0" />
+                    <span className="leading-relaxed">{o}</span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
 
           <dl className="border-border/60 mt-9 flex flex-col gap-6 border-t pt-8">
             <Meta icon={CalendarDays} label="When" value={workshop.schedule} />
@@ -51,7 +57,10 @@ export function WorkshopOverview({
               label="Where"
               value={workshopVenue(workshop.venue, workshop.city)}
             />
-            <Meta icon={Tag} label="Investment" value={workshop.price} />
+            {(workshop.status !== "past" ||
+              workshop.price !== "Contact us for pricing") && (
+              <Meta icon={Tag} label="Investment" value={workshop.price} />
+            )}
           </dl>
         </div>
 
