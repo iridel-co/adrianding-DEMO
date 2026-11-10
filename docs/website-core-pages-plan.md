@@ -1,5 +1,14 @@
 # Website Design and Core Pages Delivery Plan
 
+### Workshop card title wrapping
+
+Upcoming and past card titles can wrap long unbroken names. The local CMS
+fixture check used a Bobcat-style title and the four tags from the screenshot.
+It passed at 360px in Chromium and WebKit and on the expanded 1440px Chromium
+carousel, with the normal fixture title checked at both sizes. All eight
+workshop layout checks passed across the two projects using a Webpack build
+after the default Turbopack build failed to start its CSS worker.
+
 ### Completed workshop detail
 
 Completed workshop details use the Portal's last session when there is no

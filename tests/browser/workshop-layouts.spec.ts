@@ -111,3 +111,87 @@ test("Workshop form labels, errors and overlapping Continue activations", async 
     "Insurance advisor"
   )
 })
+
+test("long workshop card titles fit with tags and details @layout", async ({
+  page,
+  isMobile,
+}) => {
+  const title = "bobCat_testWorkshop_007"
+  for (const width of isMobile ? [360] : [360, 1440]) {
+    await page.setViewportSize({ width, height: 900 })
+    await page.emulateMedia({ reducedMotion: "no-preference" })
+    await page.goto(width === 360 ? "/workshops" : "/")
+    const card = page
+      .locator('a[href="/workshops/exceptional-salesmanship"]')
+      .filter({ has: page.locator("h3") })
+      .first()
+    await card.scrollIntoViewIfNeeded()
+    await page.evaluate(() => document.fonts.ready.then(() => undefined))
+
+    const checkLayout = async (expectWrap: boolean) => {
+      await expect
+        .poll(() =>
+          card.evaluate((link, expectWrap) => {
+            const heading = link.querySelector("h3")!
+            const tags = link.querySelector('ul[aria-label="Focus areas"]')!
+            const date = heading.previousElementSibling!
+            const details = heading.nextElementSibling!
+            const bounds = link.getBoundingClientRect()
+            const range = document.createRange()
+            range.selectNodeContents(heading)
+            const lines = Array.from(range.getClientRects())
+            const content = [
+              ...lines,
+              ...Array.from(tags.children, (tag) =>
+                tag.getBoundingClientRect()
+              ),
+              date.getBoundingClientRect(),
+              details.getBoundingClientRect(),
+            ]
+            return (
+              (!expectWrap ||
+                new Set(lines.map((line) => line.top)).size > 1) &&
+              content.every(
+                (rect) =>
+                  rect.width > 0 &&
+                  rect.height > 0 &&
+                  rect.left >= bounds.left - 1 &&
+                  rect.right <= bounds.right + 1 &&
+                  rect.top >= bounds.top - 1 &&
+                  rect.bottom <= bounds.bottom + 1
+              ) &&
+              tags.getBoundingClientRect().bottom <=
+                date.getBoundingClientRect().top &&
+              details.getBoundingClientRect().height >= details.scrollHeight - 1
+            )
+          }, expectWrap)
+        )
+        .toBe(true)
+    }
+
+    if (width === 1440) {
+      const details = card.locator("h3 + div")
+      await expect(details).toHaveCSS("opacity", "0")
+      await card.hover()
+      await expect(details).toHaveCSS("opacity", "1")
+    }
+    await expect(card.getByText("CMS workshop summary.")).toBeVisible()
+    await expect(card.getByText("Register", { exact: true })).toBeVisible()
+    await checkLayout(false)
+    await card.evaluate((link, title) => {
+      link.querySelector("h3")!.textContent = title
+      const tags = link.querySelector('ul[aria-label="Focus areas"]')!
+      const template = tags.firstElementChild!
+      tags.replaceChildren(
+        ...["Communication", "Leadership", "Sales", "Customer Experience"].map(
+          (label) => {
+            const tag = template.cloneNode(true) as HTMLElement
+            tag.lastChild!.textContent = label
+            return tag
+          }
+        )
+      )
+    }, title)
+    await checkLayout(width === 360)
+  }
+})

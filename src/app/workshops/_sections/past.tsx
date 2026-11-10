@@ -46,7 +46,7 @@ export function PastWorkshops({ workshops }: { workshops: PublicWorkshop[] }) {
                       {pastSessionDate(workshop.lastSession)}
                     </p>
                   )}
-                  <h3 className="text-2xl leading-[1.1] font-extrabold tracking-[-0.01em] text-balance">
+                  <h3 className="text-2xl leading-[1.1] font-extrabold tracking-[-0.01em] text-balance [overflow-wrap:anywhere]">
                     {workshop.title}
                   </h3>
                   <span className="mt-1 inline-flex items-center gap-1.5 text-sm font-semibold text-white/85">

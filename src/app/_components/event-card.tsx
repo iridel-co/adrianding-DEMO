@@ -69,7 +69,7 @@ export function EventCard({
         <p className="text-xs font-semibold tracking-[0.22em] text-white/75 uppercase">
           {session ? shortDate(session.date) : "Dates to be announced"}
         </p>
-        <h3 className="text-[1.75rem] leading-[1.08] font-extrabold tracking-[-0.01em] text-balance lg:text-[2.125rem]">
+        <h3 className="text-[1.75rem] leading-[1.08] font-extrabold tracking-[-0.01em] text-balance [overflow-wrap:anywhere] lg:text-[2.125rem]">
           {workshop.title}
         </h3>
 
